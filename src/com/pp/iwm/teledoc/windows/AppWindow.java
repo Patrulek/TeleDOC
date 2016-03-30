@@ -1,24 +1,21 @@
 package com.pp.iwm.teledoc.windows;
 
 import java.awt.Point;
+import java.util.Set;
 
+import com.pp.iwm.teledoc.gui.ConferenceTabsPane;
+import com.pp.iwm.teledoc.gui.DockImageButton;
 import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.StatusBar;
 import com.pp.iwm.teledoc.gui.Utils;
 
 import javafx.scene.Group;
-import javafx.scene.Parent;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -32,7 +29,10 @@ public class AppWindow {
 	private PasswordField pf_password;
 	private Label lbl_error;
 	private Dockbar dockbar;
-	private StatusBar status_bar;
+	public StatusBar status_bar;
+	public ConferenceTabsPane tab_pane;
+	
+	private boolean dragging = false;
 	
 	public AppWindow() {
 		stage = new Stage();
@@ -50,10 +50,15 @@ public class AppWindow {
 		r_window_content.setArcHeight(10.0);
 		r_window_content.setArcWidth(10.0);
 		r_window_content.setOnMousePressed(event -> mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY()));
-		r_window_content.setOnMouseDragged(event -> {stage.setX(stage.getX() + event.getScreenX() - mouse_pos.x);
-													 stage.setY(stage.getY() + event.getScreenY() - mouse_pos.y);
-													 mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
+		r_window_content.setOnMouseDragged(event -> {
+														if( (event.getSceneY() < 32 && !dragging) || dragging  ) {
+															dragging = true;
+															stage.setX(stage.getX() + event.getScreenX() - mouse_pos.x);
+															stage.setY(stage.getY() + event.getScreenY() - mouse_pos.y);
+															mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
+														}
 													});
+		r_window_content.setOnMouseReleased(event -> dragging = false);
 		
 		// cross btn
 		ImageButton btn_exit = new ImageButton("/assets/exit_icon.png");
@@ -62,6 +67,7 @@ public class AppWindow {
 		
 		// dockbar
 		dockbar = new Dockbar();
+		dockbar.app_window = this;
 		dockbar.setLayoutX(312); dockbar.setLayoutY(520);
 		populateDockbar();
 		
@@ -69,14 +75,22 @@ public class AppWindow {
 		status_bar = new StatusBar();
 		status_bar.setLayoutY(580.0);
 		
+		// conference panel
+		tab_pane = new ConferenceTabsPane();
+		
+
+		
 		// add elements
 		root.getChildren().add(r_window_content);
 		root.getChildren().add(btn_exit);
-		root.getChildren().add(dockbar);
+		root.getChildren().add(tab_pane);
 		root.getChildren().add(status_bar);
+		root.getChildren().add(dockbar);
 		
 		stage.setScene(scene);
 		stage.show();
+		
+		modifyTabPane();
 	}
 	
 	public void show() {
@@ -89,39 +103,62 @@ public class AppWindow {
 	
 	private void populateDockbar() {
 		// new conference
-		ImageButton btn_1 = new ImageButton("/assets/add_new_conf.png");
+		DockImageButton btn_1 = new DockImageButton("/assets/add_new_conf.png", "Stwórz now¹ konferencjê", dockbar);
 		dockbar.addIcon(btn_1);
 		
 		// find conference
-		ImageButton btn_2 = new ImageButton("/assets/search_conf.png");
+		DockImageButton btn_2 = new DockImageButton("/assets/search_conf.png", "Wyszukaj konferencjê", dockbar);
 		dockbar.addIcon(btn_2);
 		
 		// upload file
-		ImageButton btn_3 = new ImageButton("/assets/upload_file.png");
+		DockImageButton btn_3 = new DockImageButton("/assets/upload_file.png", "Wgraj plik", dockbar);
 		dockbar.addIcon(btn_3);
 		
 		// downlaod file
-		ImageButton btn_4 = new ImageButton("/assets/download_file.png");
+		DockImageButton btn_4 = new DockImageButton("/assets/download_file.png", "Pobierz plik", dockbar);
 		dockbar.addIcon(btn_4);
 		
 		// new conference from file
-		ImageButton btn_5 = new ImageButton("/assets/exit_icon.png");
+		DockImageButton btn_5 = new DockImageButton("/assets/new_conf_from_file.png", "Stwórz now¹ konferencjê z aktywnego pliku", dockbar);
 		dockbar.addIcon(btn_5);
 		
 		// find file
-		ImageButton btn_6 = new ImageButton("/assets/exit_icon.png");
+		DockImageButton btn_6 = new DockImageButton("/assets/find_file.png", "Wyszukaj plik", dockbar);
 		dockbar.addIcon(btn_6);
-		
-		// help
-		ImageButton btn_7 = new ImageButton("/assets/exit_icon.png");
-		dockbar.addIcon(btn_7);
-		
-		// cancel conference filter
-		ImageButton btn_8 = new ImageButton("/assets/exit_icon.png");
+
+		// options
+		DockImageButton btn_8 = new DockImageButton("/assets/options.png", "Opcje", dockbar);
 		dockbar.addIcon(btn_8);
 		
+		// help
+		DockImageButton btn_7 = new DockImageButton("/assets/help_icon.png", "Pomoc", dockbar);
+		dockbar.addIcon(btn_7);
+		
 		// logout
-		ImageButton btn_9 = new ImageButton("/assets/exit_icon.png");
+		DockImageButton btn_9 = new DockImageButton("/assets/logout.png", "Wyloguj", dockbar);
 		dockbar.addIcon(btn_9);
+		btn_9.setOnAction(event -> logout());
 	}
+	
+	private void logout() {
+		new LoginWindow();
+		this.hide();
+	}
+
+	private void modifyTabPane() {
+		tab_pane.getStyleClass().add("floating");
+		tab_pane.setStyle("-fx-tab-min-width: 90; -fx-tab-max-width: 90;");
+		
+		Set<Node> tabs = tab_pane.lookupAll(".tab-header-area > .headers-region > .tab:top > .tab-container > .tab-label");
+		for(Node tab : tabs)
+			tab.setStyle("-fx-text-fill: rgb(182, 182, 182); -fx-font-weight: normal;");
+		
+		tabs = null;
+		tabs = tab_pane.lookupAll(".tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-label");
+		for(Node tab : tabs)
+			tab.setStyle("-fx-text-fill: rgb(182, 182, 182); -fx-font-weight: bold;");
+		
+		//TODO: do poprawy
+	}
+	
 }

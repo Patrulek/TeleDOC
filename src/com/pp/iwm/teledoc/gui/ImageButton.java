@@ -42,38 +42,8 @@ public class ImageButton extends Button {
 	}
 	
 	public void setHoverAnimation() {
-		this.setOnMouseEntered(event -> {
-											if( zoom_anim_enabled ) {
-												zoom_anim.stop(); 
-												zoom_anim.setToX(zoom_in_scale);
-												zoom_anim.setToY(zoom_in_scale);
-												zoom_anim.setDuration(Duration.millis(zoom_in_duration));
-												zoom_anim.play();
-											}
-											
-											if( fade_anim_enabled ) {
-												fade_anim.stop();
-												fade_anim.setToValue(fade_in_opacity);
-												fade_anim.setDuration(Duration.millis(fade_in_duration));
-												fade_anim.play();
-											}
-										});
-		this.setOnMouseExited(event -> {
-											if( zoom_anim_enabled ) {
-												zoom_anim.stop(); 
-												zoom_anim.setToX(zoom_out_scale);
-												zoom_anim.setToY(zoom_out_scale);
-												zoom_anim.setDuration(Duration.millis(zoom_out_duration));
-												zoom_anim.play();
-											}
-											
-											if( fade_anim_enabled ) {
-												fade_anim.stop();
-												fade_anim.setToValue(fade_out_opacity);
-												fade_anim.setDuration(Duration.millis(fade_out_duration));
-												fade_anim.play();
-											}
-										});
+		this.setOnMouseEntered(event -> onMouseEntered());
+		this.setOnMouseExited(event -> onMouseExited());
 	}
 	
 	public void enableZoomAnimation(boolean enabled) {
@@ -98,5 +68,39 @@ public class ImageButton extends Button {
 		this.fade_out_opacity = set_fade_out_opacity;
 		this.fade_in_duration = set_fade_in_duration;
 		this.fade_out_duration = set_fade_out_duration;
+	}
+	
+	protected void onMouseEntered() {
+		if( zoom_anim_enabled ) {
+			zoom_anim.stop(); 
+			zoom_anim.setToX(zoom_in_scale);
+			zoom_anim.setToY(zoom_in_scale);
+			zoom_anim.setDuration(Duration.millis(zoom_in_duration));
+			zoom_anim.play();
+		}
+		
+		if( fade_anim_enabled ) {
+			fade_anim.stop();
+			fade_anim.setToValue(fade_in_opacity);
+			fade_anim.setDuration(Duration.millis(fade_in_duration));
+			fade_anim.play();
+		}
+	}
+	
+	protected void onMouseExited() {
+		if( zoom_anim_enabled ) {
+			zoom_anim.stop(); 
+			zoom_anim.setToX(zoom_out_scale);
+			zoom_anim.setToY(zoom_out_scale);
+			zoom_anim.setDuration(Duration.millis(zoom_out_duration));
+			zoom_anim.play();
+		}
+		
+		if( fade_anim_enabled ) {
+			fade_anim.stop();
+			fade_anim.setToValue(fade_out_opacity);
+			fade_anim.setDuration(Duration.millis(fade_out_duration));
+			fade_anim.play();
+		}
 	}
 }

@@ -4,13 +4,16 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pp.iwm.teledoc.windows.AppWindow;
+
+import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 
 public class Dockbar extends Pane {
 	
-	List<ImageButton> all_icons = null;
-	List<ImageButton> viewed_icons = null;
+	public AppWindow app_window;
+	List<DockImageButton> all_icons = null;
 	int max_icons = 15;
 	int icon_spacing = 4; // pixels
 	int icon_pref_size = 32;
@@ -18,16 +21,24 @@ public class Dockbar extends Pane {
 	double iconBaseScale = 0.75;
 	double iconBaseOpacity = 0.5;
 	boolean animOnlyHoveredIcon = true;
+	int selected_icon = -1;
+	
 	
 	Point mouse_pos = null;
 	Rectangle r_for_moving = null;
 	
+	Point lu_bound = null;
+	Point rd_bound = null;
+	
 	public Dockbar() {
 		this.all_icons = new ArrayList<>();
-		this.viewed_icons = new ArrayList<>();
 		
-		r_for_moving = new Rectangle(10, 32);
+		lu_bound = new Point(0, 32);
+		rd_bound = new Point(1024, 580);
+		
+		r_for_moving = new Rectangle(10, 36);
 		r_for_moving.setFill(Utils.ICONS_COLOR);
+		r_for_moving.setOpacity(0.5);
 		
 		r_for_moving.setOnMousePressed(event -> {
 											mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
@@ -37,31 +48,35 @@ public class Dockbar extends Pane {
 											//int selected_icon = (int) (diff / (icon_pref_size + icon_spacing));
 										});
 		r_for_moving.setOnMouseDragged(event -> {
-											this.setLayoutX(this.getLayoutX() + event.getScreenX() - mouse_pos.x);
-											this.setLayoutY(this.getLayoutY() + event.getScreenY() - mouse_pos.y);
+											double x = this.getLayoutX() + event.getScreenX() - mouse_pos.x;
+											x = x + this.getWidth() > rd_bound.x ? rd_bound.x - this.getWidth() : x;
+											x = x < lu_bound.x ? lu_bound.x : x;
+											
+											double y = this.getLayoutY() + event.getScreenY() - mouse_pos.y;
+											y = y + this.getHeight() > rd_bound.y ? rd_bound.y - this.getHeight() : y;
+											y = y < lu_bound.y ? lu_bound.y : y;
+											
+											this.setLayoutX(x);
+											this.setLayoutY(y);
 											mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
 										}); 
 		
 		this.getChildren().add(r_for_moving);
+		
+
 	}
 	
-	public void addIcon(ImageButton btn) {
+	public void addIcon(DockImageButton btn) {
 		all_icons.add(btn);
 		fitIcon(btn);
 		relocateNavigationRectangle();
 		
 		
-		if( viewed_icons.size() < max_icons )
-			viewed_icons.add(btn);
-		else
-			btn.setVisible(false);
-		
 		this.getChildren().add(btn);
 	}
 	
-	public void removeIcon(ImageButton btn) {
+	public void removeIcon(DockImageButton btn) {
 		all_icons.remove(btn);
-		viewed_icons.remove(btn);
 		this.getChildren().remove(btn);
 		
 		btn.setVisible(false);
@@ -83,7 +98,17 @@ public class Dockbar extends Pane {
 	}
 	
 	private void relocateNavigationRectangle() {
-		int x = (int) (all_icons.size() * (icon_pref_size + icon_spacing) + 0.25 * icon_pref_size);
+		int x = (int) (all_icons.size() * (icon_pref_size + icon_spacing) + 0.6 * icon_pref_size);
 		r_for_moving.setLayoutX(x);
+	}
+	
+	public void onIconMouseEntered(double x) {
+		selected_icon = (int)(x / (icon_pref_size + icon_spacing));
+		app_window.status_bar.setText(all_icons.get(selected_icon).btn_hint);
+	}
+	
+	public void onIconMouseExited() {
+		selected_icon = -1;
+		app_window.status_bar.setText("");
 	}
 }
