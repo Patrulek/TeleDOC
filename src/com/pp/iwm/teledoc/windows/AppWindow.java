@@ -76,7 +76,7 @@ public class AppWindow {
 		status_bar.setLayoutY(580.0);
 		
 		// conference panel
-		tab_pane = new ConferenceTabsPane();
+		tab_pane = new ConferenceTabsPane(status_bar);
 		
 
 		

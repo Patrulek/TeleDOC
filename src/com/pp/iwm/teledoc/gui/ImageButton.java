@@ -19,7 +19,7 @@ public class ImageButton extends Button {
 	
 	public FadeTransition fade_anim;
 	double fade_in_opacity = 1.0;
-	double fade_out_opacity = 0.5;
+	double fade_out_opacity = 1.0;
 	long fade_in_duration = 250;
 	long fade_out_duration = 500;
 	
@@ -41,7 +41,7 @@ public class ImageButton extends Button {
 		this.setHoverAnimation();
 	}
 	
-	public void setHoverAnimation() {
+	private void setHoverAnimation() {
 		this.setOnMouseEntered(event -> onMouseEntered());
 		this.setOnMouseExited(event -> onMouseExited());
 	}
