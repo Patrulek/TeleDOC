@@ -1,6 +1,7 @@
 package com.pp.iwm.teledoc;
 	
 import com.pp.iwm.teledoc.windows.LoginWindow;
+import com.pp.iwm.teledoc.windows.RegisterWindow;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -11,7 +12,6 @@ import javafx.scene.layout.BorderPane;
 
 
 public class Main extends Application {
-	LoginWindow login = null;
 	
 	@Override
 	public void init() {
@@ -20,9 +20,7 @@ public class Main extends Application {
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		login = new LoginWindow();
-		primaryStage = login.stage;
-		primaryStage.show();
+		new LoginWindow();
 	}
 	 
 	public static void main(String[] args) {

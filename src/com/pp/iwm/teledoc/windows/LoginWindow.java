@@ -5,6 +5,7 @@ import java.awt.Point;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.Utils;
 
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -22,6 +23,10 @@ public class LoginWindow {
 	
 	public Stage stage;
 	public Point mouse_pos;
+	
+	private TextField tf_email;
+	private PasswordField pf_password;
+	private Label lbl_error;
 	
 	public LoginWindow() {
 		stage = new Stage();
@@ -47,7 +52,7 @@ public class LoginWindow {
 		// cross btn
 		ImageButton btn_exit = new ImageButton("/assets/exit_icon.png");
 		btn_exit.setLayoutX(365.0); btn_exit.setLayoutY(5.0);
-		btn_exit.setOnAction(event -> Platform.exit());
+		btn_exit.setOnAction(event -> this.hide());
 		
 		// teledoc logo
 		ImageView iv_logo = new ImageView(new Image("/assets/teledoc_logo.png"));
@@ -58,7 +63,7 @@ public class LoginWindow {
 		iv_email.setLayoutX(20.0); iv_email.setLayoutY(157.0);
 		
 		// username text field
-		TextField tf_email = new TextField();
+		tf_email = new TextField();
 		tf_email.setLayoutX(55.0); tf_email.setLayoutY(150.0);
 		tf_email.setPrefWidth(300.0);
 		tf_email.setPromptText("email");
@@ -74,7 +79,7 @@ public class LoginWindow {
 		iv_password.setLayoutX(24.0); iv_password.setLayoutY(207.0);
 		
 		// password field
-		PasswordField pf_password = new PasswordField();
+		pf_password = new PasswordField();
 		pf_password.setLayoutX(55.0); pf_password.setLayoutY(200.0);
 		pf_password.setPrefWidth(300.0);
 		pf_password.setPromptText("password");
@@ -86,11 +91,11 @@ public class LoginWindow {
 							+ "-fx-background-color: rgb(207, 216, 220); ");
 		
 		// error label
-		Label lbl_error = new Label();
+		lbl_error = new Label();
 		lbl_error.setLayoutX(55.0); lbl_error.setLayoutY(250.0);
 		lbl_error.setPrefWidth(300.0);
 		lbl_error.setFont(Utils.LBL_FONT);
-		lbl_error.setText("Nieprawid³owy email/has³o");
+		lbl_error.setText("");
 		lbl_error.setStyle("-fx-text-fill: rgb(255, 64, 129);"
 							+ "-fx-alignment: center;");
 		//lbl_error.setVisible(false);
@@ -99,14 +104,17 @@ public class LoginWindow {
 		ImageButton btn_register = new ImageButton("/assets/register_icon.png");
 		btn_register.setLayoutX(65.0); btn_register.setLayoutY(300.0);
 		btn_register.setPrefWidth(64.0);
+		btn_register.setOnAction(event -> openRegisterWindow());
 		
 		ImageButton btn_remind = new ImageButton("/assets/remind_password.png");
 		btn_remind.setLayoutX(155.0); btn_remind.setLayoutY(300.0);
 		btn_remind.setPrefWidth(64.0);
+		btn_remind.setOnAction(event -> remindPassword());
 		
 		ImageButton btn_login = new ImageButton("/assets/login_icon.png");
 		btn_login.setLayoutX(245.0); btn_login.setLayoutY(300.0);
 		btn_login.setPrefWidth(64.0);
+		btn_login.setOnAction(event -> loginToApplication());
 		
 		// add elements
 		root.getChildren().add(r_window_content);
@@ -120,6 +128,7 @@ public class LoginWindow {
 		root.getChildren().add(btn_register);
 		root.getChildren().add(btn_remind);
 		root.getChildren().add(btn_login);
+		
 		stage.setScene(scene);
 		stage.show();
 	}
@@ -131,4 +140,69 @@ public class LoginWindow {
 	public void hide() {
 		stage.hide();
 	}
+	
+	private void openRegisterWindow() {
+		RegisterWindow register = new RegisterWindow();
+		this.hide();
+	}
+	
+	private void loginToApplication() {
+		lbl_error.setText("");
+		
+		if( validateTextFields() )
+			sendDataToServer();
+	}
+	
+	private void sendDataToServer() {
+		/*
+		 * if( !canConnect() )
+		 * 		show_error();
+		 * else
+		 * 		send_data();
+		 * 
+		 */
+		
+		// hack alert
+		if( tf_email.getText().equals("dev") && pf_password.getText().equals("dev") )
+			openAppWindow();
+	}
+	
+	private void readDataFromServer() {
+		/*
+		 * if( incorrect email/password )
+		 * 		show_error();
+		 * else
+		 * 		openAppWindow(user_email);
+		 */
+	}
+	
+	private void remindPassword() {
+		if( tf_email.getText().equals("") )
+			lbl_error.setText("Podaj swój email");
+		else {
+			lbl_error.setText("Twoje has³o to: ");
+			// sendEmailToServer()
+			// waitForMessage()
+			// showPasswordInLabel()
+		}
+	}
+	
+	private boolean validateTextFields() {
+		if( tf_email.getText().equals("") || pf_password.getText().equals("") ) {
+			lbl_error.setText("Proszê wype³niæ wszystkie pola");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean canConnect() {
+		return false;
+	}
+	
+	private void openAppWindow() {
+		// AppWindow app = new AppWindow();
+		this.hide();
+	}
+	
 }
