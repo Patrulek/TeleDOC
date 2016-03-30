@@ -5,8 +5,6 @@ import java.awt.Point;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.Utils;
 
-import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -201,7 +199,7 @@ public class LoginWindow {
 	}
 	
 	private void openAppWindow() {
-		// AppWindow app = new AppWindow();
+		new AppWindow();
 		this.hide();
 	}
 	
