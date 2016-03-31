@@ -6,6 +6,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.Background;
 import javafx.util.Duration;
 
 public class ImageButton extends Button {
@@ -29,8 +30,8 @@ public class ImageButton extends Button {
 	public ImageButton(String image_url) {
 		this.image_url = new SimpleStringProperty();
 		this.image_url.set(image_url);
+		this.setStyle("-fx-background-color: transparent;");
 		this.setGraphic(new ImageView(new Image(image_url)));
-		this.setBackground(null);
 		
 		this.zoom_anim = new ScaleTransition(Duration.millis(zoom_in_duration), this);
 		this.zoom_anim.setToX(zoom_in_scale); this.zoom_anim.setToY(zoom_in_scale);

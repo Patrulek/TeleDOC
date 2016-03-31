@@ -28,9 +28,7 @@ public class ConferenceTabsPane extends TabPane {
 		this.setPrefHeight(580.0);
 		
 		VBox vbox1 = new VBox();
-		vbox1.setAlignment(Pos.TOP_CENTER);
 		VBox vbox2 = new VBox();
-		vbox2.setAlignment(Pos.TOP_CENTER);
 		
 		for( int i = 0; i < 50; i++ )
 			vbox1.getChildren().add(new ConferenceCard(this, true));

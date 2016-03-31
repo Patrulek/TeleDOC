@@ -104,11 +104,11 @@ public class Dockbar extends Pane {
 	
 	public void onIconMouseEntered(double x) {
 		selected_icon = (int)(x / (icon_pref_size + icon_spacing));
-		app_window.status_bar.setText(all_icons.get(selected_icon).btn_hint);
+		app_window.status_bar.addText(all_icons.get(selected_icon).btn_hint);
 	}
 	
 	public void onIconMouseExited() {
 		selected_icon = -1;
-		app_window.status_bar.setText("");
+		app_window.status_bar.removeText();
 	}
 }

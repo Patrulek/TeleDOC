@@ -6,9 +6,12 @@ import java.util.Set;
 import com.pp.iwm.teledoc.gui.ConferenceTabsPane;
 import com.pp.iwm.teledoc.gui.DockImageButton;
 import com.pp.iwm.teledoc.gui.Dockbar;
+import com.pp.iwm.teledoc.gui.FileCard;
+import com.pp.iwm.teledoc.gui.FileExplorer;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.StatusBar;
 import com.pp.iwm.teledoc.gui.Utils;
+import com.pp.iwm.teledoc.objects.FileTree;
 
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -16,6 +19,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -25,12 +29,10 @@ public class AppWindow {
 	public Stage stage;
 	public Point mouse_pos;
 	
-	private TextField tf_email;
-	private PasswordField pf_password;
-	private Label lbl_error;
 	private Dockbar dockbar;
 	public StatusBar status_bar;
 	public ConferenceTabsPane tab_pane;
+	public FileExplorer file_pane;
 	
 	private boolean dragging = false;
 	
@@ -47,18 +49,6 @@ public class AppWindow {
 		// window background
 		Rectangle r_window_content = new Rectangle(1024, 600);
 		r_window_content.setFill(Utils.PRIMARY_COLOR);
-		r_window_content.setArcHeight(10.0);
-		r_window_content.setArcWidth(10.0);
-		r_window_content.setOnMousePressed(event -> mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY()));
-		r_window_content.setOnMouseDragged(event -> {
-														if( (event.getSceneY() < 32 && !dragging) || dragging  ) {
-															dragging = true;
-															stage.setX(stage.getX() + event.getScreenX() - mouse_pos.x);
-															stage.setY(stage.getY() + event.getScreenY() - mouse_pos.y);
-															mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
-														}
-													});
-		r_window_content.setOnMouseReleased(event -> dragging = false);
 		
 		// cross btn
 		ImageButton btn_exit = new ImageButton("/assets/exit_icon.png");
@@ -78,14 +68,20 @@ public class AppWindow {
 		// conference panel
 		tab_pane = new ConferenceTabsPane(status_bar);
 		
-
+		// file explorer panel
+		file_pane = new FileExplorer(status_bar);
+		file_pane.setOnMousePressed(event -> onFilePaneMousePressed(event));
+		file_pane.setOnMouseDragged(event -> onFilePaneMouseDragged(event));
+		file_pane.setOnMouseReleased(event -> onFilePaneMouseReleased(event));
 		
 		// add elements
 		root.getChildren().add(r_window_content);
-		root.getChildren().add(btn_exit);
 		root.getChildren().add(tab_pane);
+		root.getChildren().add(file_pane);
 		root.getChildren().add(status_bar);
 		root.getChildren().add(dockbar);
+		
+		root.getChildren().add(btn_exit);
 		
 		stage.setScene(scene);
 		stage.show();
@@ -159,6 +155,23 @@ public class AppWindow {
 			tab.setStyle("-fx-text-fill: rgb(182, 182, 182); -fx-font-weight: bold;");
 		
 		//TODO: do poprawy
+	}
+	
+	private void onFilePaneMousePressed(MouseEvent event) {
+		mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
+	}
+	
+	private void onFilePaneMouseDragged(MouseEvent event) {
+		if( (event.getSceneY() < 32 && !dragging) || dragging  ) {
+			dragging = true;
+			stage.setX(stage.getX() + event.getScreenX() - mouse_pos.x);
+			stage.setY(stage.getY() + event.getScreenY() - mouse_pos.y);
+			mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
+		}
+	}
+	
+	private void onFilePaneMouseReleased(MouseEvent event) {
+		dragging = false;
 	}
 	
 }

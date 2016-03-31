@@ -81,12 +81,12 @@ public class ConferenceCard extends Pane {
 		} else
 			s = "Wyœwietl szczegó³owe informacje o konferencji: " + tab_pane.hovered_card.lbl_title.getText();
 		
-		tab_pane.status_bar.setText(s);
+		tab_pane.status_bar.addText(s);
 		btn.onMouseEntered();
 	}
 	
 	private void onButtonMouseExited(ImageButton btn) {
-		tab_pane.status_bar.setText("");
+		tab_pane.status_bar.removeText();
 		btn.onMouseExited();
 	}
 }
