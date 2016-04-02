@@ -1,5 +1,7 @@
 package com.pp.iwm.teledoc.gui;
 
+import com.pp.iwm.teledoc.objects.ImageManager;
+
 import javafx.animation.FadeTransition;
 import javafx.animation.ScaleTransition;
 import javafx.beans.property.SimpleStringProperty;
@@ -11,7 +13,7 @@ import javafx.util.Duration;
 
 public class ImageButton extends Button {
 	
-	public SimpleStringProperty image_url;
+	public Integer image_key;
 	public ScaleTransition zoom_anim;
 	double zoom_in_scale = 1.15;
 	double zoom_out_scale = 1.0;
@@ -28,14 +30,13 @@ public class ImageButton extends Button {
 	boolean fade_anim_enabled = true;
 	
 	public String hint = "";
-	public String action = "";
+	public Integer action = -1;
 	
-	public ImageButton(String image_url, String hint, String action) {
+	public ImageButton(Integer image_key, String hint, Integer action) {
 		this.hint = hint;
 		this.action = action;
-		this.image_url = new SimpleStringProperty();
-		this.image_url.set(image_url);
-		this.setGraphic(new ImageView(new Image(image_url)));
+		this.image_key = image_key;
+		this.setGraphic(new ImageView(ImageManager.instance().getImage(image_key)));
 		this.setStyle("-fx-background-color: transparent;");
 		
 		this.zoom_anim = new ScaleTransition(Duration.millis(zoom_in_duration), this);

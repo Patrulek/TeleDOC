@@ -11,10 +11,6 @@ import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 
 public class ActionPane extends Pane {
-	
-	// BTN_ACTIONS
-	public static String ACT_HIDE_PANEL = "HIDE_PANEL";
-	
 	public StatusBar status_bar = null;
 	public Pane content_pane = null;
 	public TranslateTransition translate_anim = null;
@@ -40,7 +36,7 @@ public class ActionPane extends Pane {
 		
 		fade_anim_content_pane = new FadeTransition(Duration.millis(150.0), content_pane);
 		
-		btn_hide = new ImageButton("/assets/logout.png", "Ukryj panel", ACT_HIDE_PANEL);
+		btn_hide = new ImageButton(Utils.IMG_LOGOUT_ICON, Utils.HINT_HIDE_PANEL, Utils.ACT_HIDE_PANEL);
 		btn_hide.setLayoutX(725.0);
 		btn_hide.setScaleX(0.5); btn_hide.setScaleY(0.5);
 		btn_hide.setOpacity(0.5);
@@ -69,21 +65,20 @@ public class ActionPane extends Pane {
 	
 	private void changePanel(ImageButton btn) {
 		content_pane.getChildren().clear();
-		
 		switch( btn.action ) {
-			case AppWindow.ACT_NEW_CONF:
+			case Utils.ACT_NEW_CONF:
 				createNewConfPanel();
 				
 				break;
-			case AppWindow.ACT_FIND_CONF:
+			case Utils.ACT_FIND_CONF:
 				createFindConfPanel();
 				
 				break;
-			case AppWindow.ACT_NEW_CONF_FROM_FILE:
+			case Utils.ACT_NEW_CONF_FROM_FILE:
 				createNewConfPanel(); // tymczasowo
 				
 				break;
-			case AppWindow.ACT_FIND_FILE:
+			case Utils.ACT_FIND_FILE:
 				createFindConfPanel(); // tymczasowo
 				
 				break;

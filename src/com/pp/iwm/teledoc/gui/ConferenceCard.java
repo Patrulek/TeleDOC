@@ -5,11 +5,6 @@ import javafx.scene.layout.Pane;
 
 public class ConferenceCard extends Pane {
 	
-	// BTN_ACTIONS
-	public static String ACT_JOIN_CONFERENCE = "JOIN_CONFERENCE";
-	public static String ACT_OPEN_CONFERENCE = "OPEN_CONFERENCE";
-	public static String ACT_SHOW_CONF_DETAILS = "SHOW_CONF_DETAILS";
-	
 	Label lbl_title = null;
 	Label lbl_founder = null;
 	ImageButton btn_action = null;
@@ -38,12 +33,12 @@ public class ConferenceCard extends Pane {
 		lbl_founder.setFont(Utils.LBL_STATUSBAR_FONT);
 		lbl_title.setPrefWidth(120.0);
 		
-		btn_action = active_conf ? new ImageButton("/assets/add_new_conf.png", "Do³¹cz do konferencji: ", ACT_JOIN_CONFERENCE) : new ImageButton("/assets/folder_icon.png", "Otwórz ponownie konferencjê: ", ACT_OPEN_CONFERENCE);
+		btn_action = active_conf ? new ImageButton(Utils.IMG_NEW_CONF_ICON, Utils.HINT_JOIN_CONF, Utils.ACT_JOIN_CONF) : new ImageButton(Utils.IMG_FOLDER_ICON, Utils.HINT_OPEN_CONF, Utils.ACT_OPEN_CONF);
 		btn_action.setLayoutX(160.0); btn_action.setLayoutY(-6.0);
 		btn_action.customizeZoomAnimation(0.65, 0.4, 250, 250);
 		btn_action.setScaleX(0.4); btn_action.setScaleY(0.4);
 		
-		btn_information = new ImageButton("/assets/image_icon.png", "Wyœwietl szczegó³owe informacje o konferencji: ", ACT_SHOW_CONF_DETAILS);
+		btn_information = new ImageButton(Utils.IMG_FOLDER_ICON, Utils.HINT_CONF_DETAILS, Utils.ACT_CONF_DETAILS);
 		btn_information.setLayoutX(160.0); btn_information.setLayoutY(14.0);
 		btn_information.customizeZoomAnimation(0.65, 0.4, 250, 250);
 		btn_information.setScaleX(0.4); btn_information.setScaleY(0.4);

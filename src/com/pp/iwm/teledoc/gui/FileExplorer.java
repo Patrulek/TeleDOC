@@ -17,9 +17,6 @@ import javafx.scene.layout.Pane;
 
 public class FileExplorer extends Pane {
 	
-	// BTN_ACTIONS
-	public static String ACT_PARENT_FOLDER = "PARENT_FOLDER";
-	
 	FileTree file_tree = null;
 	Label lbl_user = null;
 	AppWindow app_window = null;
@@ -53,7 +50,7 @@ public class FileExplorer extends Pane {
 		simple_pane.setStyle("-fx-background-color: rgb(96, 125, 139, 1.0);");
 		simple_pane.setPrefWidth(767.0);
 		
-		btn_back = new ImageButton("/assets/logout.png", "W górê", ACT_PARENT_FOLDER);
+		btn_back = new ImageButton(Utils.IMG_LOGOUT_ICON, Utils.HINT_PARENT_FOLDER, Utils.ACT_PARENT_FOLDER);
 		btn_back.setScaleX(0.4); btn_back.setScaleY(0.4);
 		btn_back.setOpacity(0.5);
 		btn_back.setLayoutX(-5.0);

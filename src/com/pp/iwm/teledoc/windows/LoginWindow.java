@@ -4,6 +4,7 @@ import java.awt.Point;
 
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.Utils;
+import com.pp.iwm.teledoc.objects.ImageManager;
 
 import javafx.scene.Group;
 import javafx.scene.ImageCursor;
@@ -13,6 +14,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -20,18 +22,30 @@ import javafx.stage.StageStyle;
 
 public class LoginWindow extends Window {
 	
-	// BTN_ACTIONS
-	public static String ACT_REGISTER = "REGISTER";
-	public static String ACT_EXIT_APP = "EXIT_APP";
-	public static String ACT_RESET_PASS = "RESET_PASS";
-	public static String ACT_LOGIN = "LOGIN";
+	// =====================================================
+	// FIELDS
+	// =====================================================
 	
+	
+	// UI ELEMENTS
+	private Rectangle rect_window_background;
 	private TextField tf_email;
 	private PasswordField pf_password;
 	private Label lbl_error;
+	private ImageView iv_logo;
+	private ImageView iv_email;
+	private ImageView iv_password;
+	private ImageButton ibtn_exit;
+	private ImageButton ibtn_register;
+	private ImageButton ibtn_reset_password;
+	private ImageButton ibtn_login;
+	
+	// ========================================================
+	// METHODS
+	// ========================================================
 	
 	public LoginWindow() {
-
+		super();
 	}
 
 	private void openRegisterWindow() {
@@ -72,11 +86,11 @@ public class LoginWindow extends Window {
 		 */
 	}
 	
-	private void remindPassword() {
+	private void resetPassword() {
 		if( tf_email.getText().equals("") )
-			lbl_error.setText("Podaj swój email");
+			lbl_error.setText(Utils.MSG_INPUT_EMAIL);
 		else {
-			lbl_error.setText("Twoje has³o to: ");
+			lbl_error.setText(Utils.MSG_YOUR_PASSWORD);
 			// sendEmailToServer()
 			// waitForMessage()
 			// showPasswordInLabel()
@@ -85,7 +99,7 @@ public class LoginWindow extends Window {
 	
 	private boolean validateTextFields() {
 		if( tf_email.getText().equals("") || pf_password.getText().equals("") ) {
-			lbl_error.setText("Proszê wype³niæ wszystkie pola");
+			lbl_error.setText(Utils.MSG_FILL_ALL_FIELDS);
 			return false;
 		}
 		
@@ -95,68 +109,76 @@ public class LoginWindow extends Window {
 	private boolean canConnect() {
 		return false;
 	}
+	
+	private void onWindowBackgroundMousePressed(MouseEvent ev) {
+		mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
+	}
+	
+	private void onWindowBackgroundMouseReleased(MouseEvent ev) {
+		is_dragged = false;
+	}
+	
+	private void onWindowBackgroundMoseDragged(MouseEvent ev) {
+		if( (!is_dragged && ev.getSceneY() < 24) || is_dragged ) {
+			is_dragged = true;
+			stage.setX(stage.getX() + ev.getScreenX() - mouse_pos.x);
+			stage.setY(stage.getY() + ev.getScreenY() - mouse_pos.y);
+			mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
+		}
+	}
 
 	@Override
 	protected void createStage() {
-
-		Group root = new Group();
-		// hide window content
-		Scene scene = new Scene(root, 400, 400, Color.rgb(0, 0, 0, 0));
-		scene.setCursor(new ImageCursor(new Image("/assets/cursor.png")));
-		// hide title bar
+		scene = new Scene(root, 400, 400, Color.rgb(0, 0, 0, 0));
 		stage.initStyle(StageStyle.TRANSPARENT);
 		
 		// window background
-		Rectangle r_window_content = new Rectangle(400, 400);
-		r_window_content.setFill(Utils.PRIMARY_COLOR);
-		r_window_content.setArcHeight(10.0);
-		r_window_content.setArcWidth(10.0);
-		r_window_content.setOnMousePressed(event -> mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY()));
-		r_window_content.setOnMouseDragged(event -> {stage.setX(stage.getX() + event.getScreenX() - mouse_pos.x);
-													 stage.setY(stage.getY() + event.getScreenY() - mouse_pos.y);
-													 mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
-													});
+		rect_window_background = new Rectangle(400, 400);
+		rect_window_background.setFill(Utils.PRIMARY_DARK_COLOR);
+		rect_window_background.setOnMousePressed(ev -> onWindowBackgroundMousePressed(ev));
+		rect_window_background.setOnMouseDragged(ev -> onWindowBackgroundMoseDragged(ev));
+		rect_window_background.setOnMouseReleased(ev -> onWindowBackgroundMouseReleased(ev));
 		
 		// cross btn
-		ImageButton btn_exit = new ImageButton("/assets/exit_icon.png", "Zamknij program", ACT_EXIT_APP);
-		btn_exit.setLayoutX(365.0); btn_exit.setLayoutY(5.0);
-		btn_exit.setOnAction(event -> this.hide());
+		ibtn_exit = new ImageButton(Utils.IMG_EXIT_APP_ICON, Utils.HINT_CLOSE_APP, Utils.ACT_EXIT_APP);
+		ibtn_exit.setLayoutX(365.0); ibtn_exit.setLayoutY(5.0);
+		ibtn_exit.setOnAction(ev -> hide());
 		
 		// teledoc logo
-		ImageView iv_logo = new ImageView(new Image("/assets/teledoc_logo.png"));
+		iv_logo = new ImageView(ImageManager.instance().getImage(Utils.IMG_LOGO));
 		iv_logo.setLayoutX(50.0); iv_logo.setLayoutY(50.0);
 		
 		// username icon
-		ImageView iv_email = new ImageView(new Image("/assets/name_icon.png")); // TODO:  email icon
+		iv_email = new ImageView(ImageManager.instance().getImage(Utils.IMG_NAME_ICON)); // TODO:  email icon
 		iv_email.setLayoutX(20.0); iv_email.setLayoutY(157.0);
 		
 		// username text field
 		tf_email = new TextField();
 		tf_email.setLayoutX(55.0); tf_email.setLayoutY(150.0);
 		tf_email.setPrefWidth(300.0);
-		tf_email.setPromptText("email");
+		tf_email.setPromptText(Utils.PROMPT_EMAIL);
 		tf_email.setFont(Utils.TF_FONT);
-		tf_email.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-							+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-							+ "-fx-highlight-text-fill:black; "
-							+ "-fx-highlight-fill: gray; "
-							+ "-fx-background-color: rgb(207, 216, 220); ");
+		tf_email.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+							+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+							+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+							+ "-fx-highlight-fill: rgb(15, 27, 30); "
+							+ "-fx-background-color: rgb(30, 54, 60); ");
 		
 		// password icon
-		ImageView iv_password = new ImageView(new Image("/assets/pass_icon.png"));
+		iv_password = new ImageView(ImageManager.instance().getImage(Utils.IMG_PASSWORD_ICON));
 		iv_password.setLayoutX(24.0); iv_password.setLayoutY(207.0);
 		
 		// password field
 		pf_password = new PasswordField();
 		pf_password.setLayoutX(55.0); pf_password.setLayoutY(200.0);
 		pf_password.setPrefWidth(300.0);
-		pf_password.setPromptText("password");
+		pf_password.setPromptText(Utils.PROMPT_PASS);
 		pf_password.setFont(Utils.TF_FONT);
-		pf_password.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-							+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-							+ "-fx-highlight-text-fill:black; "
-							+ "-fx-highlight-fill: gray; "
-							+ "-fx-background-color: rgb(207, 216, 220); ");
+		pf_password.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+							+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+							+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+							+ "-fx-highlight-fill: rgb(15, 27, 30); "
+							+ "-fx-background-color: rgb(30, 54, 60); ");
 		
 		// error label
 		lbl_error = new Label();
@@ -164,38 +186,37 @@ public class LoginWindow extends Window {
 		lbl_error.setPrefWidth(300.0);
 		lbl_error.setFont(Utils.LBL_FONT);
 		lbl_error.setText("");
-		lbl_error.setStyle("-fx-text-fill: rgb(255, 64, 129);"
+		lbl_error.setStyle("-fx-text-fill: rgb(205, 100, 100);"
 							+ "-fx-alignment: center;");
-		//lbl_error.setVisible(false);
 		
 		// image buttons
-		ImageButton btn_register = new ImageButton("/assets/register_icon.png", "Zarejestruj", ACT_REGISTER);
-		btn_register.setLayoutX(65.0); btn_register.setLayoutY(300.0);
-		btn_register.setPrefWidth(64.0);
-		btn_register.setOnAction(event -> openRegisterWindow());
+		ibtn_register = new ImageButton(Utils.IMG_REGISTER_ICON, Utils.HINT_REGISTER, Utils.ACT_REGISTER);
+		ibtn_register.setLayoutX(65.0); ibtn_register.setLayoutY(300.0);
+		ibtn_register.setPrefWidth(64.0);
+		ibtn_register.setOnAction(ev -> openRegisterWindow());
 		
-		ImageButton btn_remind = new ImageButton("/assets/remind_password.png", "Zresetuj has³o", ACT_RESET_PASS);
-		btn_remind.setLayoutX(155.0); btn_remind.setLayoutY(300.0);
-		btn_remind.setPrefWidth(64.0);
-		btn_remind.setOnAction(event -> remindPassword());
+		ibtn_reset_password = new ImageButton(Utils.IMG_RESET_PASS_ICON, Utils.HINT_RESET_PASS, Utils.ACT_RESET_PASS);
+		ibtn_reset_password.setLayoutX(155.0); ibtn_reset_password.setLayoutY(300.0);
+		ibtn_reset_password.setPrefWidth(64.0);
+		ibtn_reset_password.setOnAction(ev -> resetPassword());
 		
-		ImageButton btn_login = new ImageButton("/assets/login_icon.png", "Zaloguj", ACT_LOGIN);
-		btn_login.setLayoutX(245.0); btn_login.setLayoutY(300.0);
-		btn_login.setPrefWidth(64.0);
-		btn_login.setOnAction(event -> loginToApplication());
+		ibtn_login = new ImageButton(Utils.IMG_LOGIN_ICON, Utils.HINT_LOGIN, Utils.ACT_LOGIN);
+		ibtn_login.setLayoutX(245.0); ibtn_login.setLayoutY(300.0);
+		ibtn_login.setPrefWidth(64.0);
+		ibtn_login.setOnAction(ev -> loginToApplication());
 		
 		// add elements
-		root.getChildren().add(r_window_content);
-		root.getChildren().add(btn_exit);
+		root.getChildren().add(rect_window_background);
+		root.getChildren().add(ibtn_exit);
 		root.getChildren().add(iv_logo);
 		root.getChildren().add(iv_email);
 		root.getChildren().add(tf_email);
 		root.getChildren().add(iv_password);
 		root.getChildren().add(pf_password);
 		root.getChildren().add(lbl_error);
-		root.getChildren().add(btn_register);
-		root.getChildren().add(btn_remind);
-		root.getChildren().add(btn_login);
+		root.getChildren().add(ibtn_register);
+		root.getChildren().add(ibtn_reset_password);
+		root.getChildren().add(ibtn_login);
 		
 		stage.setScene(scene);
 	}

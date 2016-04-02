@@ -30,17 +30,7 @@ import javafx.stage.StageStyle;
 
 public class AppWindow extends Window {
 	
-	// BTN_ACTIONS
-	public static final String ACT_EXIT_APP = "EXIT_APP";
-	public static final String ACT_NEW_CONF = "NEW_CONF";
-	public static final String ACT_FIND_CONF = "FIND_CONF";
-	public static final String ACT_UPLOAD_FILE = "UPLOAD_FILE";
-	public static final String ACT_DOWNLOAD_FILE = "DOWNLOAD_FILE";
-	public static final String ACT_NEW_CONF_FROM_FILE = "NEW_CONF_FROM_FILE";
-	public static final String ACT_FIND_FILE = "FIND_FILE";
-	public static final String ACT_SHOW_HELP = "SHOW_HELP";
-	public static final String ACT_LOGOUT = "LOGOUT";
-	
+	// UI ELEMENTS
 	private Dockbar dockbar;
 	public StatusBar status_bar;
 	public ConferenceTabsPane tab_pane;
@@ -55,44 +45,44 @@ public class AppWindow extends Window {
 	
 	private void populateDockbar() {
 		// new conference
-		DockImageButton btn_1 = new DockImageButton("/assets/add_new_conf.png", "Stwórz now¹ konferencjê", ACT_NEW_CONF, dockbar);
+		DockImageButton btn_1 = new DockImageButton(Utils.IMG_NEW_CONF_ICON, "Stwórz now¹ konferencjê", Utils.ACT_NEW_CONF, dockbar);
 		dockbar.addIcon(btn_1);
-		btn_1.setOnAction(event -> onCreateNewConference(btn_1, false));
+		btn_1.setOnAction(ev -> onCreateNewConference(btn_1, false));
 		
 		// find conference
-		DockImageButton btn_2 = new DockImageButton("/assets/search_conf.png", "Wyszukaj konferencjê", ACT_FIND_CONF, dockbar);
+		DockImageButton btn_2 = new DockImageButton(Utils.IMG_SEARCH_CONF_ICON, "Wyszukaj konferencjê", Utils.ACT_FIND_CONF, dockbar);
 		dockbar.addIcon(btn_2);
-		btn_2.setOnAction(event -> onFindConference(btn_2));
+		btn_2.setOnAction(ev -> onFindConference(btn_2));
 		
 		// upload file
-		DockImageButton btn_3 = new DockImageButton("/assets/upload_file.png", "Wgraj plik", ACT_UPLOAD_FILE, dockbar);
+		DockImageButton btn_3 = new DockImageButton(Utils.IMG_UPLOAD_ICON, "Wgraj plik", Utils.ACT_UPLOAD_FILE, dockbar);
 		dockbar.addIcon(btn_3);
-		btn_3.setOnAction(event -> onUploadFile(btn_3));
+		btn_3.setOnAction(ev -> onUploadFile(btn_3));
 		
 		// download file
-		DockImageButton btn_4 = new DockImageButton("/assets/download_file.png", "Pobierz plik", ACT_DOWNLOAD_FILE, dockbar);
+		DockImageButton btn_4 = new DockImageButton(Utils.IMG_DOWNLOAD_ICON, "Pobierz plik", Utils.ACT_DOWNLOAD_FILE, dockbar);
 		dockbar.addIcon(btn_4);
-		btn_4.setOnAction(event -> onDownloadFile(btn_4));
+		btn_4.setOnAction(ev -> onDownloadFile(btn_4));
 		
 		// new conference from file
-		DockImageButton btn_5 = new DockImageButton("/assets/new_conf_from_file.png", "Stwórz now¹ konferencjê z aktywnego pliku: ", ACT_NEW_CONF_FROM_FILE, dockbar);
+		DockImageButton btn_5 = new DockImageButton(Utils.IMG_NEW_CONF_FROM_FILE_ICON, "Stwórz now¹ konferencjê z aktywnego pliku: ", Utils.ACT_NEW_CONF_FROM_FILE, dockbar);
 		dockbar.addIcon(btn_5);
-		btn_5.setOnAction(event -> onCreateNewConference(btn_5, true));
+		btn_5.setOnAction(ev -> onCreateNewConference(btn_5, true));
 		
 		// find file
-		DockImageButton btn_6 = new DockImageButton("/assets/find_file.png", "Wyszukaj plik", ACT_FIND_FILE, dockbar);
+		DockImageButton btn_6 = new DockImageButton(Utils.IMG_SEARCH_FILE_ICON, "Wyszukaj plik", Utils.ACT_FIND_FILE, dockbar);
 		dockbar.addIcon(btn_6);
-		btn_6.setOnAction(event -> onFindFile(btn_6));
+		btn_6.setOnAction(ev -> onFindFile(btn_6));
 		
 		// help
-		DockImageButton btn_7 = new DockImageButton("/assets/help_icon.png", "Pomoc", ACT_SHOW_HELP, dockbar);
+		DockImageButton btn_7 = new DockImageButton(Utils.IMG_HELP_ICON, "Pomoc", Utils.ACT_SHOW_HELP, dockbar);
 		dockbar.addIcon(btn_7);
-		btn_7.setOnAction(event -> onShowHelp(btn_7));
+		btn_7.setOnAction(ev -> onShowHelp(btn_7));
 		
 		// logout
-		DockImageButton btn_8 = new DockImageButton("/assets/logout.png", "Wyloguj", ACT_LOGOUT, dockbar);
+		DockImageButton btn_8 = new DockImageButton(Utils.IMG_LOGOUT_ICON, "Wyloguj", Utils.ACT_LOGOUT, dockbar);
 		dockbar.addIcon(btn_8);
-		btn_8.setOnAction(event -> onLogout());
+		btn_8.setOnAction(ev -> onLogout());
 	}
 	
 	private void onCreateNewConference(ImageButton btn, boolean from_file) {
@@ -139,20 +129,20 @@ public class AppWindow extends Window {
 		//TODO: do poprawy
 	}
 	
-	private void onFilePaneMousePressed(MouseEvent event) {
-		mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
+	private void onFilePaneMousePressed(MouseEvent ev) {
+		mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
 	}
 	
-	private void onFilePaneMouseDragged(MouseEvent event) {
-		if( (event.getSceneY() < 32 && !dragging) || dragging  ) {
+	private void onFilePaneMouseDragged(MouseEvent ev) {
+		if( (ev.getSceneY() < 32 && !dragging) || dragging  ) {
 			dragging = true;
-			stage.setX(stage.getX() + event.getScreenX() - mouse_pos.x);
-			stage.setY(stage.getY() + event.getScreenY() - mouse_pos.y);
-			mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
+			stage.setX(stage.getX() + ev.getScreenX() - mouse_pos.x);
+			stage.setY(stage.getY() + ev.getScreenY() - mouse_pos.y);
+			mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
 		}
 	}
 	
-	private void onFilePaneMouseReleased(MouseEvent event) {
+	private void onFilePaneMouseReleased(MouseEvent ev) {
 		dragging = false;
 	}
 
@@ -172,9 +162,9 @@ public class AppWindow extends Window {
 		r_window_content.setFill(Utils.PRIMARY_COLOR);
 		
 		// cross btn
-		ImageButton btn_exit = new ImageButton("/assets/exit_icon.png", "Zamknij program", ACT_EXIT_APP);
+		ImageButton btn_exit = new ImageButton(Utils.IMG_EXIT_APP_ICON, "Zamknij program", Utils.ACT_EXIT_APP);
 		btn_exit.setLayoutX(989.0); btn_exit.setLayoutY(5.0);
-		btn_exit.setOnAction(event -> this.hide());
+		btn_exit.setOnAction(ev -> this.hide());
 		
 		// dockbar
 		dockbar = new Dockbar();
@@ -190,9 +180,9 @@ public class AppWindow extends Window {
 		
 		// file explorer panel
 		file_pane = new FileExplorer(this);
-		file_pane.setOnMousePressed(event -> onFilePaneMousePressed(event));
-		file_pane.setOnMouseDragged(event -> onFilePaneMouseDragged(event));
-		file_pane.setOnMouseReleased(event -> onFilePaneMouseReleased(event));
+		file_pane.setOnMousePressed(ev -> onFilePaneMousePressed(ev));
+		file_pane.setOnMouseDragged(ev -> onFilePaneMouseDragged(ev));
+		file_pane.setOnMouseReleased(ev -> onFilePaneMouseReleased(ev));
 		
 		// action panel
 		action_pane = new ActionPane(status_bar);

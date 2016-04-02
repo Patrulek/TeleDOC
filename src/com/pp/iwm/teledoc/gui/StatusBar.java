@@ -13,7 +13,7 @@ public class StatusBar extends Pane {
 	public StatusBar() {
 		this.setPrefWidth(1024.0);
 		this.setPrefHeight(20.0);
-		this.setStyle("-fx-background-color: rgb(69, 90, 100);");
+		this.setStyle("-fx-background-color: rgb(28, 31, 36);");
 		
 		texts = new Stack<>();
 		

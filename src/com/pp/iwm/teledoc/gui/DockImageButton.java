@@ -4,8 +4,8 @@ public class DockImageButton extends ImageButton {
 
 	Dockbar dockbar;
 	
-	public DockImageButton(String image_url, String hint, String action, Dockbar dockbar) {
-		super(image_url, hint, action);
+	public DockImageButton(Integer image_key, String hint, Integer action, Dockbar dockbar) {
+		super(image_key, hint, action);
 		
 		this.dockbar = dockbar;
 	}

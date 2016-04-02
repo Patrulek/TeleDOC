@@ -4,6 +4,7 @@ import java.awt.Point;
 
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.Utils;
+import com.pp.iwm.teledoc.objects.ImageManager;
 
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -12,6 +13,7 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
@@ -19,20 +21,31 @@ import javafx.stage.StageStyle;
 
 public class RegisterWindow extends Window {
 	
-	// BTN_ACTIONS
-	public static String ACT_EXIT_APP = "EXIT_APP";
-	public static String ACT_BACK_TO_LOGIN = "BACK_TO_LOGIN";
-	public static String ACT_REGISTER = "REGISTER";
+	// ================================================================
+	// FIELDS
+	// ================================================================
 	
-	private Label lbl_error = null;
-	private TextField tf_name = null;
-	private TextField tf_surname = null;
-	private TextField tf_email = null;
-	private PasswordField pf_password = null;
 	
-	public RegisterWindow() {
-		
-	}
+	// UI ELEMENTS
+	private Rectangle rect_window_background;
+	private ImageButton ibtn_exit;
+	private ImageView iv_logo;
+	private ImageView iv_name;
+	private ImageView iv_surname;
+	private ImageView iv_email;
+	private ImageView iv_password;
+	private TextField tf_name;
+	private TextField tf_surname;
+	private TextField tf_email;
+	private PasswordField pf_password;
+	private Label lbl_error;
+	private ImageButton ibtn_register;
+	private ImageButton ibtn_back;
+	
+	
+	// =================================================================
+	// METHODS
+	// =================================================================
 	
 	private void openLoginWindow(boolean register_success) {
 		openWindow(new LoginWindow(), true);
@@ -40,7 +53,7 @@ public class RegisterWindow extends Window {
 	
 	private boolean validateTextFields() {
 		if( tf_email.getText().equals("") || tf_name.equals("") || tf_surname.equals("") || pf_password.getText().equals("")) {
-			lbl_error.setText("Proszê wype³niæ wszystkie pola");
+			lbl_error.setText(Utils.MSG_FILL_ALL_FIELDS);
 			return false;
 		}
 		
@@ -51,7 +64,7 @@ public class RegisterWindow extends Window {
 		String email = tf_email.getText();
 		
 		if( !email.contains("@") || !email.contains(".") ) {
-			lbl_error.setText("Niepoprawny email");
+			lbl_error.setText(Utils.MSG_INCORRECT_MAIL);
 			return false;
 		}
 		
@@ -60,7 +73,7 @@ public class RegisterWindow extends Window {
 	
 	private boolean validatePassword() {
 		if( pf_password.getText().length() < 6 ) {
-			lbl_error.setText("Podane has³o jest za krótkie");
+			lbl_error.setText(Utils.MSG_PASS_TOO_SHORT);
 			return false;
 		}
 		
@@ -96,99 +109,111 @@ public class RegisterWindow extends Window {
 		 * 		openLoginWindow(register_success);
 		 */
 	}
+	
+	private void onWindowBackgroundMousePressed(MouseEvent ev) {
+		mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
+	}
+	
+	private void onWindowBackgroundMouseReleased(MouseEvent ev) {
+		is_dragged = false;
+	}
+	
+	private void onWindowBackgroundMoseDragged(MouseEvent ev) {
+		if( (!is_dragged && ev.getSceneY() < 24) || is_dragged ) {
+			is_dragged = true;
+			stage.setX(stage.getX() + ev.getScreenX() - mouse_pos.x);
+			stage.setY(stage.getY() + ev.getScreenY() - mouse_pos.y);
+			mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
+		}
+	}
 
 	@Override
 	protected void createStage() {
-		Group root = new Group();
-		// hide window content
 		Scene scene = new Scene(root, 400, 600, Color.rgb(0, 0, 0, 0));
-		// hide title bar
 		stage.initStyle(StageStyle.TRANSPARENT);
 		
 		// window background
-		Rectangle r_window_content = new Rectangle(400, 600);
-		r_window_content.setFill(Utils.PRIMARY_COLOR);
-		r_window_content.setArcHeight(10.0);
-		r_window_content.setArcWidth(10.0);
-		r_window_content.setOnMousePressed(event -> mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY()));
-		r_window_content.setOnMouseDragged(event -> {stage.setX(stage.getX() + event.getScreenX() - mouse_pos.x);
-													 stage.setY(stage.getY() + event.getScreenY() - mouse_pos.y);
-													 mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
-													});
+		rect_window_background = new Rectangle(400, 600);
+		rect_window_background.setFill(Utils.PRIMARY_DARK_COLOR);
+		rect_window_background.setArcHeight(10.0);
+		rect_window_background.setArcWidth(10.0);
+		rect_window_background.setOnMousePressed(ev -> onWindowBackgroundMousePressed(ev));
+		rect_window_background.setOnMouseReleased(ev -> onWindowBackgroundMouseReleased(ev));
+		rect_window_background.setOnMouseDragged(ev -> onWindowBackgroundMoseDragged(ev));
 		
 		// cross btn
-		ImageButton btn_exit = new ImageButton("/assets/exit_icon.png", "Zamknij program", ACT_EXIT_APP);
-		btn_exit.setLayoutX(365.0); btn_exit.setLayoutY(5.0);
-		btn_exit.setOnAction(event -> this.hide());
+		ibtn_exit = new ImageButton(Utils.IMG_EXIT_APP_ICON, Utils.HINT_CLOSE_APP, Utils.ACT_EXIT_APP);
+		ibtn_exit.setLayoutX(365.0); ibtn_exit.setLayoutY(5.0);
+		ibtn_exit.setOnAction(ev -> hide());
 		
 		// teledoc logo
-		ImageView iv_logo = new ImageView(new Image("/assets/teledoc_logo.png"));
+		iv_logo = new ImageView(ImageManager.instance().getImage(Utils.IMG_LOGO));
 		iv_logo.setLayoutX(50.0); iv_logo.setLayoutY(50.0);
 		
 		// name icon
-		ImageView iv_name = new ImageView(new Image("/assets/name_icon.png"));
+		iv_name = new ImageView(ImageManager.instance().getImage(Utils.IMG_NAME_ICON));
 		iv_name.setLayoutX(20.0); iv_name.setLayoutY(167.0);
 		
 		// name text field
 		tf_name = new TextField();
 		tf_name.setLayoutX(55.0); tf_name.setLayoutY(160.0);
 		tf_name.setPrefWidth(300.0);
-		tf_name.setPromptText("name");
+		tf_name.setPromptText("Imiê");
 		tf_name.setFont(Utils.TF_FONT);
-		tf_name.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-							+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-							+ "-fx-highlight-text-fill:black; "
-							+ "-fx-highlight-fill: gray; "
-							+ "-fx-background-color: rgb(207, 216, 220); ");
+		tf_name.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+						+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+						+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+						+ "-fx-highlight-fill: rgb(15, 27, 30); "
+						+ "-fx-background-color: rgb(30, 54, 60); ");
 		
 		// surname icon
-		ImageView iv_surname = new ImageView(new Image("/assets/name_icon.png")); // TODO:  surname icon
+		iv_surname = new ImageView(ImageManager.instance().getImage(Utils.IMG_NAME_ICON)); // TODO:  surname icon
 		iv_surname.setLayoutX(20.0); iv_surname.setLayoutY(237.0);
 				
 		// surname text field
 		tf_surname = new TextField();
 		tf_surname.setLayoutX(55.0); tf_surname.setLayoutY(230.0);
 		tf_surname.setPrefWidth(300.0);
-		tf_surname.setPromptText("surname");
+		tf_surname.setPromptText("Nazwisko");
 		tf_surname.setFont(Utils.TF_FONT);
-		tf_surname.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-							+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-							+ "-fx-highlight-text-fill:black; "
-							+ "-fx-highlight-fill: gray; "
-							+ "-fx-background-color: rgb(207, 216, 220); ");
+		tf_surname.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+							+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+							+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+							+ "-fx-highlight-fill: rgb(15, 27, 30); "
+							+ "-fx-background-color: rgb(30, 54, 60); ");
 		
 
 		// email icon
-		ImageView iv_email = new ImageView(new Image("/assets/name_icon.png")); // TODO:  email icon
+		iv_email = new ImageView(ImageManager.instance().getImage(Utils.IMG_NAME_ICON)); // TODO:  email icon
 		iv_email.setLayoutX(20.0); iv_email.setLayoutY(307.0);
 				
 		// email text field
 		tf_email = new TextField();
 		tf_email.setLayoutX(55.0); tf_email.setLayoutY(300.0);
 		tf_email.setPrefWidth(300.0);
-		tf_email.setPromptText("email");
+		tf_email.setPromptText("Email");
 		tf_email.setFont(Utils.TF_FONT);
-		tf_email.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-							+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-							+ "-fx-highlight-text-fill:black; "
-							+ "-fx-highlight-fill: gray; "
-							+ "-fx-background-color: rgb(207, 216, 220); ");		
+		tf_email.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+						+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+						+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+						+ "-fx-highlight-fill: rgb(15, 27, 30); "
+						+ "-fx-background-color: rgb(30, 54, 60); ");	
 		
 		// password icon
-		ImageView iv_password = new ImageView(new Image("/assets/pass_icon.png"));
+		iv_password = new ImageView(ImageManager.instance().getImage(Utils.IMG_PASSWORD_ICON));
 		iv_password.setLayoutX(24.0); iv_password.setLayoutY(377.0);
 		
 		// password field
 		pf_password = new PasswordField();
 		pf_password.setLayoutX(55.0); pf_password.setLayoutY(370.0);
 		pf_password.setPrefWidth(300.0);
-		pf_password.setPromptText("password");
+		pf_password.setPromptText("Has³o");
 		pf_password.setFont(Utils.TF_FONT);
-		pf_password.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-							+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-							+ "-fx-highlight-text-fill:black; "
-							+ "-fx-highlight-fill: gray; "
-							+ "-fx-background-color: rgb(207, 216, 220); ");
+		pf_password.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+							+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+							+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+							+ "-fx-highlight-fill: rgb(15, 27, 30); "
+							+ "-fx-background-color: rgb(30, 54, 60); ");
 		
 		
 		// password error label
@@ -197,25 +222,25 @@ public class RegisterWindow extends Window {
 		lbl_error.setPrefWidth(300.0);
 		lbl_error.setFont(Utils.LBL_FONT);
 		lbl_error.setText("");
-		lbl_error.setStyle("-fx-text-fill: rgb(255, 64, 129);"
+		lbl_error.setStyle("-fx-text-fill: rgb(205, 100, 100);"
 							+ "-fx-alignment: center;");
 		
 		
 		// image buttons
-		ImageButton btn_register = new ImageButton("/assets/register_icon.png", "Zarejestruj", ACT_REGISTER);
-		btn_register.setLayoutX(220.0); btn_register.setLayoutY(470.0);
-		btn_register.setPrefWidth(64.0);
-		btn_register.setOnAction(event -> registerAccount());
+		ibtn_register = new ImageButton(Utils.IMG_REGISTER_ICON, Utils.HINT_REGISTER, Utils.ACT_REGISTER);
+		ibtn_register.setLayoutX(220.0); ibtn_register.setLayoutY(470.0);
+		ibtn_register.setPrefWidth(64.0);
+		ibtn_register.setOnAction(ev -> registerAccount());
 		
-		ImageButton btn_back = new ImageButton("/assets/back_icon.png", "Powrót do ekranu logowania", ACT_BACK_TO_LOGIN);
-		btn_back.setLayoutX(90.0); btn_back.setLayoutY(470.0);
-		btn_back.setPrefWidth(64.0);
-		btn_back.setOnAction(event -> openLoginWindow(false));
+		ibtn_back = new ImageButton(Utils.IMG_BACK_ICON, Utils.HINT_BACK_TO_LOGIN, Utils.ACT_BACK_TO_LOGIN);
+		ibtn_back.setLayoutX(90.0); ibtn_back.setLayoutY(470.0);
+		ibtn_back.setPrefWidth(64.0);
+		ibtn_back.setOnAction(ev -> openLoginWindow(false));
 		
 		
 		// add elements
-		root.getChildren().add(r_window_content);
-		root.getChildren().add(btn_exit);
+		root.getChildren().add(rect_window_background);
+		root.getChildren().add(ibtn_exit);
 		root.getChildren().add(iv_logo);
 		root.getChildren().add(iv_name);
 		root.getChildren().add(tf_name);
@@ -226,8 +251,8 @@ public class RegisterWindow extends Window {
 		root.getChildren().add(iv_password);
 		root.getChildren().add(pf_password);
 		root.getChildren().add(lbl_error);
-		root.getChildren().add(btn_register);
-		root.getChildren().add(btn_back);
+		root.getChildren().add(ibtn_register);
+		root.getChildren().add(ibtn_back);
 		stage.setScene(scene);
 	}
 }
