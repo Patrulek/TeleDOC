@@ -36,6 +36,8 @@ public class Dockbar extends Pane {
 		lu_bound = new Point(0, 32);
 		rd_bound = new Point(1024, 580);
 		
+		this.setLayoutX(695.0); this.setLayoutY(480.0);
+		
 		r_for_moving = new Rectangle(10, 36);
 		r_for_moving.setFill(Utils.ICONS_COLOR);
 		r_for_moving.setOpacity(0.5);
@@ -71,7 +73,6 @@ public class Dockbar extends Pane {
 		fitIcon(btn);
 		relocateNavigationRectangle();
 		
-		
 		this.getChildren().add(btn);
 	}
 	
@@ -104,7 +105,11 @@ public class Dockbar extends Pane {
 	
 	public void onIconMouseEntered(double x) {
 		selected_icon = (int)(x / (icon_pref_size + icon_spacing));
-		app_window.status_bar.addText(all_icons.get(selected_icon).btn_hint);
+		
+		if( selected_icon == 4 && app_window.file_pane.selected_card != null && !app_window.file_pane.selected_card.file.is_folder ) // hardcoded
+			app_window.status_bar.addText(all_icons.get(selected_icon).hint + app_window.file_pane.selected_card.file.name);
+		else
+			app_window.status_bar.addText(all_icons.get(selected_icon).hint);
 	}
 	
 	public void onIconMouseExited() {

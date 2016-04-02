@@ -27,11 +27,16 @@ public class ImageButton extends Button {
 	boolean zoom_anim_enabled = true;
 	boolean fade_anim_enabled = true;
 	
-	public ImageButton(String image_url) {
+	public String hint = "";
+	public String action = "";
+	
+	public ImageButton(String image_url, String hint, String action) {
+		this.hint = hint;
+		this.action = action;
 		this.image_url = new SimpleStringProperty();
 		this.image_url.set(image_url);
-		this.setStyle("-fx-background-color: transparent;");
 		this.setGraphic(new ImageView(new Image(image_url)));
+		this.setStyle("-fx-background-color: transparent;");
 		
 		this.zoom_anim = new ScaleTransition(Duration.millis(zoom_in_duration), this);
 		this.zoom_anim.setToX(zoom_in_scale); this.zoom_anim.setToY(zoom_in_scale);
@@ -53,6 +58,11 @@ public class ImageButton extends Button {
 	
 	public void enableFadeAnimation(boolean enabled) {
 		fade_anim_enabled = enabled;
+	}
+	
+	public void enableAnimations(boolean enabled) {
+		enableFadeAnimation(enabled);
+		enableZoomAnimation(enabled);
 	}
 	
 	public void customizeZoomAnimation(double set_zoom_in_scale, double set_zoom_out_scale, 

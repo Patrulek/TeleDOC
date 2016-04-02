@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 
 import com.pp.iwm.teledoc.objects.File;
 import com.pp.iwm.teledoc.objects.FileTree;
+import com.pp.iwm.teledoc.windows.AppWindow;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
 import javafx.scene.control.Label;
@@ -16,9 +17,12 @@ import javafx.scene.layout.Pane;
 
 public class FileExplorer extends Pane {
 	
+	// BTN_ACTIONS
+	public static String ACT_PARENT_FOLDER = "PARENT_FOLDER";
+	
 	FileTree file_tree = null;
 	Label lbl_user = null;
-	StatusBar status_bar = null;
+	AppWindow app_window = null;
 	ScrollPane scroll_pane = null;
 	Pane simple_pane = null;
 	FileCard selected_card = null;
@@ -29,11 +33,11 @@ public class FileExplorer extends Pane {
 	int max_cards_in_row = 0;
 	double cards_gap = 20.0;
 	
-	public FileExplorer(StatusBar status_bar) {
+	public FileExplorer(AppWindow app_window) {
 		this.setPrefWidth(804.0);
 		this.setPrefHeight(580.0);
 		this.setLayoutX(220.0);
-		this.status_bar = status_bar;
+		this.app_window = app_window;
 		
 		
 		files = new ArrayList<>();
@@ -49,7 +53,7 @@ public class FileExplorer extends Pane {
 		simple_pane.setStyle("-fx-background-color: rgb(96, 125, 139, 1.0);");
 		simple_pane.setPrefWidth(767.0);
 		
-		btn_back = new ImageButton("/assets/logout.png");
+		btn_back = new ImageButton("/assets/logout.png", "W górê", ACT_PARENT_FOLDER);
 		btn_back.setScaleX(0.4); btn_back.setScaleY(0.4);
 		btn_back.setOpacity(0.5);
 		btn_back.setLayoutX(-5.0);
@@ -152,15 +156,24 @@ public class FileExplorer extends Pane {
 	}
 	
 	private void onScrollPaneMouseClicked() {
-		if( selected_card != null && hovered_card == null) 
+		if( selected_card != null && hovered_card == null) {
 			this.selected_card.deselectCard();
+			this.selected_card = null;
+		}
 	}
 	
 	private void onBtnMouseClicked(ImageButton btn) {
 		if( btn == btn_back ) {
-			file_tree.current_root = file_tree.current_root.parent != null ? file_tree.current_root.parent : file_tree.current_root;
-			updateLabelPath();
-			refreshView();
+			if( file_tree.current_root.parent != null ) {
+				if( selected_card != null ) {
+					selected_card = null;
+					app_window.status_bar.removeText();
+				}
+				
+				file_tree.current_root = file_tree.current_root.parent;
+				updateLabelPath();
+				refreshView();
+			}
 		}
 	}
 	
@@ -172,11 +185,11 @@ public class FileExplorer extends Pane {
 		btn.onMouseEntered();
 		
 		if( btn == btn_back )
-			status_bar.addText("W górê");
+			app_window.status_bar.addText(btn.hint);
 	}
 	
 	private void onBtnMouseExited(ImageButton btn) {
 		btn.onMouseExited();
-		status_bar.removeText();
+		app_window.status_bar.removeText();
 	}
 }

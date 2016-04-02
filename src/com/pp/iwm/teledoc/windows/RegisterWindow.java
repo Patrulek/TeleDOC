@@ -17,9 +17,12 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class RegisterWindow {
-	public Stage stage;
-	public Point mouse_pos;
+public class RegisterWindow extends Window {
+	
+	// BTN_ACTIONS
+	public static String ACT_EXIT_APP = "EXIT_APP";
+	public static String ACT_BACK_TO_LOGIN = "BACK_TO_LOGIN";
+	public static String ACT_REGISTER = "REGISTER";
 	
 	private Label lbl_error = null;
 	private TextField tf_name = null;
@@ -28,9 +31,74 @@ public class RegisterWindow {
 	private PasswordField pf_password = null;
 	
 	public RegisterWindow() {
-		stage = new Stage();
-		mouse_pos = new Point(0, 0);
 		
+	}
+	
+	private void openLoginWindow(boolean register_success) {
+		openWindow(new LoginWindow(), true);
+	}
+	
+	private boolean validateTextFields() {
+		if( tf_email.getText().equals("") || tf_name.equals("") || tf_surname.equals("") || pf_password.getText().equals("")) {
+			lbl_error.setText("Proszê wype³niæ wszystkie pola");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean validateEmail() {
+		String email = tf_email.getText();
+		
+		if( !email.contains("@") || !email.contains(".") ) {
+			lbl_error.setText("Niepoprawny email");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean validatePassword() {
+		if( pf_password.getText().length() < 6 ) {
+			lbl_error.setText("Podane has³o jest za krótkie");
+			return false;
+		}
+		
+		return true;
+	}
+	
+	private boolean canConnect() {
+		return false;
+	}
+	
+	private void sendDataToServer() {
+		/*
+		 * if( !canConnect() )
+		 * 		show_error();
+		 * else
+		 * 		send_data();
+		 * 
+		 */
+	}
+	
+	private void registerAccount() {
+		lbl_error.setText("");
+		
+		if( validateTextFields() && validateEmail() && validatePassword() )
+			sendDataToServer();
+	}
+	
+	private void readDataFromServer() {
+		/*
+		 * if( email_already_exists )
+		 * 		show_error();
+		 * else
+		 * 		openLoginWindow(register_success);
+		 */
+	}
+
+	@Override
+	protected void createStage() {
 		Group root = new Group();
 		// hide window content
 		Scene scene = new Scene(root, 400, 600, Color.rgb(0, 0, 0, 0));
@@ -49,7 +117,7 @@ public class RegisterWindow {
 													});
 		
 		// cross btn
-		ImageButton btn_exit = new ImageButton("/assets/exit_icon.png");
+		ImageButton btn_exit = new ImageButton("/assets/exit_icon.png", "Zamknij program", ACT_EXIT_APP);
 		btn_exit.setLayoutX(365.0); btn_exit.setLayoutY(5.0);
 		btn_exit.setOnAction(event -> this.hide());
 		
@@ -134,12 +202,12 @@ public class RegisterWindow {
 		
 		
 		// image buttons
-		ImageButton btn_register = new ImageButton("/assets/register_icon.png");
+		ImageButton btn_register = new ImageButton("/assets/register_icon.png", "Zarejestruj", ACT_REGISTER);
 		btn_register.setLayoutX(220.0); btn_register.setLayoutY(470.0);
 		btn_register.setPrefWidth(64.0);
 		btn_register.setOnAction(event -> registerAccount());
 		
-		ImageButton btn_back = new ImageButton("/assets/back_icon.png");
+		ImageButton btn_back = new ImageButton("/assets/back_icon.png", "Powrót do ekranu logowania", ACT_BACK_TO_LOGIN);
 		btn_back.setLayoutX(90.0); btn_back.setLayoutY(470.0);
 		btn_back.setPrefWidth(64.0);
 		btn_back.setOnAction(event -> openLoginWindow(false));
@@ -161,78 +229,5 @@ public class RegisterWindow {
 		root.getChildren().add(btn_register);
 		root.getChildren().add(btn_back);
 		stage.setScene(scene);
-		stage.show();
-	}
-	
-	public void show() {
-		stage.show();
-	}
-	
-	public void hide() {
-		stage.hide();
-	}
-	
-	private void openLoginWindow(boolean register_success) {
-		LoginWindow login = new LoginWindow();
-		this.hide();
-	}
-	
-	private boolean validateTextFields() {
-		if( tf_email.getText().equals("") || tf_name.equals("") || tf_surname.equals("") || pf_password.getText().equals("")) {
-			lbl_error.setText("Proszê wype³niæ wszystkie pola");
-			return false;
-		}
-		
-		return true;
-	}
-	
-	private boolean validateEmail() {
-		String email = tf_email.getText();
-		
-		if( !email.contains("@") || !email.contains(".") ) {
-			lbl_error.setText("Niepoprawny email");
-			return false;
-		}
-		
-		return true;
-	}
-	
-	private boolean validatePassword() {
-		if( pf_password.getText().length() < 6 ) {
-			lbl_error.setText("Podane has³o jest za krótkie");
-			return false;
-		}
-		
-		return true;
-	}
-	
-	private boolean canConnect() {
-		return false;
-	}
-	
-	private void sendDataToServer() {
-		/*
-		 * if( !canConnect() )
-		 * 		show_error();
-		 * else
-		 * 		send_data();
-		 * 
-		 */
-	}
-	
-	private void registerAccount() {
-		lbl_error.setText("");
-		
-		if( validateTextFields() && validateEmail() && validatePassword() )
-			sendDataToServer();
-	}
-	
-	private void readDataFromServer() {
-		/*
-		 * if( email_already_exists )
-		 * 		show_error();
-		 * else
-		 * 		openLoginWindow(register_success);
-		 */
 	}
 }

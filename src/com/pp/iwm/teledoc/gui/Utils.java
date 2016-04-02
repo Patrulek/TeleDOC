@@ -16,6 +16,7 @@ public class Utils {
 	public static Color ERROR_COLOR = Color.rgb(255, 30, 30);
 	public static Color TRANSPARENT = Color.rgb(0, 0, 0, 0.0);
 	
+	public static Font TF_FONT_SMALL = Font.font("SanSerif", 12.0);
 	public static Font TF_FONT = Font.font("SanSerif", 16.0);
 	public static Font LBL_FONT = Font.font("Verdana", FontWeight.BOLD, 12.0);
 	public static Font LBL_STATUSBAR_FONT = Font.font("Verdana", 10.0);

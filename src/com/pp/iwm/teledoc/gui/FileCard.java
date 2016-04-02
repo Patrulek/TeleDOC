@@ -53,11 +53,11 @@ public class FileCard extends VBox {
 	
 	public void selectCard() {
 		lbl_name.setStyle("-fx-background-color: rgb(69, 90, 100); -fx-text-fill: rgb(182, 182, 182);");
-		file_explorer.status_bar.addText(lbl_name.getText());
+		file_explorer.app_window.status_bar.addText(lbl_name.getText());
 	}
 	
 	public void deselectCard() {
 		lbl_name.setStyle("-fx-background-color: rgb(0, 0, 0, 0); -fx-text-fill: rgb(182, 182, 182);");
-		file_explorer.status_bar.removeText();
+		file_explorer.app_window.status_bar.removeText();
 	}
 }

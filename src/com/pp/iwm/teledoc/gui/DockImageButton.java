@@ -3,13 +3,11 @@ package com.pp.iwm.teledoc.gui;
 public class DockImageButton extends ImageButton {
 
 	Dockbar dockbar;
-	public String btn_hint;
 	
-	public DockImageButton(String image_url, String btn_hint, Dockbar dockbar) {
-		super(image_url);
+	public DockImageButton(String image_url, String hint, String action, Dockbar dockbar) {
+		super(image_url, hint, action);
 		
 		this.dockbar = dockbar;
-		this.btn_hint = btn_hint;
 	}
 	
 	protected void onMouseEntered() {
