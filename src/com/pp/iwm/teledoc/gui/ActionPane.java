@@ -144,7 +144,8 @@ public class ActionPane extends Pane {
 	
 	private void createFindConfPanel() {
 		TextField tf_conf_title = new TextField();
-		PasswordField pf_password = new PasswordField();
+		PasswordField pf_password = new PasswordField(); 
+		//
 		Button btn_create = new Button("Szukaj");
 		
 		tf_conf_title.setPromptText("Nazwa konferencji");
