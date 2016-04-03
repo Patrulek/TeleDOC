@@ -20,15 +20,15 @@ public class FileTree {
 		addFile("root/_d_u_p_a_/png.png");
 	}
 	
-	public List<File> getFilesForFolder(String folder) {
+	public List<File> getFilesForFolder(String _folder) {
 		List<File> visible_files = new ArrayList<>();
 		int pos = -1;
 		File temp_root = root_file;
-		folder = folder.substring(5);
+		_folder = _folder.substring(5);
 		
-		while( (pos = folder.indexOf("/")) != -1 && !folder.equals("") ) {
-			String file_name = folder.substring(0, pos + 1);
-			folder = folder.substring(pos + 1);
+		while( (pos = _folder.indexOf("/")) != -1 && !_folder.equals("") ) {
+			String file_name = _folder.substring(0, pos + 1);
+			_folder = _folder.substring(pos + 1);
 			
 			if( temp_root.children.containsKey(file_name) )
 				temp_root = temp_root.children.get(file_name);
@@ -45,16 +45,16 @@ public class FileTree {
 		return visible_files;
 	}
 	
-	public void addFile(String path) {
+	public void addFile(String _path) {
 		File temp_root = root_file;
 		int pos = -1;
 		String parent_path = "root/";
 		String file_name = "";
-		path = path.substring(5);
+		_path = _path.substring(5);
 		
-		while( (pos = path.indexOf("/")) != -1 ) {
-			file_name = path.substring(0, pos + 1);
-			path = path.substring(pos + 1);
+		while( (pos = _path.indexOf("/")) != -1 ) {
+			file_name = _path.substring(0, pos + 1);
+			_path = _path.substring(pos + 1);
 			
 			if( !temp_root.children.containsKey(file_name) ) {
 				parent_path = temp_root.path + file_name;
@@ -65,17 +65,17 @@ public class FileTree {
 				temp_root = temp_root.children.get(file_name);
 		}
 		
-		if( !path.equals("")  ) {
-			parent_path = temp_root.path + path;
-			if( !temp_root.children.containsKey(path) ) {
+		if( !_path.equals("")  ) {
+			parent_path = temp_root.path + _path;
+			if( !temp_root.children.containsKey(_path) ) {
 				File new_file = new File(parent_path, temp_root);
-				temp_root.children.put(path, new_file);
+				temp_root.children.put(_path, new_file);
 			}
 		}
 	}
 	
-	public void printTree(File root) {
-		File temp_root = root;
+	public void printTree(File _root) {
+		File temp_root = _root;
 		
 		for( Entry<String, File> entry : temp_root.children.entrySet() ) {
 			File file = entry.getValue();
@@ -85,8 +85,8 @@ public class FileTree {
 		}
 	}
 	
-	public void removeFile(String file) {
-		root_file.children.remove(file);
+	public void removeFile(String _file) {
+		root_file.children.remove(_file);
 		// notify
 	}
 	

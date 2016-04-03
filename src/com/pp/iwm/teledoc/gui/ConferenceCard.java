@@ -13,22 +13,22 @@ public class ConferenceCard extends Pane {
 	
 	boolean active_conf = true;
 	
-	public ConferenceCard(ConferenceTabsPane tab_pane, boolean active_conf) {
+	public ConferenceCard(ConferenceTabsPane _tab_pane, boolean _active_conf) {
 		super();
-		this.tab_pane = tab_pane;
-		this.active_conf = active_conf;
+		tab_pane = _tab_pane;
+		active_conf = _active_conf;
 		
 		setPrefWidth(220.0); 
 		setPrefHeight(50.0);
 		
 		lbl_title = new Label("Tytu³");
-		lbl_title.setStyle("-fx-text-fill: rgb(114, 114, 114);");
+		lbl_title.setStyle("-fx-text-fill: rgb(160, 160, 200);");
 		lbl_title.setLayoutX(5.0); lbl_title.setLayoutY(7.0);
 		lbl_title.setFont(Utils.LBL_STATUSBAR_FONT);
 		lbl_title.setPrefWidth(120.0);
 		
 		lbl_founder = new Label("Za³o¿yciel: ");
-		lbl_founder.setStyle("-fx-text-fill: rgb(114, 114, 114);");
+		lbl_founder.setStyle("-fx-text-fill: rgb(160, 160, 200);");
 		lbl_founder.setLayoutX(5.0); lbl_founder.setLayoutY(27.0);
 		lbl_founder.setFont(Utils.LBL_STATUSBAR_FONT);
 		lbl_title.setPrefWidth(120.0);
@@ -53,9 +53,9 @@ public class ConferenceCard extends Pane {
 		getChildren().add(btn_action);
 		getChildren().add(btn_information);
 		
-		this.setOnMouseClicked(event -> onMouseClicked());
-		this.setOnMouseEntered(event -> onMouseEntered());
-		this.setOnMouseExited(event -> onMouseExited());
+		setOnMouseClicked(event -> onMouseClicked());
+		setOnMouseEntered(event -> onMouseEntered());
+		setOnMouseExited(event -> onMouseExited());
 	}
 	
 	private void onMouseClicked() {
@@ -70,15 +70,15 @@ public class ConferenceCard extends Pane {
 		tab_pane.onCardHover(null);
 	}
 	
-	private void onButtonMouseEntered(ImageButton btn) {
-		String s = btn.hint + tab_pane.hovered_card.lbl_title.getText();
+	private void onButtonMouseEntered(ImageButton _btn) {
+		String s = _btn.getHint() + tab_pane.hovered_card.lbl_title.getText();
 		
 		tab_pane.status_bar.addText(s);
-		btn.onMouseEntered();
+		_btn.onMouseEntered();
 	}
 	
-	private void onButtonMouseExited(ImageButton btn) {
+	private void onButtonMouseExited(ImageButton _btn) {
 		tab_pane.status_bar.removeText();
-		btn.onMouseExited();
+		_btn.onMouseExited();
 	}
 }

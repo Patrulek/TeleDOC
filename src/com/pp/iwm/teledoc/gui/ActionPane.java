@@ -1,6 +1,7 @@
 package com.pp.iwm.teledoc.gui;
 
-import com.pp.iwm.teledoc.windows.AppWindow;
+import com.pp.iwm.teledoc.animations.FadeTransitionInfo;
+import com.pp.iwm.teledoc.animations.TranslateTransitionInfo;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
@@ -13,59 +14,64 @@ import javafx.util.Duration;
 public class ActionPane extends Pane {
 	public StatusBar status_bar = null;
 	public Pane content_pane = null;
+	public TranslateTransitionInfo translate_info;
 	public TranslateTransition translate_anim = null;
 	public FadeTransition fade_anim = null;
-	double translate_anim_distance = 60.0;
+	public FadeTransitionInfo fade_info;
 	public FadeTransition fade_anim_content_pane = null;
+	public FadeTransitionInfo fade_info_content_pane;
 	
 	ImageButton btn_hide = null;
 	
-	public ActionPane(StatusBar status_bar) {
-		this.status_bar = status_bar;
-		this.setStyle("-fx-background-color: rgb(69, 90, 100, 0.8);");
-		this.setPrefWidth(767.0); this.setPrefHeight(60.0);
-		this.setLayoutX(235.0); this.setLayoutY(580.0);
-		this.setOpacity(0.0);
+	public ActionPane(StatusBar _status_bar) {
+		status_bar = _status_bar;
+		setStyle("-fx-background-color: rgb(15, 27, 30);");
+		setPrefWidth(759.0); setPrefHeight(60.0);
+		setLayoutX(250.0); setLayoutY(580.0);
+		setOpacity(0.0);
 		
 		content_pane = new Pane();
 		content_pane.setStyle("-fx-background-color: transparent;");
-		content_pane.setPrefWidth(767.0); content_pane.setPrefHeight(60.0);
+		content_pane.setPrefWidth(759.0); content_pane.setPrefHeight(60.0);
 		
-		this.translate_anim = new TranslateTransition(Duration.millis(300.0), this);
-		this.fade_anim = new FadeTransition(Duration.millis(300.0), this);
+		translate_anim = new TranslateTransition(Duration.millis(300.0), this);
+		translate_info = new TranslateTransitionInfo(translate_anim);
+		translate_info.customize(0, -60, 300, 450);
+		
+		fade_anim = new FadeTransition(Duration.millis(300.0), this);
+		fade_info = new FadeTransitionInfo(fade_anim);
+		fade_info.customize(1.0, 0.0, 550, 150);
 		
 		fade_anim_content_pane = new FadeTransition(Duration.millis(150.0), content_pane);
+		fade_info_content_pane = new FadeTransitionInfo(fade_anim_content_pane);
+		fade_info_content_pane.customize(1.0, 0.0, 200, 150);
 		
-		btn_hide = new ImageButton(Utils.IMG_LOGOUT_ICON, Utils.HINT_HIDE_PANEL, Utils.ACT_HIDE_PANEL);
-		btn_hide.setLayoutX(725.0);
-		btn_hide.setScaleX(0.5); btn_hide.setScaleY(0.5);
-		btn_hide.setOpacity(0.5);
-		btn_hide.customizeFadeAnimation(1.0, 0.5, 250, 400);
-		btn_hide.customizeZoomAnimation(0.65, 0.5, 250, 400);
+		btn_hide = new ImageButton(Utils.IMG_HIDE_PANEL, Utils.HINT_HIDE_PANEL, Utils.ACT_HIDE_PANEL);
+		btn_hide.setLayoutX(720.0); btn_hide.setLayoutY(5.0);
+		btn_hide.enableFadeAnimation(false);
+		btn_hide.customizeZoomAnimation(1.15, 1.0, 250, 400);
 		btn_hide.setOnMouseClicked(event -> onHideBtnMouseClicked());
 		btn_hide.setOnMouseEntered(event -> onHideBtnMouseEntered());
 		btn_hide.setOnMouseExited(event-> onHideBtnMouseExited());
 
-		this.getChildren().add(content_pane);
-		this.getChildren().add(btn_hide);
+		getChildren().add(content_pane);
+		getChildren().add(btn_hide);
 	}
 	
-	public void create(ImageButton btn) {
-		recreate(btn);
+	public void create(ImageButton _btn) {
+		recreate(_btn);
 		show();
 	}
 	
-	private void recreate(ImageButton btn) {
-		fade_anim_content_pane.stop();
-		fade_anim_content_pane.setToValue(0.0);
-		fade_anim_content_pane.setDuration(Duration.millis(150.0));
-		fade_anim_content_pane.play();
-		fade_anim_content_pane.setOnFinished(event -> changePanel(btn));
+	private void recreate(ImageButton _btn) {
+		fade_info_content_pane.play(false);
+		fade_anim_content_pane.setOnFinished(event -> changePanel(_btn));
 	}
 	
-	private void changePanel(ImageButton btn) {
+	private void changePanel(ImageButton _btn) {
 		content_pane.getChildren().clear();
-		switch( btn.action ) {
+		
+		switch( _btn.getAction() ) {
 			case Utils.ACT_NEW_CONF:
 				createNewConfPanel();
 				
@@ -85,22 +91,12 @@ public class ActionPane extends Pane {
 		}
 		
 		fade_anim_content_pane.setOnFinished(null);
-		fade_anim_content_pane.setDuration(Duration.millis(200.0));
-		fade_anim_content_pane.setToValue(1.0);
-		fade_anim_content_pane.play();
+		fade_info_content_pane.play(true);
 	}
 	
 	public void show() {
-		translate_anim.stop(); 
-		fade_anim.stop();
-		
-		translate_anim.setToY(-translate_anim_distance);
-		translate_anim.setDuration(Duration.millis(300.0));
-		fade_anim.setToValue(1.0);
-		fade_anim.setDuration(Duration.millis(550.0));
-		
-		translate_anim.play(); 
-		fade_anim.play();
+		fade_info.play(true);
+		translate_info.play(true);
 	}
 	
 	private void createNewConfPanel() {
@@ -160,8 +156,8 @@ public class ActionPane extends Pane {
 		content_pane.getChildren().add(btn_create);
 	}
 	
-	public void onBtnAction(Button btn) {
-		if( btn.getText().equals("Stwórz") ) {	// TODO: zmieniæ 
+	public void onBtnAction(Button _btn) {
+		if( _btn.getText().equals("Stwórz") ) {	// TODO: zmieniæ 
 			// wys³aæ zapytanie do servera
 			// odebraæ wiadomoœæ od servera
 			// zmieniæ okno
@@ -170,20 +166,12 @@ public class ActionPane extends Pane {
 	}
 	
 	public void hide() {
-		translate_anim.stop();
-		fade_anim.stop();
-		
-		translate_anim.setToY(translate_anim_distance);
-		translate_anim.setDuration(Duration.millis(450.0));
-		fade_anim.setToValue(0.0);
-		fade_anim.setDuration(Duration.millis(150.0));
-		
-		translate_anim.play();
-		fade_anim.play();
+		fade_info.play(false);
+		translate_info.play(false);
 	}
 	
 	private void onHideBtnMouseEntered() {
-		status_bar.addText(btn_hide.hint);
+		status_bar.addText(btn_hide.getHint());
 		btn_hide.onMouseEntered();
 	}
 	
@@ -193,6 +181,6 @@ public class ActionPane extends Pane {
 	}
 	
 	private void onHideBtnMouseClicked() {
-		this.hide();
+		hide();
 	}
 }

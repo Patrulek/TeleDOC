@@ -47,7 +47,7 @@ public class RegisterWindow extends Window {
 	// METHODS
 	// =================================================================
 	
-	private void openLoginWindow(boolean register_success) {
+	private void openLoginWindow(boolean _register_success) {
 		openWindow(new LoginWindow(), true);
 	}
 	
@@ -110,53 +110,51 @@ public class RegisterWindow extends Window {
 		 */
 	}
 	
-	private void onWindowBackgroundMousePressed(MouseEvent ev) {
-		mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
+	private void onWindowBackgroundMousePressed(MouseEvent _ev) {
+		mouse_pos = new Point((int)_ev.getScreenX(), (int)_ev.getScreenY());
 	}
 	
-	private void onWindowBackgroundMouseReleased(MouseEvent ev) {
+	private void onWindowBackgroundMouseReleased(MouseEvent _ev) {
 		is_dragged = false;
 	}
 	
-	private void onWindowBackgroundMoseDragged(MouseEvent ev) {
-		if( (!is_dragged && ev.getSceneY() < 24) || is_dragged ) {
+	private void onWindowBackgroundMoseDragged(MouseEvent _ev) {
+		if( (!is_dragged && _ev.getSceneY() < 24) || is_dragged ) {
 			is_dragged = true;
-			stage.setX(stage.getX() + ev.getScreenX() - mouse_pos.x);
-			stage.setY(stage.getY() + ev.getScreenY() - mouse_pos.y);
-			mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
+			stage.setX(stage.getX() + _ev.getScreenX() - mouse_pos.x);
+			stage.setY(stage.getY() + _ev.getScreenY() - mouse_pos.y);
+			mouse_pos = new Point((int)_ev.getScreenX(), (int)_ev.getScreenY());
 		}
 	}
 
 	@Override
 	protected void createStage() {
-		Scene scene = new Scene(root, 400, 600, Color.rgb(0, 0, 0, 0));
+		Scene scene = new Scene(root, 400, 485, Color.rgb(0, 0, 0, 0));
 		stage.initStyle(StageStyle.TRANSPARENT);
 		
 		// window background
-		rect_window_background = new Rectangle(400, 600);
+		rect_window_background = new Rectangle(400, 485);
 		rect_window_background.setFill(Utils.PRIMARY_DARK_COLOR);
-		rect_window_background.setArcHeight(10.0);
-		rect_window_background.setArcWidth(10.0);
 		rect_window_background.setOnMousePressed(ev -> onWindowBackgroundMousePressed(ev));
 		rect_window_background.setOnMouseReleased(ev -> onWindowBackgroundMouseReleased(ev));
 		rect_window_background.setOnMouseDragged(ev -> onWindowBackgroundMoseDragged(ev));
 		
 		// cross btn
 		ibtn_exit = new ImageButton(Utils.IMG_EXIT_APP_ICON, Utils.HINT_CLOSE_APP, Utils.ACT_EXIT_APP);
-		ibtn_exit.setLayoutX(365.0); ibtn_exit.setLayoutY(5.0);
+		ibtn_exit.setLayoutX(366.0); ibtn_exit.setLayoutY(5.0);
 		ibtn_exit.setOnAction(ev -> hide());
 		
 		// teledoc logo
 		iv_logo = new ImageView(ImageManager.instance().getImage(Utils.IMG_LOGO));
-		iv_logo.setLayoutX(50.0); iv_logo.setLayoutY(50.0);
+		iv_logo.setLayoutX(65.0); iv_logo.setLayoutY(25.0);
 		
 		// name icon
 		iv_name = new ImageView(ImageManager.instance().getImage(Utils.IMG_NAME_ICON));
-		iv_name.setLayoutX(20.0); iv_name.setLayoutY(167.0);
+		iv_name.setLayoutX(33.0); iv_name.setLayoutY(163.0);
 		
 		// name text field
 		tf_name = new TextField();
-		tf_name.setLayoutX(55.0); tf_name.setLayoutY(160.0);
+		tf_name.setLayoutX(67.0); tf_name.setLayoutY(160.0);
 		tf_name.setPrefWidth(300.0);
 		tf_name.setPromptText("Imiê");
 		tf_name.setFont(Utils.TF_FONT);
@@ -167,12 +165,12 @@ public class RegisterWindow extends Window {
 						+ "-fx-background-color: rgb(30, 54, 60); ");
 		
 		// surname icon
-		iv_surname = new ImageView(ImageManager.instance().getImage(Utils.IMG_NAME_ICON)); // TODO:  surname icon
-		iv_surname.setLayoutX(20.0); iv_surname.setLayoutY(237.0);
+		iv_surname = new ImageView(ImageManager.instance().getImage(Utils.IMG_SURNAME_ICON));
+		iv_surname.setLayoutX(33.0); iv_surname.setLayoutY(213.0);
 				
 		// surname text field
 		tf_surname = new TextField();
-		tf_surname.setLayoutX(55.0); tf_surname.setLayoutY(230.0);
+		tf_surname.setLayoutX(67.0); tf_surname.setLayoutY(210.0);
 		tf_surname.setPrefWidth(300.0);
 		tf_surname.setPromptText("Nazwisko");
 		tf_surname.setFont(Utils.TF_FONT);
@@ -184,12 +182,12 @@ public class RegisterWindow extends Window {
 		
 
 		// email icon
-		iv_email = new ImageView(ImageManager.instance().getImage(Utils.IMG_NAME_ICON)); // TODO:  email icon
-		iv_email.setLayoutX(20.0); iv_email.setLayoutY(307.0);
+		iv_email = new ImageView(ImageManager.instance().getImage(Utils.IMG_EMAIL_ICON));
+		iv_email.setLayoutX(33.0); iv_email.setLayoutY(263.0);
 				
 		// email text field
 		tf_email = new TextField();
-		tf_email.setLayoutX(55.0); tf_email.setLayoutY(300.0);
+		tf_email.setLayoutX(67.0); tf_email.setLayoutY(260.0);
 		tf_email.setPrefWidth(300.0);
 		tf_email.setPromptText("Email");
 		tf_email.setFont(Utils.TF_FONT);
@@ -201,11 +199,11 @@ public class RegisterWindow extends Window {
 		
 		// password icon
 		iv_password = new ImageView(ImageManager.instance().getImage(Utils.IMG_PASSWORD_ICON));
-		iv_password.setLayoutX(24.0); iv_password.setLayoutY(377.0);
+		iv_password.setLayoutX(33.0); iv_password.setLayoutY(313.0);
 		
 		// password field
 		pf_password = new PasswordField();
-		pf_password.setLayoutX(55.0); pf_password.setLayoutY(370.0);
+		pf_password.setLayoutX(67.0); pf_password.setLayoutY(310.0);
 		pf_password.setPrefWidth(300.0);
 		pf_password.setPromptText("Has³o");
 		pf_password.setFont(Utils.TF_FONT);
@@ -214,11 +212,12 @@ public class RegisterWindow extends Window {
 							+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
 							+ "-fx-highlight-fill: rgb(15, 27, 30); "
 							+ "-fx-background-color: rgb(30, 54, 60); ");
+		pf_password.setOnAction(ev -> registerAccount());
 		
 		
 		// password error label
 		lbl_error = new Label();
-		lbl_error.setLayoutX(55.0); lbl_error.setLayoutY(435.0);
+		lbl_error.setLayoutX(55.0); lbl_error.setLayoutY(360.0);
 		lbl_error.setPrefWidth(300.0);
 		lbl_error.setFont(Utils.LBL_FONT);
 		lbl_error.setText("");
@@ -227,15 +226,15 @@ public class RegisterWindow extends Window {
 		
 		
 		// image buttons
-		ibtn_register = new ImageButton(Utils.IMG_REGISTER_ICON, Utils.HINT_REGISTER, Utils.ACT_REGISTER);
-		ibtn_register.setLayoutX(220.0); ibtn_register.setLayoutY(470.0);
-		ibtn_register.setPrefWidth(64.0);
-		ibtn_register.setOnAction(ev -> registerAccount());
-		
 		ibtn_back = new ImageButton(Utils.IMG_BACK_ICON, Utils.HINT_BACK_TO_LOGIN, Utils.ACT_BACK_TO_LOGIN);
-		ibtn_back.setLayoutX(90.0); ibtn_back.setLayoutY(470.0);
+		ibtn_back.setLayoutX(97.0); ibtn_back.setLayoutY(395.0);
 		ibtn_back.setPrefWidth(64.0);
 		ibtn_back.setOnAction(ev -> openLoginWindow(false));
+		
+		ibtn_register = new ImageButton(Utils.IMG_REGISTER_ICON, Utils.HINT_REGISTER, Utils.ACT_REGISTER);
+		ibtn_register.setLayoutX(219.0); ibtn_register.setLayoutY(395.0);
+		ibtn_register.setPrefWidth(64.0);
+		ibtn_register.setOnAction(ev -> registerAccount());
 		
 		
 		// add elements
@@ -253,6 +252,8 @@ public class RegisterWindow extends Window {
 		root.getChildren().add(lbl_error);
 		root.getChildren().add(ibtn_register);
 		root.getChildren().add(ibtn_back);
+		
+		tf_name.requestFocus();
 		stage.setScene(scene);
 	}
 }

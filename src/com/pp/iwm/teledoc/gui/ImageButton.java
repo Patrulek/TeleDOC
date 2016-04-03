@@ -1,5 +1,7 @@
 package com.pp.iwm.teledoc.gui;
 
+import com.pp.iwm.teledoc.animations.FadeTransitionInfo;
+import com.pp.iwm.teledoc.animations.ScaleTransitionInfo;
 import com.pp.iwm.teledoc.objects.ImageManager;
 
 import javafx.animation.FadeTransition;
@@ -13,106 +15,106 @@ import javafx.util.Duration;
 
 public class ImageButton extends Button {
 	
-	public Integer image_key;
-	public ScaleTransition zoom_anim;
-	double zoom_in_scale = 1.15;
-	double zoom_out_scale = 1.0;
-	long zoom_in_duration = 250;
-	long zoom_out_duration = 500;
+	// =============================================== 
+	// FIELDS
+	// ===============================================
 	
-	public FadeTransition fade_anim;
-	double fade_in_opacity = 1.0;
-	double fade_out_opacity = 1.0;
-	long fade_in_duration = 250;
-	long fade_out_duration = 500;
+	private ScaleTransition zoom_anim;
+	private ScaleTransitionInfo zoom_info;
 	
-	boolean zoom_anim_enabled = true;
-	boolean fade_anim_enabled = true;
+	private FadeTransition fade_anim;
+	private FadeTransitionInfo fade_info;
 	
-	public String hint = "";
-	public Integer action = -1;
+	private boolean zoom_anim_enabled = true;
+	private boolean fade_anim_enabled = true;
 	
-	public ImageButton(Integer image_key, String hint, Integer action) {
-		this.hint = hint;
-		this.action = action;
-		this.image_key = image_key;
-		this.setGraphic(new ImageView(ImageManager.instance().getImage(image_key)));
-		this.setStyle("-fx-background-color: transparent;");
+	private String hint = "";
+	private int action = -1;
+	private int image_key = -1;
+	
+	// ===============================================
+	// METHODS
+	// ===============================================
+	
+	public ImageButton(int _image_key, String _hint, int _action) {
+		hint = _hint;
+		action = _action;
+		image_key = _image_key;
+		setGraphic(new ImageView(ImageManager.instance().getImage(image_key)));
+		setStyle("-fx-background-color: transparent;");								// TODO: css
 		
-		this.zoom_anim = new ScaleTransition(Duration.millis(zoom_in_duration), this);
-		this.zoom_anim.setToX(zoom_in_scale); this.zoom_anim.setToY(zoom_in_scale);
+		zoom_anim = new ScaleTransition(Duration.millis(0), this);
+		zoom_info = new ScaleTransitionInfo(zoom_anim);
 		
-		this.fade_anim = new FadeTransition(Duration.millis(fade_in_duration), this);
-		this.fade_anim.setToValue(fade_in_opacity);
+		fade_anim = new FadeTransition(Duration.millis(0), this);
+		fade_info = new FadeTransitionInfo(fade_anim);
 		
-		this.setHoverAnimation();
+		setHoverAnimation(true);
 	}
 	
-	private void setHoverAnimation() {
-		this.setOnMouseEntered(event -> onMouseEntered());
-		this.setOnMouseExited(event -> onMouseExited());
+	public void setHint(String _hint) {
+		hint = _hint;
 	}
 	
-	public void enableZoomAnimation(boolean enabled) {
-		zoom_anim_enabled = enabled;
+	public void setHoverAnimation(boolean _enable) {
+		if( _enable ) {
+			setOnMouseEntered(ev -> onMouseEntered());
+			setOnMouseExited(ev -> onMouseExited());
+		} else {
+			setOnMouseEntered(null);
+			setOnMouseExited(null);
+		}
+		
 	}
 	
-	public void enableFadeAnimation(boolean enabled) {
-		fade_anim_enabled = enabled;
+	public void enableZoomAnimation(boolean _enabled) {
+		zoom_anim_enabled = _enabled;
 	}
 	
-	public void enableAnimations(boolean enabled) {
-		enableFadeAnimation(enabled);
-		enableZoomAnimation(enabled);
+	public void enableFadeAnimation(boolean _enabled) {
+		fade_anim_enabled = _enabled;
 	}
 	
-	public void customizeZoomAnimation(double set_zoom_in_scale, double set_zoom_out_scale, 
-										long set_zoom_in_duration, long set_zoom_out_duration) {
-		this.zoom_in_scale = set_zoom_in_scale;
-		this.zoom_out_scale = set_zoom_out_scale;
-		this.zoom_in_duration = set_zoom_in_duration;
-		this.zoom_out_duration = set_zoom_out_duration;
+	public void enableAnimations(boolean _enabled) {
+		enableFadeAnimation(_enabled);
+		enableZoomAnimation(_enabled);
 	}
 	
-	public void customizeFadeAnimation(double set_fade_in_opacity, double set_fade_out_opacity,
-										long set_fade_in_duration, long set_fade_out_duration) {
-		this.fade_in_opacity = set_fade_in_opacity;
-		this.fade_out_opacity = set_fade_out_opacity;
-		this.fade_in_duration = set_fade_in_duration;
-		this.fade_out_duration = set_fade_out_duration;
+	public void customizeZoomAnimation(double _zoom_in_scale, double _zoom_out_scale, 
+										long _zoom_in_duration, long _zoom_out_duration) {
+		zoom_info.customize(_zoom_in_scale, _zoom_out_scale, _zoom_in_duration, _zoom_out_duration);
+	}
+	
+	public void customizeFadeAnimation(double _fade_in_opacity, double _fade_out_opacity,
+										long _fade_in_duration, long _fade_out_duration) {
+		fade_info.customize(_fade_in_opacity, _fade_out_opacity, _fade_in_duration, _fade_out_duration);
 	}
 	
 	protected void onMouseEntered() {
-		if( zoom_anim_enabled ) {
-			zoom_anim.stop(); 
-			zoom_anim.setToX(zoom_in_scale);
-			zoom_anim.setToY(zoom_in_scale);
-			zoom_anim.setDuration(Duration.millis(zoom_in_duration));
-			zoom_anim.play();
-		}
+		if( zoom_anim_enabled ) 
+			zoom_info.play(true);
 		
-		if( fade_anim_enabled ) {
-			fade_anim.stop();
-			fade_anim.setToValue(fade_in_opacity);
-			fade_anim.setDuration(Duration.millis(fade_in_duration));
-			fade_anim.play();
-		}
+		if( fade_anim_enabled )
+			fade_info.play(true);
 	}
 	
 	protected void onMouseExited() {
-		if( zoom_anim_enabled ) {
-			zoom_anim.stop(); 
-			zoom_anim.setToX(zoom_out_scale);
-			zoom_anim.setToY(zoom_out_scale);
-			zoom_anim.setDuration(Duration.millis(zoom_out_duration));
-			zoom_anim.play();
-		}
+		if( zoom_anim_enabled )
+			zoom_info.play(false);
 		
-		if( fade_anim_enabled ) {
-			fade_anim.stop();
-			fade_anim.setToValue(fade_out_opacity);
-			fade_anim.setDuration(Duration.millis(fade_out_duration));
-			fade_anim.play();
-		}
+		if( fade_anim_enabled )
+			fade_info.play(false);
+	}
+	
+	public int getAction() {
+		return action;
+	}
+	
+	public String getHint() {
+		return hint;
+	}
+	
+	public String Hint() {
+		return hint;
 	}
 }

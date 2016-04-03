@@ -13,11 +13,11 @@ public class File {
 	public File parent = null;
 	public Map<String, File> children = null;
 	
-	public File(String path, File parent) {
-		this.path = path;
+	public File(String _path, File _parent) {
+		path = _path;
+		parent = _parent;
 		children = new HashMap<>();
-		this.parent = parent;
-		
+
 		int length = path.length();
 		int pos = path.lastIndexOf("/");
 		
@@ -25,23 +25,23 @@ public class File {
 		
 		if( is_folder ) {
 			int pos2 = path.lastIndexOf("/", pos - 1);
-			this.name = path.substring(pos2 + 1);
-			//this.parent_path = path.substring(0, pos2 + 1);
+			name = path.substring(pos2 + 1);
+			//parent_path = path.substring(0, pos2 + 1);
 		} 
 		else { 
-			this.name = path.substring(pos + 1);
-			//this.parent_path = path.substring(0, pos + 1);
+			name = path.substring(pos + 1);
+			//parent_path = path.substring(0, pos + 1);
 		}
 		
-		//System.out.println(this.path + " | " + is_folder + " | " + this.name + " | ");// + this.parent_path);
+		//System.out.println(path + " | " + is_folder + " | " + name + " | ");// + parent_path);
 	}
 	
 	@Override
-	public boolean equals(Object obj) {
-		if( obj instanceof File ) {
-			File f = (File)obj;
+	public boolean equals(Object _obj) {
+		if( _obj instanceof File ) {
+			File f = (File)_obj;
 			
-			if( this.path.equals(f.path) )
+			if( path.equals(f.path) )
 				return true;
 		}
 		

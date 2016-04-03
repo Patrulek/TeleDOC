@@ -11,9 +11,9 @@ public class StatusBar extends Pane {
 	Stack<String> texts = null;
 	
 	public StatusBar() {
-		this.setPrefWidth(1024.0);
-		this.setPrefHeight(20.0);
-		this.setStyle("-fx-background-color: rgb(28, 31, 36);");
+		setPrefWidth(1024.0);
+		setPrefHeight(20.0);
+		setStyle("-fx-background-color: rgb(45, 72, 90);");
 		
 		texts = new Stack<>();
 		
@@ -21,14 +21,14 @@ public class StatusBar extends Pane {
 		lbl_hint.setLayoutX(10.0);
 		lbl_hint.setLayoutY(3.0);
 		lbl_hint.setFont(Utils.LBL_STATUSBAR_FONT);
-		lbl_hint.setStyle("-fx-text-fill: rgb(182, 182, 182);");
+		lbl_hint.setStyle("-fx-text-fill: rgb(170, 170, 240);");
 		
-		this.getChildren().add(lbl_hint);
+		getChildren().add(lbl_hint);
 	}
 	
-	public void addText(String text) {
-		texts.push(text);
-		setText(text);
+	public void addText(String _text) {
+		texts.push(_text);
+		setText(_text);
 	}
 	
 	public void removeText() {
@@ -42,7 +42,7 @@ public class StatusBar extends Pane {
 		}
 	}
 	
-	private void setText(String text) {
-		lbl_hint.setText(text);
+	private void setText(String _text) {
+		lbl_hint.setText(_text);
 	}
 }

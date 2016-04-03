@@ -10,21 +10,22 @@ public class Utils {
 	public static final Color PRIMARY_DARK_COLOR = Color.rgb(15, 27, 30);
 	public static final Color PRIMARY_LIGHT_COLOR = Color.rgb(60, 108, 120);
 	public static final Color PRIMARY_VERY_LIGHT_COLOR = Color.rgb(90, 162, 180);
-	public static final Color ICONS_COLOR = Color.rgb(255, 255, 255, 0.8);
+	public static final Color ACCENT_LIGHT_COLOR = Color.rgb(255, 205, 205);
 	public static final Color ACCENT_COLOR = Color.rgb(222, 135, 205);
 	public static final Color ACCENT_DARK_COLOR = Color.rgb(162, 105, 148);
-	public static final Color TEXT_COLOR = Color.rgb(114, 114, 114);
-	public static final Color TEXT_DARK_COLOR = Color.rgb(33, 33, 33);
-	public static final Color TEXT_LIGHT_COLOR = Color.rgb(200, 200, 255);
+	public static final Color TEXT_COLOR = Color.rgb(110, 110, 140);
+	public static final Color TEXT_DARK_COLOR = Color.rgb(30, 30, 40);
+	// 140, 140, 170
+	// 160, 160, 200
+	public static final Color TEXT_LIGHT_COLOR = Color.rgb(170, 170, 240);
 	
-	//public static final Color TEXT_PROMPT_COLOR = Color.rgb(, green, blue)
 	public static final Color ERROR_TEXT_COLOR = Color.rgb(205, 100, 100);
 	public static final Color APPROVE_TEXT_COLOR = Color.rgb(100, 205, 100);
 	public static final Color TRANSPARENT = Color.rgb(0, 0, 0, 0.0);
 	
 	// FONTS
-	public static final Font TF_FONT_SMALL = Font.font("Sans-Serif", 12.0);
-	public static final Font TF_FONT = Font.font("Sans-Serif", 16.0);
+	public static final Font TF_FONT_SMALL = Font.font("Helvetica", 10.0);
+	public static final Font TF_FONT = Font.font("Helvetica", 14.0);
 	public static final Font LBL_FONT = Font.font("Verdana", FontWeight.BOLD, 12.0);
 	public static final Font LBL_STATUSBAR_FONT = Font.font("Verdana", 10.0);
 	
@@ -97,4 +98,9 @@ public class Utils {
 	public static final int IMG_RESET_PASS_ICON = 2017;
 	public static final int IMG_SEARCH_CONF_ICON = 2018;
 	public static final int IMG_UPLOAD_ICON = 2019;
+	public static final int IMG_APP_ICON = 2020;
+	public static final int IMG_EMAIL_ICON = 2021;
+	public static final int IMG_SURNAME_ICON = 2022;
+	public static final int IMG_HIDE_PANEL = 2023;
+	public static final int IMG_PARENT_FOLDER = 2024;
 }

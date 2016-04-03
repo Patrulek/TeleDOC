@@ -3,6 +3,7 @@ package com.pp.iwm.teledoc.objects;
 import java.util.HashMap;
 import java.util.Map;
 
+import javafx.application.Platform;
 import javafx.scene.image.Image;
 
 public class ImageManager {
@@ -26,27 +27,34 @@ public class ImageManager {
 		return s_instance;
 	}
 	
-	public void loadImage(Integer key, Image img) {
-		if( !images.containsKey(key) )
-			images.put(key, img);
+	public void loadImage(Integer _key, Image _img) {
+		if( images.containsValue(_img) ) {
+			System.out.println("B³¹d: Próbujesz wczytaæ drugi raz ten sam obraz!");
+			Platform.exit();
+		}
+			
+		if( !images.containsKey(_key) )
+			images.put(_key, _img);
+		else 
+			System.out.println("Uwaga: Próbujesz nadpisaæ wczytany wczeœniej obraz!");
 	}
 	
-	public void loadImage(Integer key, String img_path) {
-		if( !images.containsKey(key) )
-			images.put(key, new Image(img_path));
+	public void loadImage(Integer _key, String _img_path) {
+		if( !images.containsKey(_key) )
+			images.put(_key, new Image(_img_path));
 	}
 	
-	public void unloadImage(Integer key) {
-		if( images.containsKey(key) )
-			images.remove(key);
+	public void unloadImage(Integer _key) {
+		if( images.containsKey(_key) )
+			images.remove(_key);
 	}
 	
 	public void unloadImages() {
 		images.clear();
 	}
 	
-	public Image getImage(Integer key) {
-		return images.get(key);
+	public Image getImage(Integer _key) {
+		return images.get(_key);
 	}
 	
 	private ImageManager() {

@@ -13,6 +13,7 @@ import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.StatusBar;
 import com.pp.iwm.teledoc.gui.Utils;
 import com.pp.iwm.teledoc.objects.FileTree;
+import com.sun.org.apache.bcel.internal.generic.LLOAD;
 
 import javafx.scene.Group;
 import javafx.scene.ImageCursor;
@@ -31,13 +32,16 @@ import javafx.stage.StageStyle;
 public class AppWindow extends Window {
 	
 	// UI ELEMENTS
+	private Rectangle rect_window_background; 
+	private ImageButton ibtn_exit;
+	private Label lbl_user;
+	
 	private Dockbar dockbar;
 	public StatusBar status_bar;
 	public ConferenceTabsPane tab_pane;
 	public FileExplorer file_pane;
 	public ActionPane action_pane;
 	
-	private boolean dragging = false;
 	
 	public AppWindow() {
 		
@@ -119,56 +123,63 @@ public class AppWindow extends Window {
 		
 		Set<Node> tabs = tab_pane.lookupAll(".tab-header-area > .headers-region > .tab:top > .tab-container > .tab-label");
 		for(Node tab : tabs)
-			tab.setStyle("-fx-text-fill: rgb(182, 182, 182); -fx-font-weight: normal;");
+			tab.setStyle("-fx-text-fill: rgb(210, 210, 140); -fx-font-weight: normal;");
 		
 		tabs = null;
 		tabs = tab_pane.lookupAll(".tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-label");
 		for(Node tab : tabs)
-			tab.setStyle("-fx-text-fill: rgb(182, 182, 182); -fx-font-weight: bold;");
+			tab.setStyle("-fx-text-fill: rgb(210, 210, 140); -fx-font-weight: bold;");
 		
 		//TODO: do poprawy
 	}
 	
-	private void onFilePaneMousePressed(MouseEvent ev) {
+	private void onWindowBackgroundMousePressed(MouseEvent ev) {
 		mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
 	}
 	
-	private void onFilePaneMouseDragged(MouseEvent ev) {
-		if( (ev.getSceneY() < 32 && !dragging) || dragging  ) {
-			dragging = true;
+	private void onWindowBackgroundMouseDragged(MouseEvent ev) {
+		if( (ev.getSceneY() < 24 && !is_dragged) || is_dragged  ) {
+			is_dragged = true;
 			stage.setX(stage.getX() + ev.getScreenX() - mouse_pos.x);
 			stage.setY(stage.getY() + ev.getScreenY() - mouse_pos.y);
 			mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
 		}
 	}
 	
-	private void onFilePaneMouseReleased(MouseEvent ev) {
-		dragging = false;
+	private void onWindowBackgroundMouseReleased(MouseEvent ev) {
+		is_dragged = false;
 	}
 
 	@Override
 	protected void createStage() {
-		Group root = new Group();
-		// hide window content
 		Scene scene = new Scene(root, 1024, 600, Color.rgb(0, 0, 0, 0));
-		scene.setCursor(new ImageCursor(new Image("/assets/cursor.png")));
-		
-		
-		// hide title bar
 		stage.initStyle(StageStyle.TRANSPARENT);
 		
 		// window background
-		Rectangle r_window_content = new Rectangle(1024, 600);
-		r_window_content.setFill(Utils.PRIMARY_COLOR);
+		rect_window_background = new Rectangle(1024, 600);
+		rect_window_background.setFill(Utils.PRIMARY_DARK_COLOR);
+		rect_window_background.setOnMousePressed(ev -> onWindowBackgroundMousePressed(ev));
+		rect_window_background.setOnMouseDragged(ev -> onWindowBackgroundMouseDragged(ev));
+		rect_window_background.setOnMouseReleased(ev -> onWindowBackgroundMouseReleased(ev));
 		
 		// cross btn
-		ImageButton btn_exit = new ImageButton(Utils.IMG_EXIT_APP_ICON, "Zamknij program", Utils.ACT_EXIT_APP);
-		btn_exit.setLayoutX(989.0); btn_exit.setLayoutY(5.0);
-		btn_exit.setOnAction(ev -> this.hide());
+		ibtn_exit = new ImageButton(Utils.IMG_EXIT_APP_ICON, Utils.HINT_CLOSE_APP, Utils.ACT_EXIT_APP);
+		ibtn_exit.setLayoutX(990.0); ibtn_exit.setLayoutY(5.0);
+		ibtn_exit.setOnAction(ev -> hide());
+		
+		// user label
+		lbl_user = new Label("Patryk Lewandowski (patryk.jan.lewandowski@gmail.com)");
+		lbl_user.setLayoutX(20.0); lbl_user.setLayoutY(12.0);
+		lbl_user.setFont(Utils.LBL_FONT);
+		lbl_user.setStyle("-fx-text-fill: rgb(140, 140, 170); -fx-font-weight: normal;");
+		lbl_user.setOnMousePressed(ev -> onWindowBackgroundMousePressed(ev));
+		lbl_user.setOnMouseDragged(ev -> onWindowBackgroundMouseDragged(ev));
+		lbl_user.setOnMouseReleased(ev -> onWindowBackgroundMouseReleased(ev));
 		
 		// dockbar
 		dockbar = new Dockbar();
 		dockbar.app_window = this;
+		dockbar.setLayoutX(250.0); dockbar.setLayoutY(32.0);
 		populateDockbar();
 		
 		// status bar
@@ -177,25 +188,25 @@ public class AppWindow extends Window {
 		
 		// conference panel
 		tab_pane = new ConferenceTabsPane(status_bar);
+		tab_pane.setLayoutX(15.0); tab_pane.setLayoutY(32.0);
 		
 		// file explorer panel
 		file_pane = new FileExplorer(this);
-		file_pane.setOnMousePressed(ev -> onFilePaneMousePressed(ev));
-		file_pane.setOnMouseDragged(ev -> onFilePaneMouseDragged(ev));
-		file_pane.setOnMouseReleased(ev -> onFilePaneMouseReleased(ev));
+		file_pane.setLayoutX(250.0); file_pane.setLayoutY(32.0);
 		
 		// action panel
 		action_pane = new ActionPane(status_bar);
 		
 		// add elements
-		root.getChildren().add(r_window_content);
+		root.getChildren().add(rect_window_background);
 		root.getChildren().add(tab_pane);
 		root.getChildren().add(file_pane);
 		root.getChildren().add(action_pane);
 		root.getChildren().add(status_bar);
 		root.getChildren().add(dockbar);
-		
-		root.getChildren().add(btn_exit);
+
+		root.getChildren().add(lbl_user);
+		root.getChildren().add(ibtn_exit);
 		
 		stage.setScene(scene);
 		

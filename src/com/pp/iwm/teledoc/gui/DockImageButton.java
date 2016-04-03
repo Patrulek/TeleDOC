@@ -4,10 +4,10 @@ public class DockImageButton extends ImageButton {
 
 	Dockbar dockbar;
 	
-	public DockImageButton(Integer image_key, String hint, Integer action, Dockbar dockbar) {
-		super(image_key, hint, action);
+	public DockImageButton(Integer _image_key, String _hint, Integer _action, Dockbar _dockbar) {
+		super(_image_key, _hint, _action);
 		
-		this.dockbar = dockbar;
+		dockbar = _dockbar;
 	}
 	
 	protected void onMouseEntered() {
