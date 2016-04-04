@@ -1,15 +1,16 @@
 package com.pp.iwm.teledoc.gui;
 
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
 public class ConferenceCard extends Pane {
 	
-	Label lbl_title = null;
-	Label lbl_founder = null;
-	ImageButton btn_action = null;
-	ImageButton btn_information = null;
-	ConferenceTabsPane tab_pane = null;
+	public Label lbl_title = null;
+	public Label lbl_founder = null;
+	private ImageButton btn_action = null;
+	private ImageButton btn_information = null;
+	private ConferenceTabsPane tab_pane = null;
 	
 	boolean active_conf = true;
 	
@@ -43,10 +44,10 @@ public class ConferenceCard extends Pane {
 		btn_information.customizeZoomAnimation(0.65, 0.4, 250, 250);
 		btn_information.setScaleX(0.4); btn_information.setScaleY(0.4);
 
-		btn_action.setOnMouseEntered(event -> onButtonMouseEntered(btn_action));
-		btn_action.setOnMouseExited(event -> onButtonMouseExited(btn_action));
-		btn_information.setOnMouseEntered(event -> onButtonMouseEntered(btn_information));
-		btn_information.setOnMouseExited(event -> onButtonMouseExited(btn_information));
+		btn_action.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onButtonMouseEntered(btn_action));
+		btn_action.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onButtonMouseExited(btn_action));
+		btn_information.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onButtonMouseEntered(btn_information));
+		btn_information.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onButtonMouseExited(btn_information));
 		
 		getChildren().add(lbl_title);
 		getChildren().add(lbl_founder);
@@ -73,12 +74,10 @@ public class ConferenceCard extends Pane {
 	private void onButtonMouseEntered(ImageButton _btn) {
 		String s = _btn.getHint() + tab_pane.hovered_card.lbl_title.getText();
 		
-		tab_pane.status_bar.addText(s);
-		_btn.onMouseEntered();
+		tab_pane.addTextToStatusBar(s);
 	}
 	
 	private void onButtonMouseExited(ImageButton _btn) {
-		tab_pane.status_bar.removeText();
-		_btn.onMouseExited();
+		tab_pane.removeTextFromStatusBar();
 	}
 }

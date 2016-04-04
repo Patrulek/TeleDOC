@@ -4,12 +4,21 @@ import javafx.animation.FadeTransition;
 import javafx.util.Duration;
 
 public class FadeTransitionInfo {
+	
+	// ===================================
+	// FIELDS
+	// ===================================
+	
 	private double in_op = 1.0;
 	private double out_op = 1.0;
 	private long in_dur = 250;
 	private long out_dur = 500;
 	
 	private FadeTransition fade_anim;
+	
+	// ====================================
+	// METHODS
+	// ====================================
 	
 	public FadeTransitionInfo(FadeTransition _fade_anim) {
 		fade_anim = _fade_anim;

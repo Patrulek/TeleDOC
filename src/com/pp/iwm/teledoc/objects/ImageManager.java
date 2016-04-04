@@ -60,5 +60,4 @@ public class ImageManager {
 	private ImageManager() {
 		images = new HashMap<>();
 	}
-	
 }

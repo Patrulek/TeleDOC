@@ -1,32 +1,24 @@
 package com.pp.iwm.teledoc.windows;
 
 import java.awt.Point;
+import java.util.List;
 import java.util.Set;
 
 import com.pp.iwm.teledoc.gui.ActionPane;
 import com.pp.iwm.teledoc.gui.ConferenceTabsPane;
-import com.pp.iwm.teledoc.gui.DockImageButton;
 import com.pp.iwm.teledoc.gui.Dockbar;
-import com.pp.iwm.teledoc.gui.FileCard;
 import com.pp.iwm.teledoc.gui.FileExplorer;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.StatusBar;
 import com.pp.iwm.teledoc.gui.Utils;
-import com.pp.iwm.teledoc.objects.FileTree;
-import com.sun.org.apache.bcel.internal.generic.LLOAD;
 
-import javafx.scene.Group;
-import javafx.scene.ImageCursor;
+import javafx.event.ActionEvent;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class AppWindow extends Window {
@@ -49,42 +41,42 @@ public class AppWindow extends Window {
 	
 	private void populateDockbar() {
 		// new conference
-		DockImageButton btn_1 = new DockImageButton(Utils.IMG_NEW_CONF_ICON, "Stwórz now¹ konferencjê", Utils.ACT_NEW_CONF, dockbar);
+		ImageButton btn_1 = new ImageButton(Utils.IMG_NEW_CONF_ICON, Utils.HINT_CREATE_NEW_CONF, Utils.ACT_NEW_CONF);
 		dockbar.addIcon(btn_1);
 		btn_1.setOnAction(ev -> onCreateNewConference(btn_1, false));
 		
 		// find conference
-		DockImageButton btn_2 = new DockImageButton(Utils.IMG_SEARCH_CONF_ICON, "Wyszukaj konferencjê", Utils.ACT_FIND_CONF, dockbar);
+		ImageButton btn_2 = new ImageButton(Utils.IMG_SEARCH_CONF_ICON, Utils.HINT_SEARCH_CONF, Utils.ACT_FIND_CONF);
 		dockbar.addIcon(btn_2);
 		btn_2.setOnAction(ev -> onFindConference(btn_2));
 		
 		// upload file
-		DockImageButton btn_3 = new DockImageButton(Utils.IMG_UPLOAD_ICON, "Wgraj plik", Utils.ACT_UPLOAD_FILE, dockbar);
+		ImageButton btn_3 = new ImageButton(Utils.IMG_UPLOAD_ICON, Utils.HINT_UPLOAD_FILE, Utils.ACT_UPLOAD_FILE);
 		dockbar.addIcon(btn_3);
 		btn_3.setOnAction(ev -> onUploadFile(btn_3));
 		
 		// download file
-		DockImageButton btn_4 = new DockImageButton(Utils.IMG_DOWNLOAD_ICON, "Pobierz plik", Utils.ACT_DOWNLOAD_FILE, dockbar);
+		ImageButton btn_4 = new ImageButton(Utils.IMG_DOWNLOAD_ICON, Utils.HINT_DOWNLOAD_FILE, Utils.ACT_DOWNLOAD_FILE);
 		dockbar.addIcon(btn_4);
 		btn_4.setOnAction(ev -> onDownloadFile(btn_4));
 		
 		// new conference from file
-		DockImageButton btn_5 = new DockImageButton(Utils.IMG_NEW_CONF_FROM_FILE_ICON, "Stwórz now¹ konferencjê z aktywnego pliku: ", Utils.ACT_NEW_CONF_FROM_FILE, dockbar);
+		ImageButton btn_5 = new ImageButton(Utils.IMG_NEW_CONF_FROM_FILE_ICON, Utils.HINT_CREATE_CONF_FROM_FILE, Utils.ACT_NEW_CONF_FROM_FILE);
 		dockbar.addIcon(btn_5);
 		btn_5.setOnAction(ev -> onCreateNewConference(btn_5, true));
 		
 		// find file
-		DockImageButton btn_6 = new DockImageButton(Utils.IMG_SEARCH_FILE_ICON, "Wyszukaj plik", Utils.ACT_FIND_FILE, dockbar);
+		ImageButton btn_6 = new ImageButton(Utils.IMG_SEARCH_FILE_ICON, Utils.HINT_SEARCH_FILE, Utils.ACT_FIND_FILE);
 		dockbar.addIcon(btn_6);
 		btn_6.setOnAction(ev -> onFindFile(btn_6));
 		
 		// help
-		DockImageButton btn_7 = new DockImageButton(Utils.IMG_HELP_ICON, "Pomoc", Utils.ACT_SHOW_HELP, dockbar);
+		ImageButton btn_7 = new ImageButton(Utils.IMG_HELP_ICON, Utils.HINT_HELP, Utils.ACT_SHOW_HELP);
 		dockbar.addIcon(btn_7);
 		btn_7.setOnAction(ev -> onShowHelp(btn_7));
 		
 		// logout
-		DockImageButton btn_8 = new DockImageButton(Utils.IMG_LOGOUT_ICON, "Wyloguj", Utils.ACT_LOGOUT, dockbar);
+		ImageButton btn_8 = new ImageButton(Utils.IMG_LOGOUT_ICON, Utils.HINT_LOGOUT, Utils.ACT_LOGOUT);
 		dockbar.addIcon(btn_8);
 		btn_8.setOnAction(ev -> onLogout());
 	}
@@ -149,6 +141,51 @@ public class AppWindow extends Window {
 	private void onWindowBackgroundMouseReleased(MouseEvent ev) {
 		is_dragged = false;
 	}
+	
+	public void addTextToStatusBar(String _text) {
+		status_bar.addText(_text);
+	}
+	
+	public void removeTextFromStatusBar() {
+		status_bar.removeText();
+	}
+	
+	public void addHidePanelIcon() {
+		ImageButton ibtn = new ImageButton(Utils.IMG_HIDE_PANEL, Utils.HINT_HIDE_PANEL, Utils.ACT_HIDE_PANEL);
+		ibtn.addEventHandler(ActionEvent.ACTION, ev -> action_pane.hide());
+		dockbar.addIcon(ibtn);
+	}
+	
+	public void removeHidePanelIcon() {
+		dockbar.removeIcon(dockbar.findIcon(Utils.ACT_HIDE_PANEL));
+	}
+	
+	private void onDockbarMouseMoved(MouseEvent _ev) {
+		int selected_icon = dockbar.getSelectedIconIndex();
+		int old_selected_icon = dockbar.getOldSelectedIconIndex();
+		List<ImageButton> all_icons = dockbar.getIcons();
+		
+		if( old_selected_icon != selected_icon ) {
+			removeTextFromStatusBar();
+			
+			if( selected_icon >= 0 ) {
+				if( all_icons.get(selected_icon).getHint().equals(Utils.HINT_CREATE_CONF_FROM_FILE)
+					&& file_pane.getSelectedCard() != null && !file_pane.getSelectedCard().file.is_folder )
+					addTextToStatusBar(all_icons.get(selected_icon).getHint() + file_pane.getSelectedCard().file.name);
+				else
+					addTextToStatusBar(all_icons.get(selected_icon).getHint());
+			}
+		}
+	}
+	
+	private void onDockbarMouseEntered(MouseEvent _ev) {
+		addTextToStatusBar("");
+	}
+	
+	private void onDockbarMouseExited(MouseEvent _ev) {
+		dockbar.resetSelection();
+		removeTextFromStatusBar();
+	}
 
 	@Override
 	protected void createStage() {
@@ -166,6 +203,8 @@ public class AppWindow extends Window {
 		ibtn_exit = new ImageButton(Utils.IMG_EXIT_APP_ICON, Utils.HINT_CLOSE_APP, Utils.ACT_EXIT_APP);
 		ibtn_exit.setLayoutX(990.0); ibtn_exit.setLayoutY(5.0);
 		ibtn_exit.setOnAction(ev -> hide());
+		ibtn_exit.addEventFilter(MouseEvent.MOUSE_ENTERED, ev -> status_bar.addText(ibtn_exit.getHint()));
+		ibtn_exit.addEventFilter(MouseEvent.MOUSE_EXITED, ev -> status_bar.removeText());
 		
 		// user label
 		lbl_user = new Label("Patryk Lewandowski (patryk.jan.lewandowski@gmail.com)");
@@ -177,9 +216,11 @@ public class AppWindow extends Window {
 		lbl_user.setOnMouseReleased(ev -> onWindowBackgroundMouseReleased(ev));
 		
 		// dockbar
-		dockbar = new Dockbar();
-		dockbar.app_window = this;
+		dockbar = new Dockbar(32.0, 8.0);
 		dockbar.setLayoutX(250.0); dockbar.setLayoutY(32.0);
+		dockbar.addEventFilter(MouseEvent.MOUSE_MOVED, ev -> onDockbarMouseMoved(ev));
+		dockbar.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onDockbarMouseEntered(ev));
+		dockbar.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onDockbarMouseExited(ev));
 		populateDockbar();
 		
 		// status bar
@@ -187,7 +228,7 @@ public class AppWindow extends Window {
 		status_bar.setLayoutY(580.0);
 		
 		// conference panel
-		tab_pane = new ConferenceTabsPane(status_bar);
+		tab_pane = new ConferenceTabsPane(this);
 		tab_pane.setLayoutX(15.0); tab_pane.setLayoutY(32.0);
 		
 		// file explorer panel
@@ -195,7 +236,7 @@ public class AppWindow extends Window {
 		file_pane.setLayoutX(250.0); file_pane.setLayoutY(32.0);
 		
 		// action panel
-		action_pane = new ActionPane(status_bar);
+		action_pane = new ActionPane(this);
 		
 		// add elements
 		root.getChildren().add(rect_window_background);

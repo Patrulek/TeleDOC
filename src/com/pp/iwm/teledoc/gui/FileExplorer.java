@@ -10,9 +10,11 @@ import com.pp.iwm.teledoc.objects.FileTree;
 import com.pp.iwm.teledoc.windows.AppWindow;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
+import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
 public class FileExplorer extends Pane {
@@ -42,13 +44,13 @@ public class FileExplorer extends Pane {
 		simple_pane.setStyle("-fx-background-color: rgb(30, 54, 60, 1.0);");
 		simple_pane.setPrefWidth(759.0);
 		
-		btn_back = new ImageButton(Utils.IMG_PARENT_FOLDER, Utils.HINT_PARENT_FOLDER, Utils.ACT_PARENT_FOLDER);
+		btn_back = new ImageButton(Utils.IMG_PARENT_FOLDER_SMALL, Utils.HINT_PARENT_FOLDER, Utils.ACT_PARENT_FOLDER);
 		btn_back.setLayoutX(3.0); btn_back.setLayoutY(8.0);
 		btn_back.customizeZoomAnimation(1.15, 1.0, 200, 200);
 		btn_back.enableFadeAnimation(false);
-		btn_back.setOnMouseEntered(event -> onBtnMouseEntered(btn_back));
-		btn_back.setOnMouseExited(event -> onBtnMouseExited(btn_back));
-		btn_back.setOnMouseClicked(event -> onBtnMouseClicked(btn_back));
+		btn_back.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onBtnMouseEntered(btn_back));
+		btn_back.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onBtnMouseExited(btn_back));
+		btn_back.addEventHandler(ActionEvent.ACTION, ev -> onBtnMouseClicked(btn_back));
 		
 		lbl_path = new Label("root/");
 		lbl_path.setFont(Utils.LBL_STATUSBAR_FONT);
@@ -73,6 +75,10 @@ public class FileExplorer extends Pane {
 		
 		file_tree = new FileTree();
 		refreshView();
+	}
+	
+	public FileCard getSelectedCard() {
+		return selected_card;
 	}
 	
 	public void onCardSelect(FileCard _selected_card) {
@@ -168,14 +174,11 @@ public class FileExplorer extends Pane {
 	}
 	
 	private void onBtnMouseEntered(ImageButton _btn) {
-		_btn.onMouseEntered();
-		
 		if( _btn == btn_back )
 			app_window.status_bar.addText(_btn.getHint());
 	}
 	
 	private void onBtnMouseExited(ImageButton _btn) {
-		_btn.onMouseExited();
 		app_window.status_bar.removeText();
 	}
 }

@@ -4,12 +4,21 @@ import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
 
 public class TranslateTransitionInfo {
+	
+	// ===================================
+	// FIELDS
+	// ===================================
+	
 	private double x_dist;
 	private double y_dist;
 	private long in_dur;
 	private long out_dur;
 	
 	private TranslateTransition translate_anim;
+	
+	// ===================================
+	// METHODS
+	// ===================================
 	
 	public TranslateTransitionInfo(TranslateTransition _translate_anim) {
 		translate_anim = _translate_anim;

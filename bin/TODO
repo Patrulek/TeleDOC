@@ -1,0 +1,28 @@
+Refaktoryzacja:
+
+- Main 							-- done
+
+- FadeTransitionInfo 			-- done
+- ScaleTransitionInfo 			-- done
+- TranslateTransitionInfo 		-- done
+
+- ActionPane
+- ConferenceCard
+- ConferenceTabsPane
+- Dockbar 						-- done
+- FileCard
+- FileExplorer
+- ImageButton					-- done
+- StatusBar						-- done
+- Utils							-- done
+
+- File
+- FileTree
+- ImageManager					-- done
+- User							-- done
+
+- AppWindow
+- LoginWindow					-- done
+- RegisterWindow				-- done
+- Window						-- done
+ 

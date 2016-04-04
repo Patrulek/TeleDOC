@@ -1,5 +1,8 @@
 package com.pp.iwm.teledoc.gui;
 
+import com.pp.iwm.teledoc.windows.AppWindow;
+import com.pp.iwm.teledoc.windows.Window;
+
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.control.Tab;
@@ -16,11 +19,12 @@ public class ConferenceTabsPane extends TabPane {
 	
 	ConferenceCard selected_card = null;
 	ConferenceCard hovered_card = null;
-	StatusBar status_bar = null;
+	private Window window;
 	
-	public ConferenceTabsPane(StatusBar _status_bar) {
+	
+	public ConferenceTabsPane(Window _window) {
 		super();
-		status_bar = _status_bar;
+		window = _window;
 		
 		setPrefWidth(220.0);
 		setPrefHeight(536.0);
@@ -77,5 +81,13 @@ public class ConferenceTabsPane extends TabPane {
 	
 	public void onCardHover(ConferenceCard _hovered_card) {
 		hovered_card = _hovered_card;
+	}
+	
+	public void addTextToStatusBar(String _text) {
+		((AppWindow)window).addTextToStatusBar(_text);
+	}
+	
+	public void removeTextFromStatusBar() {
+		((AppWindow)window).removeTextFromStatusBar();
 	}
 }

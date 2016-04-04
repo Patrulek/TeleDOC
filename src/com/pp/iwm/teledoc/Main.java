@@ -13,7 +13,15 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 	
+	// =====================================
+	// FIELDS
+	// =====================================
+	
 	Window main_window = null;
+	
+	// =====================================
+	// METHODS
+	// =====================================
 	
 	@Override
 	public void init() {
@@ -56,6 +64,7 @@ public class Main extends Application {
 		ImageManager.instance().loadImage(Utils.IMG_EMAIL_ICON, "/assets/email_icon.png");
 		ImageManager.instance().loadImage(Utils.IMG_SURNAME_ICON, "/assets/surname_icon.png");
 		ImageManager.instance().loadImage(Utils.IMG_HIDE_PANEL, "/assets/hide_panel.png");
-		ImageManager.instance().loadImage(Utils.IMG_PARENT_FOLDER, "/assets/parent_folder.png");
+		ImageManager.instance().loadImage(Utils.IMG_HIDE_PANEL_SMALL, "/assets/hide_panel_small.png");
+		ImageManager.instance().loadImage(Utils.IMG_PARENT_FOLDER_SMALL, "/assets/parent_folder.png");
 	}
 }

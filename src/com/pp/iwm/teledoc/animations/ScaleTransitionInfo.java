@@ -4,12 +4,21 @@ import javafx.animation.ScaleTransition;
 import javafx.util.Duration;
 
 public class ScaleTransitionInfo {
+	
+	// ===================================
+	// FIELDS
+	// ===================================
+	
 	private double in_sc = 1.15;
 	private double out_sc = 1.0;
 	private long in_dur = 250;
 	private long out_dur = 500;
 	
 	private ScaleTransition zoom_anim;
+	
+	// ===================================
+	// METHODS
+	// ===================================
 	
 	public ScaleTransitionInfo(ScaleTransition _zoom_anim) {
 		zoom_anim = _zoom_anim;

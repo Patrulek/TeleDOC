@@ -49,6 +49,8 @@ public class Utils {
 	public static final int ACT_CONF_DETAILS = 1014;
 	public static final int ACT_PARENT_FOLDER = 1015;
 	public static final int ACT_HIDE_PANEL = 1016;
+	public static final int ACT_CREATE = 1017;
+	public static final int ACT_SEARCH = 1018;
 	
 	public static final int ACT_EXIT_APP = 1022;
 	
@@ -69,6 +71,16 @@ public class Utils {
 	public static final String HINT_CONF_DETAILS = "Szczegó³owe informacje o konferencji: ";
 	public static final String HINT_OPEN_CONF = "Otwórz ponownie konferencjê: ";
 	public static final String HINT_HIDE_PANEL = "Ukryj panel";
+	public static final String HINT_CREATE = "Stwórz";
+	public static final String HINT_SEARCH = "Szukaj";
+	public static final String HINT_CREATE_NEW_CONF = "Stwórz now¹ konferencjê";
+	public static final String HINT_SEARCH_CONF = "Wyszukaj konferencjê";
+	public static final String HINT_UPLOAD_FILE = "Wgraj plik";
+	public static final String HINT_DOWNLOAD_FILE = "Pobierz plik";
+	public static final String HINT_CREATE_CONF_FROM_FILE = "Stwórz now¹ konferencjê z aktywnego pliku: ";
+	public static final String HINT_SEARCH_FILE = "Wyszukaj plik";
+	public static final String HINT_HELP = "Pomoc";
+	public static final String HINT_LOGOUT = "Wyloguj";
 	
 	// MESSAGES
 	public static final String MSG_INPUT_EMAIL = "Podaj swój email";
@@ -101,6 +113,7 @@ public class Utils {
 	public static final int IMG_APP_ICON = 2020;
 	public static final int IMG_EMAIL_ICON = 2021;
 	public static final int IMG_SURNAME_ICON = 2022;
-	public static final int IMG_HIDE_PANEL = 2023;
-	public static final int IMG_PARENT_FOLDER = 2024;
+	public static final int IMG_HIDE_PANEL_SMALL = 2023;
+	public static final int IMG_HIDE_PANEL = 2024;
+	public static final int IMG_PARENT_FOLDER_SMALL = 2025;
 }

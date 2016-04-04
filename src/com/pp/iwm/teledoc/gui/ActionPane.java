@@ -2,17 +2,22 @@ package com.pp.iwm.teledoc.gui;
 
 import com.pp.iwm.teledoc.animations.FadeTransitionInfo;
 import com.pp.iwm.teledoc.animations.TranslateTransitionInfo;
+import com.pp.iwm.teledoc.windows.AppWindow;
+import com.pp.iwm.teledoc.windows.Window;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
+import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 
 public class ActionPane extends Pane {
-	public StatusBar status_bar = null;
+	
+	private Window window;
 	public Pane content_pane = null;
 	public TranslateTransitionInfo translate_info;
 	public TranslateTransition translate_anim = null;
@@ -21,10 +26,12 @@ public class ActionPane extends Pane {
 	public FadeTransition fade_anim_content_pane = null;
 	public FadeTransitionInfo fade_info_content_pane;
 	
+	public boolean is_visible = false;
+	
 	ImageButton btn_hide = null;
 	
-	public ActionPane(StatusBar _status_bar) {
-		status_bar = _status_bar;
+	public ActionPane(Window _window) {
+		window = _window;
 		setStyle("-fx-background-color: rgb(15, 27, 30);");
 		setPrefWidth(759.0); setPrefHeight(60.0);
 		setLayoutX(250.0); setLayoutY(580.0);
@@ -46,13 +53,13 @@ public class ActionPane extends Pane {
 		fade_info_content_pane = new FadeTransitionInfo(fade_anim_content_pane);
 		fade_info_content_pane.customize(1.0, 0.0, 200, 150);
 		
-		btn_hide = new ImageButton(Utils.IMG_HIDE_PANEL, Utils.HINT_HIDE_PANEL, Utils.ACT_HIDE_PANEL);
+		btn_hide = new ImageButton(Utils.IMG_HIDE_PANEL_SMALL, Utils.HINT_HIDE_PANEL, Utils.ACT_HIDE_PANEL);
 		btn_hide.setLayoutX(720.0); btn_hide.setLayoutY(5.0);
 		btn_hide.enableFadeAnimation(false);
 		btn_hide.customizeZoomAnimation(1.15, 1.0, 250, 400);
-		btn_hide.setOnMouseClicked(event -> onHideBtnMouseClicked());
-		btn_hide.setOnMouseEntered(event -> onHideBtnMouseEntered());
-		btn_hide.setOnMouseExited(event-> onHideBtnMouseExited());
+		btn_hide.addEventHandler(ActionEvent.ACTION, ev -> onHideBtnAction(ev));
+		btn_hide.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onHideBtnMouseEntered(ev));
+		btn_hide.addEventHandler(MouseEvent.MOUSE_EXITED, ev-> onHideBtnMouseExited(ev));
 
 		getChildren().add(content_pane);
 		getChildren().add(btn_hide);
@@ -97,63 +104,71 @@ public class ActionPane extends Pane {
 	public void show() {
 		fade_info.play(true);
 		translate_info.play(true);
+		
+		if( !is_visible ) {
+			is_visible = true;
+			((AppWindow)window).addHidePanelIcon();
+		}
 	}
 	
 	private void createNewConfPanel() {
 		TextField tf_conf_title = new TextField();
 		PasswordField pf_password = new PasswordField();
-		Button btn_create = new Button("Stwórz");
+		ImageButton ibtn_create = new ImageButton(Utils.IMG_NEW_CONF_ICON, Utils.HINT_CREATE, Utils.ACT_CREATE);
 		
 		tf_conf_title.setPromptText("Nazwa konferencji");
 		tf_conf_title.setLayoutX(50.0); tf_conf_title.setLayoutY(20.0);
 		tf_conf_title.setPrefWidth(200.0);
-		tf_conf_title.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-				+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-				+ "-fx-highlight-text-fill:black; "
-				+ "-fx-highlight-fill: gray; "
-				+ "-fx-background-color: rgb(207, 216, 220); ");
+		tf_conf_title.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+				+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-fill: rgb(15, 27, 30); "
+				+ "-fx-background-color: rgb(30, 54, 60); ");
 		tf_conf_title.setFont(Utils.TF_FONT_SMALL);
 		
 		
 		pf_password.setPromptText("Has³o (opcjonalne)");
 		pf_password.setLayoutX(300.0); pf_password.setLayoutY(20.0);
 		pf_password.setPrefWidth(200.0);
-		pf_password.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-				+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-				+ "-fx-highlight-text-fill:black; "
-				+ "-fx-highlight-fill: gray; "
-				+ "-fx-background-color: rgb(207, 216, 220); ");
+		pf_password.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+				+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-fill: rgb(15, 27, 30); "
+				+ "-fx-background-color: rgb(30, 54, 60); ");
 		pf_password.setFont(Utils.TF_FONT_SMALL);
 		
-		btn_create.setLayoutX(550.0); btn_create.setLayoutY(20.0);
-		btn_create.setOnAction(event -> onBtnAction(btn_create));
+		ibtn_create.setLayoutX(530.0); ibtn_create.setLayoutY(11.0);
+		ibtn_create.setOnAction(event -> onBtnAction(ibtn_create));
+		ibtn_create.addEventFilter(MouseEvent.MOUSE_ENTERED, ev -> onBtnEntered(ibtn_create));
+		ibtn_create.addEventFilter(MouseEvent.MOUSE_EXITED, ev -> onBtnExited(ibtn_create));
 		
 		content_pane.getChildren().add(tf_conf_title);
 		content_pane.getChildren().add(pf_password);
-		content_pane.getChildren().add(btn_create);
+		content_pane.getChildren().add(ibtn_create);
 	}
 	
 	private void createFindConfPanel() {
 		TextField tf_conf_title = new TextField();
-		PasswordField pf_password = new PasswordField(); 
 		//
-		Button btn_create = new Button("Szukaj");
+		ImageButton ibtn_search = new ImageButton(Utils.IMG_SEARCH_CONF_ICON, Utils.HINT_SEARCH, Utils.ACT_SEARCH);
 		
 		tf_conf_title.setPromptText("Nazwa konferencji");
 		tf_conf_title.setLayoutX(50.0); tf_conf_title.setLayoutY(20.0);
 		tf_conf_title.setPrefWidth(200.0);
-		tf_conf_title.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-				+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-				+ "-fx-highlight-text-fill:black; "
-				+ "-fx-highlight-fill: gray; "
-				+ "-fx-background-color: rgb(207, 216, 220); ");
+		tf_conf_title.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+				+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-fill: rgb(15, 27, 30); "
+				+ "-fx-background-color: rgb(30, 54, 60); ");
 		tf_conf_title.setFont(Utils.TF_FONT_SMALL);
 		
-		btn_create.setLayoutX(300.0); btn_create.setLayoutY(20.0);
-		btn_create.setOnAction(event -> onBtnAction(btn_create));
+		ibtn_search.setLayoutX(280.0); ibtn_search.setLayoutY(11.0);
+		ibtn_search.setOnAction(event -> onBtnAction(ibtn_search));
+		ibtn_search.addEventFilter(MouseEvent.MOUSE_ENTERED, ev -> onBtnEntered(ibtn_search));
+		ibtn_search.addEventFilter(MouseEvent.MOUSE_EXITED, ev -> onBtnExited(ibtn_search));
 		
 		content_pane.getChildren().add(tf_conf_title);
-		content_pane.getChildren().add(btn_create);
+		content_pane.getChildren().add(ibtn_search);
 	}
 	
 	public void onBtnAction(Button _btn) {
@@ -165,22 +180,33 @@ public class ActionPane extends Pane {
 		}
 	}
 	
+	private void onBtnEntered(ImageButton _ibtn) {
+		((AppWindow)window).addTextToStatusBar(_ibtn.getHint());
+	}
+	
+	private void onBtnExited(ImageButton _ibtn) {
+		((AppWindow)window).removeTextFromStatusBar();
+	}
+	
 	public void hide() {
 		fade_info.play(false);
 		translate_info.play(false);
+		
+		if( is_visible ) {
+			is_visible = false;
+			((AppWindow)window).removeHidePanelIcon();
+		}
 	}
 	
-	private void onHideBtnMouseEntered() {
-		status_bar.addText(btn_hide.getHint());
-		btn_hide.onMouseEntered();
+	private void onHideBtnMouseEntered(MouseEvent _ev) {
+		((AppWindow)window).addTextToStatusBar(btn_hide.getHint());
 	}
 	
-	private void onHideBtnMouseExited() {
-		status_bar.removeText();
-		btn_hide.onMouseExited();
+	private void onHideBtnMouseExited(MouseEvent _ev) {
+		((AppWindow)window).removeTextFromStatusBar();
 	}
 	
-	private void onHideBtnMouseClicked() {
+	private void onHideBtnAction(ActionEvent _ev) {
 		hide();
 	}
 }

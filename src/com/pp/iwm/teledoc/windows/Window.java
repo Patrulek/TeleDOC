@@ -12,13 +12,21 @@ import javafx.stage.Stage;
 
 public abstract class Window {
 	
-	protected Stage stage = null;
-	protected Group root = null;
-	protected Scene scene = null;
-	protected Point mouse_pos = null;
+	// ===================================
+	// FIELDS
+	// ===================================
+	
+	protected Stage stage;
+	protected Group root;
+	protected Scene scene;
+	protected Point mouse_pos;
 	protected User user = null;
 	
 	protected boolean is_dragged = false;
+	
+	// ===================================
+	// METHODS
+	// ===================================
 	
 	public Window() {
 		stage = new Stage();
@@ -28,7 +36,13 @@ public abstract class Window {
 		createStage();
 	}
 	
-	protected abstract void createStage();
+	public void show() {
+		stage.show();
+	}
+	
+	public void hide() {
+		stage.hide();
+	}
 	
 	protected void openWindow(Window _new_window, boolean _hide_current) {
 		_new_window.show();
@@ -39,11 +53,5 @@ public abstract class Window {
 		}
 	}
 	
-	public void show() {
-		stage.show();
-	}
-	
-	public void hide() {
-		stage.hide();
-	}
+	protected abstract void createStage();
 }
