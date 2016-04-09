@@ -1,119 +1,150 @@
 package com.pp.iwm.teledoc.gui;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.pp.iwm.teledoc.windows.AppWindow;
-
-import javafx.fxml.FXML;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
-import javafx.scene.shape.Rectangle;
 
 public class Dockbar extends Pane {
 	
-	public AppWindow app_window;
-	List<DockImageButton> all_icons = null;
-	int max_icons = 15;
-	int icon_spacing = 4; // pixels
-	int icon_pref_size = 32;
-	boolean horizontal_bar = true;
-	double iconBaseScale = 0.75;
-	double iconBaseOpacity = 0.5;
-	boolean animOnlyHoveredIcon = true;
-	int selected_icon = -1;
+	// =========================================
+	// FIELDS
+	// =========================================
+	
+	private List<ImageButton> all_icons = null;
+	private double icon_spacing;
+	private double icon_size;
+	
+	// private boolean horizontal_bar = true;
+	private double icon_base_scale = 0.75;
+	private double icon_base_opacity = 0.66;
+	private double dist_y = -2.0;
+	// private boolean animOnlyHoveredIcon = true;
+	private int old_selected_icon = -1;
+	private int selected_icon = -1;
 	
 	
-	Point mouse_pos = null;
-	Rectangle r_for_moving = null;
+	// ==========================================
+	// METHODS
+	// ==========================================
 	
-	Point lu_bound = null;
-	Point rd_bound = null;
-	
-	public Dockbar() {
-		this.all_icons = new ArrayList<>();
-		
-		lu_bound = new Point(0, 32);
-		rd_bound = new Point(1024, 580);
-		
-		this.setLayoutX(695.0); this.setLayoutY(480.0);
-		
-		r_for_moving = new Rectangle(10, 36);
-		r_for_moving.setFill(Utils.ICONS_COLOR);
-		r_for_moving.setOpacity(0.5);
-		
-		r_for_moving.setOnMousePressed(event -> {
-											mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
-											
-											//double diff = event.getSceneX() - this.getLayoutX();
-											//System.out.println(event.getSceneX() + " | " + this.getLayoutX());
-											//int selected_icon = (int) (diff / (icon_pref_size + icon_spacing));
-										});
-		r_for_moving.setOnMouseDragged(event -> {
-											double x = this.getLayoutX() + event.getScreenX() - mouse_pos.x;
-											x = x + this.getWidth() > rd_bound.x ? rd_bound.x - this.getWidth() : x;
-											x = x < lu_bound.x ? lu_bound.x : x;
-											
-											double y = this.getLayoutY() + event.getScreenY() - mouse_pos.y;
-											y = y + this.getHeight() > rd_bound.y ? rd_bound.y - this.getHeight() : y;
-											y = y < lu_bound.y ? lu_bound.y : y;
-											
-											this.setLayoutX(x);
-											this.setLayoutY(y);
-											mouse_pos = new Point((int)event.getScreenX(), (int)event.getScreenY());
-										}); 
-		
-		this.getChildren().add(r_for_moving);
-		
+	public Dockbar(double _icon_size, double _icon_spacing) {
+		icon_size = _icon_size;
+		icon_spacing = _icon_spacing;
+		all_icons = new ArrayList<>();
 
-	}
-	
-	public void addIcon(DockImageButton btn) {
-		all_icons.add(btn);
-		fitIcon(btn);
-		relocateNavigationRectangle();
-		
-		this.getChildren().add(btn);
-	}
-	
-	public void removeIcon(DockImageButton btn) {
-		all_icons.remove(btn);
-		this.getChildren().remove(btn);
-		
-		btn.setVisible(false);
-		
-		relocateNavigationRectangle();
-		
-		// recompute dockbar
-	}
-	
-	private void fitIcon(ImageButton btn) {
-		btn.setScaleX(iconBaseScale);
-		btn.setScaleY(iconBaseScale);
-		btn.setOpacity(iconBaseOpacity);
-		btn.customizeZoomAnimation(1.15, iconBaseScale, 250, 500);
-		btn.customizeFadeAnimation(1.0, iconBaseOpacity, 250, 500);
+		setStyle("-fx-background-color: transparent;");
 
-		int x = (all_icons.size() - 1) * (icon_pref_size + icon_spacing);
-		btn.setLayoutX(x);
+		addEventFilter(MouseEvent.MOUSE_MOVED, ev -> onMouseMoved(ev));
 	}
 	
-	private void relocateNavigationRectangle() {
-		int x = (int) (all_icons.size() * (icon_pref_size + icon_spacing) + 0.6 * icon_pref_size);
-		r_for_moving.setLayoutX(x);
-	}
-	
-	public void onIconMouseEntered(double x) {
-		selected_icon = (int)(x / (icon_pref_size + icon_spacing));
+	public void addIcon(ImageButton _ibtn) {
+		all_icons.add(_ibtn);
+		fitIcon(_ibtn);
 		
-		if( selected_icon == 4 && app_window.file_pane.selected_card != null && !app_window.file_pane.selected_card.file.is_folder ) // hardcoded
-			app_window.status_bar.addText(all_icons.get(selected_icon).hint + app_window.file_pane.selected_card.file.name);
-		else
-			app_window.status_bar.addText(all_icons.get(selected_icon).hint);
+		getChildren().add(_ibtn);
+		animateAddition(_ibtn, true);
 	}
 	
-	public void onIconMouseExited() {
-		selected_icon = -1;
-		app_window.status_bar.removeText();
+	private void animateAddition(ImageButton _ibtn, boolean _in) {
+		_ibtn.enableTranslateAnimation(false);
+		_ibtn.enableZoomAnimation(false);
+		_ibtn.customizeFadeAnimation(0.66, 0.0, 200, 200);
+		
+		if( _in ) {
+			_ibtn.setOpacity(0.0);
+			_ibtn.playAnimations(true);
+			_ibtn.customizeFadeAnimation(1.0, icon_base_opacity, 250, 500);
+			_ibtn.enableAnimations(true);
+		} else {
+			_ibtn.getFadeAnim().setOnFinished(ev -> { getChildren().remove(_ibtn); relocateIcons();} );
+			_ibtn.playAnimations(false);
+			_ibtn.enableAnimations(false);
+		}
+	}
+	
+	public void removeIcon(int _icon_index) {
+		ImageButton ibtn = all_icons.get(_icon_index);
+		removeIcon(ibtn);
+	}
+	
+	public void removeIcon(ImageButton _ibtn) {
+		all_icons.remove(_ibtn);
+		animateAddition(_ibtn, false);
+	}
+	
+	private void fitIcon(ImageButton _btn) {
+		_btn.setScaleX(icon_base_scale);
+		_btn.setScaleY(icon_base_scale);
+		_btn.setOpacity(icon_base_opacity);
+		_btn.customizeZoomAnimation(0.85, icon_base_scale, 250, 500);
+		_btn.customizeFadeAnimation(1.0, icon_base_opacity, 250, 500);
+		_btn.customizeTranslateAnimation(0.0, dist_y, 250, 500);
+
+		double x = (all_icons.size() - 1) * (icon_size + icon_spacing);
+		_btn.setLayoutX(x);
+	}
+	
+	private void relocateIcons() {
+		int i = 0;
+		
+		for( ImageButton ibtn : all_icons ) {
+			double x = i * (icon_size + icon_spacing);
+			ibtn.setLayoutX(x);
+			i++;
+		}
+	}
+	
+	private void onMouseMoved(MouseEvent _ev) {
+		old_selected_icon = selected_icon;
+		
+		if( selected_icon == -1 ) {
+			if( _ev.getX() >= 6 && _ev.getX() < (6 + all_icons.size() * (icon_size + icon_spacing)) )
+				selected_icon = (int)((_ev.getX() - 6) / (icon_size + icon_spacing ));
+		} else {
+			if( _ev.getX() < 26 + selected_icon * (icon_size + icon_spacing) ) { 
+				if( _ev.getX() < 4 )
+					selected_icon = -1;
+				else
+					selected_icon = (int)((_ev.getX() - 4) / (icon_size + icon_spacing));
+			} else {
+				if( _ev.getX() >= 6 + all_icons.size() * (icon_size + icon_spacing) )
+					selected_icon = -1;
+				else
+					selected_icon = (int)((_ev.getX() - 6) / (icon_size + icon_spacing));
+			}
+		}
+	}
+	
+	public int getSelectedIconIndex() {
+		return selected_icon;
+	}
+	
+	public int getOldSelectedIconIndex() {
+		return old_selected_icon;
+	}
+	
+	public ImageButton getSelectedIcon() {
+		if( selected_icon >= 0 )
+			return all_icons.get(selected_icon);
+		
+		return null;
+	}
+	
+	public void resetSelection() {
+		old_selected_icon = selected_icon = -1;
+	}
+	
+	public List<ImageButton> getIcons() {
+		return all_icons;
+	}
+	
+	public ImageButton findIcon(int action) {
+		for( ImageButton ibtn : all_icons )
+			if( ibtn.getAction() == action )
+				return ibtn;
+		
+		return null;
 	}
 }

@@ -7,17 +7,21 @@ import java.util.Map;
 
 public class File {
 	
-	public String name;
-	public boolean is_folder;
-	public String path;
-	public File parent = null;
-	public Map<String, File> children = null;
+	// ======================================
+	// FIELDS 
+	// ======================================
 	
-	public File(String path, File parent) {
-		this.path = path;
+	private String name;
+	private boolean is_folder;
+	private String path;
+	private File parent = null;
+	private Map<String, File> children = null;
+	
+	public File(String _path, File _parent) {
+		path = _path;
+		parent = _parent;
 		children = new HashMap<>();
-		this.parent = parent;
-		
+
 		int length = path.length();
 		int pos = path.lastIndexOf("/");
 		
@@ -25,28 +29,40 @@ public class File {
 		
 		if( is_folder ) {
 			int pos2 = path.lastIndexOf("/", pos - 1);
-			this.name = path.substring(pos2 + 1);
-			//this.parent_path = path.substring(0, pos2 + 1);
-		} 
-		else { 
-			this.name = path.substring(pos + 1);
-			//this.parent_path = path.substring(0, pos + 1);
-		}
-		
-		//System.out.println(this.path + " | " + is_folder + " | " + this.name + " | ");// + this.parent_path);
+			name = path.substring(pos2 + 1);
+		} else
+			name = path.substring(pos + 1);
+	}
+	
+	public String getPath() {
+		return path;
+	}
+	
+	public Map<String, File> getChildren() {
+		return children;
+	}
+	
+	public boolean isFolder() {
+		return is_folder;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public File getParent() {
+		return parent;
 	}
 	
 	@Override
-	public boolean equals(Object obj) {
-		if( obj instanceof File ) {
-			File f = (File)obj;
+	public boolean equals(Object _obj) {
+		if( _obj instanceof File ) {
+			File f = (File)_obj;
 			
-			if( this.path.equals(f.path) )
+			if( path.equals(f.path) )
 				return true;
 		}
 		
 		return false;
 	}
-	
-	//private void
 }

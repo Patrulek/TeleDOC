@@ -7,28 +7,34 @@ import javafx.scene.layout.Pane;
 
 public class StatusBar extends Pane {
 	
-	Label lbl_hint = null;
-	Stack<String> texts = null;
+	// ===================================
+	// FIELDS
+	// ===================================
+	
+	private Label lbl_hint;
+	private Stack<String> texts;
+	
+	// ===================================
+	// METHODS
+	// ===================================
 	
 	public StatusBar() {
-		this.setPrefWidth(1024.0);
-		this.setPrefHeight(20.0);
-		this.setStyle("-fx-background-color: rgb(69, 90, 100);");
+		setPrefWidth(1024.0); setPrefHeight(20.0);
+		setStyle("-fx-background-color: rgb(45, 81, 90);");
 		
 		texts = new Stack<>();
 		
 		lbl_hint = new Label("");
-		lbl_hint.setLayoutX(10.0);
-		lbl_hint.setLayoutY(3.0);
+		lbl_hint.setLayoutX(10.0); lbl_hint.setLayoutY(3.0);
 		lbl_hint.setFont(Utils.LBL_STATUSBAR_FONT);
-		lbl_hint.setStyle("-fx-text-fill: rgb(182, 182, 182);");
+		lbl_hint.setStyle("-fx-text-fill: rgb(180, 180, 240);");
 		
-		this.getChildren().add(lbl_hint);
+		getChildren().add(lbl_hint);
 	}
 	
-	public void addText(String text) {
-		texts.push(text);
-		setText(text);
+	public void addText(String _text) {
+		texts.push(_text);
+		setText(_text);
 	}
 	
 	public void removeText() {
@@ -42,7 +48,7 @@ public class StatusBar extends Pane {
 		}
 	}
 	
-	private void setText(String text) {
-		lbl_hint.setText(text);
+	private void setText(String _text) {
+		lbl_hint.setText(_text);
 	}
 }

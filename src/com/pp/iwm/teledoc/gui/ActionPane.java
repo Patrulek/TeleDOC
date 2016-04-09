@@ -1,172 +1,200 @@
 package com.pp.iwm.teledoc.gui;
 
+import com.pp.iwm.teledoc.animations.FadeTransitionInfo;
+import com.pp.iwm.teledoc.animations.TranslateTransitionInfo;
 import com.pp.iwm.teledoc.windows.AppWindow;
+import com.pp.iwm.teledoc.windows.Window;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
+import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 
 public class ActionPane extends Pane {
 	
-	// BTN_ACTIONS
-	public static String ACT_HIDE_PANEL = "HIDE_PANEL";
+	// ========================================
+	// FIELDS
+	// ========================================
 	
-	public StatusBar status_bar = null;
-	public Pane content_pane = null;
-	public TranslateTransition translate_anim = null;
-	public FadeTransition fade_anim = null;
-	double translate_anim_distance = 60.0;
-	public FadeTransition fade_anim_content_pane = null;
+	private Window window;
+	private Pane content_pane;
+	private ImageButton btn_hide;
 	
-	ImageButton btn_hide = null;
+	private TranslateTransitionInfo translate_info;
+	private TranslateTransition translate_anim = null;
+	private FadeTransition fade_anim = null;
+	private FadeTransitionInfo fade_info;
+	private FadeTransition fade_anim_content_pane = null;
+	private FadeTransitionInfo fade_info_content_pane;
 	
-	public ActionPane(StatusBar status_bar) {
-		this.status_bar = status_bar;
-		this.setStyle("-fx-background-color: rgb(69, 90, 100, 0.8);");
-		this.setPrefWidth(767.0); this.setPrefHeight(60.0);
-		this.setLayoutX(235.0); this.setLayoutY(580.0);
-		this.setOpacity(0.0);
+	private boolean is_visible = false;
+	private PaneState pane_state = PaneState.UNDEFINED;
+	
+	public enum PaneState {
+		UNDEFINED, NEW_CONF, SEARCH_CONF, SEARCH_FILE;
+	}
+	
+	// ============================================
+	// METHODS
+	// ============================================
+	
+	public ActionPane(Window _window) {
+		window = _window;
+		setStyle("-fx-background-color: rgb(15, 27, 30);");
+		setPrefSize(759.0, 60.0);
+		setOpacity(0.0);
 		
 		content_pane = new Pane();
 		content_pane.setStyle("-fx-background-color: transparent;");
-		content_pane.setPrefWidth(767.0); content_pane.setPrefHeight(60.0);
+		content_pane.setPrefSize(759.0, 60.0);
 		
-		this.translate_anim = new TranslateTransition(Duration.millis(300.0), this);
-		this.fade_anim = new FadeTransition(Duration.millis(300.0), this);
+		translate_anim = new TranslateTransition(Duration.millis(300.0), this);
+		translate_info = new TranslateTransitionInfo(translate_anim);
+		translate_info.customize(0, -60, 300, 450);
+		
+		fade_anim = new FadeTransition(Duration.millis(300.0), this);
+		fade_info = new FadeTransitionInfo(fade_anim);
+		fade_info.customize(1.0, 0.0, 550, 150);
 		
 		fade_anim_content_pane = new FadeTransition(Duration.millis(150.0), content_pane);
+		fade_info_content_pane = new FadeTransitionInfo(fade_anim_content_pane);
+		fade_info_content_pane.customize(1.0, 0.0, 200, 150);
 		
-		btn_hide = new ImageButton("/assets/logout.png", "Ukryj panel", ACT_HIDE_PANEL);
-		btn_hide.setLayoutX(725.0);
-		btn_hide.setScaleX(0.5); btn_hide.setScaleY(0.5);
-		btn_hide.setOpacity(0.5);
-		btn_hide.customizeFadeAnimation(1.0, 0.5, 250, 400);
-		btn_hide.customizeZoomAnimation(0.65, 0.5, 250, 400);
-		btn_hide.setOnMouseClicked(event -> onHideBtnMouseClicked());
-		btn_hide.setOnMouseEntered(event -> onHideBtnMouseEntered());
-		btn_hide.setOnMouseExited(event-> onHideBtnMouseExited());
+		btn_hide = new ImageButton(Utils.IMG_HIDE_PANEL_SMALL, Utils.HINT_HIDE_PANEL, Utils.ACT_HIDE_PANEL);
+		btn_hide.setLayoutX(720.0); btn_hide.setLayoutY(5.0);
+		btn_hide.enableFadeAnimation(false);
+		btn_hide.customizeZoomAnimation(1.15, 1.0, 250, 400);
+		btn_hide.addEventHandler(ActionEvent.ACTION, ev -> onHideBtnAction(ev));
+		btn_hide.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onHideBtnMouseEntered(ev));
+		btn_hide.addEventHandler(MouseEvent.MOUSE_EXITED, ev-> onHideBtnMouseExited(ev));
 
-		this.getChildren().add(content_pane);
-		this.getChildren().add(btn_hide);
+		getChildren().add(content_pane);
+		getChildren().add(btn_hide);
 	}
 	
-	public void create(ImageButton btn) {
-		recreate(btn);
-		show();
+	public void changePaneState(PaneState _pane_state) {
+		if( pane_state != _pane_state ) {
+			pane_state = _pane_state;
+			recreate();
+			show();
+		}
 	}
 	
-	private void recreate(ImageButton btn) {
-		fade_anim_content_pane.stop();
-		fade_anim_content_pane.setToValue(0.0);
-		fade_anim_content_pane.setDuration(Duration.millis(150.0));
-		fade_anim_content_pane.play();
-		fade_anim_content_pane.setOnFinished(event -> changePanel(btn));
+	private void recreate() {
+		fade_info_content_pane.play(false);
+		fade_anim_content_pane.setOnFinished(ev -> changePanel());
 	}
 	
-	private void changePanel(ImageButton btn) {
+	private void changePanel() {
 		content_pane.getChildren().clear();
 		
-		switch( btn.action ) {
-			case AppWindow.ACT_NEW_CONF:
+		switch( pane_state ) {
+			case NEW_CONF:
 				createNewConfPanel();
 				
 				break;
-			case AppWindow.ACT_FIND_CONF:
-				createFindConfPanel();
-				
-				break;
-			case AppWindow.ACT_NEW_CONF_FROM_FILE:
-				createNewConfPanel(); // tymczasowo
-				
-				break;
-			case AppWindow.ACT_FIND_FILE:
-				createFindConfPanel(); // tymczasowo
+			case SEARCH_CONF:
+			case SEARCH_FILE:
+				createSearchConfPanel();
 				
 				break;
 		}
 		
 		fade_anim_content_pane.setOnFinished(null);
-		fade_anim_content_pane.setDuration(Duration.millis(200.0));
-		fade_anim_content_pane.setToValue(1.0);
-		fade_anim_content_pane.play();
+		fade_info_content_pane.play(true);
 	}
 	
 	public void show() {
-		translate_anim.stop(); 
-		fade_anim.stop();
+		fade_info.play(true);
+		translate_info.play(true);
 		
-		translate_anim.setToY(-translate_anim_distance);
-		translate_anim.setDuration(Duration.millis(300.0));
-		fade_anim.setToValue(1.0);
-		fade_anim.setDuration(Duration.millis(550.0));
+		if( !is_visible ) {
+			is_visible = true;
+			((AppWindow)window).addHidePanelIcon();
+		}
+	}
+	
+	public void hide() {
+		fade_info.play(false);
+		translate_info.play(false);
 		
-		translate_anim.play(); 
-		fade_anim.play();
+		if( is_visible ) {
+			is_visible = false;
+			((AppWindow)window).removeHidePanelIcon();
+		}
 	}
 	
 	private void createNewConfPanel() {
 		TextField tf_conf_title = new TextField();
 		PasswordField pf_password = new PasswordField();
-		Button btn_create = new Button("Stwórz");
+		ImageButton ibtn_create = new ImageButton(Utils.IMG_NEW_CONF_ICON, Utils.HINT_CREATE, Utils.ACT_CREATE);
 		
 		tf_conf_title.setPromptText("Nazwa konferencji");
 		tf_conf_title.setLayoutX(50.0); tf_conf_title.setLayoutY(20.0);
 		tf_conf_title.setPrefWidth(200.0);
-		tf_conf_title.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-				+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-				+ "-fx-highlight-text-fill:black; "
-				+ "-fx-highlight-fill: gray; "
-				+ "-fx-background-color: rgb(207, 216, 220); ");
+		tf_conf_title.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+				+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-fill: rgb(15, 27, 30); "
+				+ "-fx-background-color: rgb(30, 54, 60); ");
 		tf_conf_title.setFont(Utils.TF_FONT_SMALL);
 		
 		
 		pf_password.setPromptText("Has³o (opcjonalne)");
 		pf_password.setLayoutX(300.0); pf_password.setLayoutY(20.0);
 		pf_password.setPrefWidth(200.0);
-		pf_password.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-				+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-				+ "-fx-highlight-text-fill:black; "
-				+ "-fx-highlight-fill: gray; "
-				+ "-fx-background-color: rgb(207, 216, 220); ");
+		pf_password.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+				+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-fill: rgb(15, 27, 30); "
+				+ "-fx-background-color: rgb(30, 54, 60); ");
 		pf_password.setFont(Utils.TF_FONT_SMALL);
 		
-		btn_create.setLayoutX(550.0); btn_create.setLayoutY(20.0);
-		btn_create.setOnAction(event -> onBtnAction(btn_create));
+		ibtn_create.setLayoutX(530.0); ibtn_create.setLayoutY(11.0);
+		ibtn_create.setOnAction(event -> onBtnAction(ibtn_create));
+		ibtn_create.addEventFilter(MouseEvent.MOUSE_ENTERED, ev -> onBtnEntered(ibtn_create));
+		ibtn_create.addEventFilter(MouseEvent.MOUSE_EXITED, ev -> onBtnExited(ibtn_create));
 		
 		content_pane.getChildren().add(tf_conf_title);
 		content_pane.getChildren().add(pf_password);
-		content_pane.getChildren().add(btn_create);
+		content_pane.getChildren().add(ibtn_create);
 	}
 	
-	private void createFindConfPanel() {
+	private void createSearchConfPanel() {
 		TextField tf_conf_title = new TextField();
-		PasswordField pf_password = new PasswordField(); 
 		//
-		Button btn_create = new Button("Szukaj");
+		ImageButton ibtn_search = new ImageButton(Utils.IMG_SEARCH_CONF_ICON, Utils.HINT_SEARCH, Utils.ACT_SEARCH);
 		
-		tf_conf_title.setPromptText("Nazwa konferencji");
+		if( pane_state == PaneState.SEARCH_CONF)
+			tf_conf_title.setPromptText("Nazwa konferencji");
+		else
+			tf_conf_title.setPromptText("Nazwa pliku");
+		
 		tf_conf_title.setLayoutX(50.0); tf_conf_title.setLayoutY(20.0);
 		tf_conf_title.setPrefWidth(200.0);
-		tf_conf_title.setStyle("-fx-text-fill: rgb(114, 114, 114); "
-				+ "-fx-prompt-text-fill: rgb(182, 182, 182); "
-				+ "-fx-highlight-text-fill:black; "
-				+ "-fx-highlight-fill: gray; "
-				+ "-fx-background-color: rgb(207, 216, 220); ");
+		tf_conf_title.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+				+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-fill: rgb(15, 27, 30); "
+				+ "-fx-background-color: rgb(30, 54, 60); ");
 		tf_conf_title.setFont(Utils.TF_FONT_SMALL);
 		
-		btn_create.setLayoutX(300.0); btn_create.setLayoutY(20.0);
-		btn_create.setOnAction(event -> onBtnAction(btn_create));
+		ibtn_search.setLayoutX(280.0); ibtn_search.setLayoutY(11.0);
+		ibtn_search.setOnAction(event -> onBtnAction(ibtn_search));
+		ibtn_search.addEventFilter(MouseEvent.MOUSE_ENTERED, ev -> onBtnEntered(ibtn_search));
+		ibtn_search.addEventFilter(MouseEvent.MOUSE_EXITED, ev -> onBtnExited(ibtn_search));
 		
 		content_pane.getChildren().add(tf_conf_title);
-		content_pane.getChildren().add(btn_create);
+		content_pane.getChildren().add(ibtn_search);
 	}
 	
-	public void onBtnAction(Button btn) {
-		if( btn.getText().equals("Stwórz") ) {	// TODO: zmieniæ 
+	private void onBtnAction(Button _btn) {
+		if( _btn.getText().equals("Stwórz") ) {	// TODO: zmieniæ 
 			// wys³aæ zapytanie do servera
 			// odebraæ wiadomoœæ od servera
 			// zmieniæ okno
@@ -174,30 +202,23 @@ public class ActionPane extends Pane {
 		}
 	}
 	
-	public void hide() {
-		translate_anim.stop();
-		fade_anim.stop();
-		
-		translate_anim.setToY(translate_anim_distance);
-		translate_anim.setDuration(Duration.millis(450.0));
-		fade_anim.setToValue(0.0);
-		fade_anim.setDuration(Duration.millis(150.0));
-		
-		translate_anim.play();
-		fade_anim.play();
+	private void onBtnEntered(ImageButton _ibtn) {
+		((AppWindow)window).addTextToStatusBar(_ibtn.getHint());
 	}
 	
-	private void onHideBtnMouseEntered() {
-		status_bar.addText(btn_hide.hint);
-		btn_hide.onMouseEntered();
+	private void onBtnExited(ImageButton _ibtn) {
+		((AppWindow)window).removeTextFromStatusBar();
 	}
 	
-	private void onHideBtnMouseExited() {
-		status_bar.removeText();
-		btn_hide.onMouseExited();
+	private void onHideBtnMouseEntered(MouseEvent _ev) {
+		((AppWindow)window).addTextToStatusBar(btn_hide.getHint());
 	}
 	
-	private void onHideBtnMouseClicked() {
-		this.hide();
+	private void onHideBtnMouseExited(MouseEvent _ev) {
+		((AppWindow)window).removeTextFromStatusBar();
+	}
+	
+	private void onHideBtnAction(ActionEvent _ev) {
+		hide();
 	}
 }
