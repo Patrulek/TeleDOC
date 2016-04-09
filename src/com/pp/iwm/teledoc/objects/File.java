@@ -7,11 +7,15 @@ import java.util.Map;
 
 public class File {
 	
-	public String name;
-	public boolean is_folder;
-	public String path;
-	public File parent = null;
-	public Map<String, File> children = null;
+	// ======================================
+	// FIELDS 
+	// ======================================
+	
+	private String name;
+	private boolean is_folder;
+	private String path;
+	private File parent = null;
+	private Map<String, File> children = null;
 	
 	public File(String _path, File _parent) {
 		path = _path;
@@ -26,14 +30,28 @@ public class File {
 		if( is_folder ) {
 			int pos2 = path.lastIndexOf("/", pos - 1);
 			name = path.substring(pos2 + 1);
-			//parent_path = path.substring(0, pos2 + 1);
-		} 
-		else { 
+		} else
 			name = path.substring(pos + 1);
-			//parent_path = path.substring(0, pos + 1);
-		}
-		
-		//System.out.println(path + " | " + is_folder + " | " + name + " | ");// + parent_path);
+	}
+	
+	public String getPath() {
+		return path;
+	}
+	
+	public Map<String, File> getChildren() {
+		return children;
+	}
+	
+	public boolean isFolder() {
+		return is_folder;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public File getParent() {
+		return parent;
 	}
 	
 	@Override
@@ -47,6 +65,4 @@ public class File {
 		
 		return false;
 	}
-	
-	//private void
 }

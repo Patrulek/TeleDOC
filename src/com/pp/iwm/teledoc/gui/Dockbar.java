@@ -18,7 +18,7 @@ public class Dockbar extends Pane {
 	
 	// private boolean horizontal_bar = true;
 	private double icon_base_scale = 0.75;
-	private double icon_base_opacity = 0.5;
+	private double icon_base_opacity = 0.66;
 	private double dist_y = -2.0;
 	// private boolean animOnlyHoveredIcon = true;
 	private int old_selected_icon = -1;
@@ -50,18 +50,18 @@ public class Dockbar extends Pane {
 	private void animateAddition(ImageButton _ibtn, boolean _in) {
 		_ibtn.enableTranslateAnimation(false);
 		_ibtn.enableZoomAnimation(false);
-		_ibtn.customizeFadeAnimation(0.5, 0.0, 200, 200);
+		_ibtn.customizeFadeAnimation(0.66, 0.0, 200, 200);
 		
 		if( _in ) {
 			_ibtn.setOpacity(0.0);
 			_ibtn.playAnimations(true);
+			_ibtn.customizeFadeAnimation(1.0, icon_base_opacity, 250, 500);
+			_ibtn.enableAnimations(true);
 		} else {
 			_ibtn.getFadeAnim().setOnFinished(ev -> { getChildren().remove(_ibtn); relocateIcons();} );
 			_ibtn.playAnimations(false);
+			_ibtn.enableAnimations(false);
 		}
-		
-		_ibtn.customizeFadeAnimation(1.0, icon_base_opacity, 250, 500);
-		_ibtn.enableAnimations(true);
 	}
 	
 	public void removeIcon(int _icon_index) {

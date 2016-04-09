@@ -144,32 +144,35 @@ public class LoginWindow extends Window {
 
 	@Override
 	protected void createStage() {
-		scene = new Scene(root, 400, 385, Color.rgb(0, 0, 0, 0));
+		scene = new Scene(root, 404, 389, Color.rgb(0, 0, 0, 0));
 		stage.initStyle(StageStyle.TRANSPARENT);
 		
 		// window background
 		rect_window_background = new Rectangle(400, 385);
 		rect_window_background.setFill(Utils.PRIMARY_DARK_COLOR);
+		rect_window_background.setLayoutX(2.0); rect_window_background.setLayoutY(2.0);
+		rect_window_background.setStroke(Color.rgb(45, 81, 90));
+		rect_window_background.setStrokeWidth(2.0);
 		rect_window_background.setOnMousePressed(ev -> onWindowBackgroundMousePressed(ev));
 		rect_window_background.setOnMouseDragged(ev -> onWindowBackgroundMoseDragged(ev));
 		rect_window_background.setOnMouseReleased(ev -> onWindowBackgroundMouseReleased(ev));
 		
 		// cross btn
 		ibtn_exit = new ImageButton(Utils.IMG_EXIT_APP_ICON, Utils.HINT_CLOSE_APP, Utils.ACT_EXIT_APP);
-		ibtn_exit.setLayoutX(366.0); ibtn_exit.setLayoutY(5.0);
+		ibtn_exit.setLayoutX(368.0); ibtn_exit.setLayoutY(7.0);
 		ibtn_exit.setOnAction(ev -> hide());
 		
 		// teledoc logo
 		iv_logo = new ImageView(ImageManager.instance().getImage(Utils.IMG_LOGO));
-		iv_logo.setLayoutX(65.0); iv_logo.setLayoutY(25.0);
+		iv_logo.setLayoutX(67.0); iv_logo.setLayoutY(27.0);
 		
 		// username icon
 		iv_email = new ImageView(ImageManager.instance().getImage(Utils.IMG_EMAIL_ICON));
-		iv_email.setLayoutX(33.0); iv_email.setLayoutY(163.0);
+		iv_email.setLayoutX(35.0); iv_email.setLayoutY(165.0);
 		
 		// username text field
 		tf_email = new TextField();
-		tf_email.setLayoutX(67.0); tf_email.setLayoutY(160.0);
+		tf_email.setLayoutX(69.0); tf_email.setLayoutY(162.0);
 		tf_email.setPrefWidth(300.0);
 		tf_email.setPromptText(Utils.PROMPT_EMAIL);
 		tf_email.setFont(Utils.TF_FONT);
@@ -181,11 +184,11 @@ public class LoginWindow extends Window {
 		
 		// password icon
 		iv_password = new ImageView(ImageManager.instance().getImage(Utils.IMG_PASSWORD_ICON));
-		iv_password.setLayoutX(33.0); iv_password.setLayoutY(213.0);
+		iv_password.setLayoutX(35.0); iv_password.setLayoutY(215.0);
 		
 		// password field
 		pf_password = new PasswordField();
-		pf_password.setLayoutX(67.0); pf_password.setLayoutY(210.0);
+		pf_password.setLayoutX(69.0); pf_password.setLayoutY(212.0);
 		pf_password.setPrefWidth(300.0);
 		pf_password.setPromptText(Utils.PROMPT_PASS);
 		pf_password.setFont(Utils.TF_FONT);
@@ -198,7 +201,7 @@ public class LoginWindow extends Window {
 		
 		// error label
 		lbl_error = new Label();
-		lbl_error.setLayoutX(55.0); lbl_error.setLayoutY(260.0);
+		lbl_error.setLayoutX(57.0); lbl_error.setLayoutY(262.0);
 		lbl_error.setPrefWidth(300.0);
 		lbl_error.setFont(Utils.LBL_FONT);
 		lbl_error.setText("");
@@ -207,17 +210,17 @@ public class LoginWindow extends Window {
 		
 		// image buttons
 		ibtn_register = new ImageButton(Utils.IMG_REGISTER_ICON, Utils.HINT_REGISTER, Utils.ACT_REGISTER);
-		ibtn_register.setLayoutX(56.0); ibtn_register.setLayoutY(295.0);
+		ibtn_register.setLayoutX(58.0); ibtn_register.setLayoutY(297.0);
 		ibtn_register.setPrefWidth(64.0);
 		ibtn_register.setOnAction(ev -> openRegisterWindow());
 		
 		ibtn_reset_password = new ImageButton(Utils.IMG_RESET_PASS_ICON, Utils.HINT_RESET_PASS, Utils.ACT_RESET_PASS);
-		ibtn_reset_password.setLayoutX(158.0); ibtn_reset_password.setLayoutY(295.0);
+		ibtn_reset_password.setLayoutX(160.0); ibtn_reset_password.setLayoutY(297.0);
 		ibtn_reset_password.setPrefWidth(64.0);
 		ibtn_reset_password.setOnAction(ev -> resetPassword());
 		
 		ibtn_login = new ImageButton(Utils.IMG_LOGIN_ICON, Utils.HINT_LOGIN, Utils.ACT_LOGIN);
-		ibtn_login.setLayoutX(260.0); ibtn_login.setLayoutY(295.0);
+		ibtn_login.setLayoutX(262.0); ibtn_login.setLayoutY(297.0);
 		ibtn_login.setPrefWidth(64.0);
 		ibtn_login.setOnAction(ev -> loginToApplication());
 

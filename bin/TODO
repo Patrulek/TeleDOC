@@ -6,22 +6,22 @@ Refaktoryzacja:
 - ScaleTransitionInfo 			-- done
 - TranslateTransitionInfo 		-- done
 
-- ActionPane
-- ConferenceCard
-- ConferenceTabsPane
+- ActionPane					-- done
+- ConferenceCard				-- done
+- ConferencePanel				-- done
 - Dockbar 						-- done
-- FileCard
-- FileExplorer
+- FileCard						-- done
+- FileExplorer					-- done
 - ImageButton					-- done
 - StatusBar						-- done
 - Utils							-- done
 
-- File
-- FileTree
+- File							-- done
+- FileTree						-- done
 - ImageManager					-- done
 - User							-- done
 
-- AppWindow
+- AppWindow						-- done
 - LoginWindow					-- done
 - RegisterWindow				-- done
 - Window						-- done

@@ -36,6 +36,10 @@ public abstract class Window {
 		createStage();
 	}
 	
+	public void setUser(User _user) {
+		user = _user;
+	}
+	
 	public void show() {
 		stage.show();
 	}

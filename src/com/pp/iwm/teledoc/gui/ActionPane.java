@@ -17,29 +17,41 @@ import javafx.util.Duration;
 
 public class ActionPane extends Pane {
 	
+	// ========================================
+	// FIELDS
+	// ========================================
+	
 	private Window window;
-	public Pane content_pane = null;
-	public TranslateTransitionInfo translate_info;
-	public TranslateTransition translate_anim = null;
-	public FadeTransition fade_anim = null;
-	public FadeTransitionInfo fade_info;
-	public FadeTransition fade_anim_content_pane = null;
-	public FadeTransitionInfo fade_info_content_pane;
+	private Pane content_pane;
+	private ImageButton btn_hide;
 	
-	public boolean is_visible = false;
+	private TranslateTransitionInfo translate_info;
+	private TranslateTransition translate_anim = null;
+	private FadeTransition fade_anim = null;
+	private FadeTransitionInfo fade_info;
+	private FadeTransition fade_anim_content_pane = null;
+	private FadeTransitionInfo fade_info_content_pane;
 	
-	ImageButton btn_hide = null;
+	private boolean is_visible = false;
+	private PaneState pane_state = PaneState.UNDEFINED;
+	
+	public enum PaneState {
+		UNDEFINED, NEW_CONF, SEARCH_CONF, SEARCH_FILE;
+	}
+	
+	// ============================================
+	// METHODS
+	// ============================================
 	
 	public ActionPane(Window _window) {
 		window = _window;
 		setStyle("-fx-background-color: rgb(15, 27, 30);");
-		setPrefWidth(759.0); setPrefHeight(60.0);
-		setLayoutX(250.0); setLayoutY(580.0);
+		setPrefSize(759.0, 60.0);
 		setOpacity(0.0);
 		
 		content_pane = new Pane();
 		content_pane.setStyle("-fx-background-color: transparent;");
-		content_pane.setPrefWidth(759.0); content_pane.setPrefHeight(60.0);
+		content_pane.setPrefSize(759.0, 60.0);
 		
 		translate_anim = new TranslateTransition(Duration.millis(300.0), this);
 		translate_info = new TranslateTransitionInfo(translate_anim);
@@ -65,34 +77,30 @@ public class ActionPane extends Pane {
 		getChildren().add(btn_hide);
 	}
 	
-	public void create(ImageButton _btn) {
-		recreate(_btn);
-		show();
+	public void changePaneState(PaneState _pane_state) {
+		if( pane_state != _pane_state ) {
+			pane_state = _pane_state;
+			recreate();
+			show();
+		}
 	}
 	
-	private void recreate(ImageButton _btn) {
+	private void recreate() {
 		fade_info_content_pane.play(false);
-		fade_anim_content_pane.setOnFinished(event -> changePanel(_btn));
+		fade_anim_content_pane.setOnFinished(ev -> changePanel());
 	}
 	
-	private void changePanel(ImageButton _btn) {
+	private void changePanel() {
 		content_pane.getChildren().clear();
 		
-		switch( _btn.getAction() ) {
-			case Utils.ACT_NEW_CONF:
+		switch( pane_state ) {
+			case NEW_CONF:
 				createNewConfPanel();
 				
 				break;
-			case Utils.ACT_FIND_CONF:
-				createFindConfPanel();
-				
-				break;
-			case Utils.ACT_NEW_CONF_FROM_FILE:
-				createNewConfPanel(); // tymczasowo
-				
-				break;
-			case Utils.ACT_FIND_FILE:
-				createFindConfPanel(); // tymczasowo
+			case SEARCH_CONF:
+			case SEARCH_FILE:
+				createSearchConfPanel();
 				
 				break;
 		}
@@ -108,6 +116,16 @@ public class ActionPane extends Pane {
 		if( !is_visible ) {
 			is_visible = true;
 			((AppWindow)window).addHidePanelIcon();
+		}
+	}
+	
+	public void hide() {
+		fade_info.play(false);
+		translate_info.play(false);
+		
+		if( is_visible ) {
+			is_visible = false;
+			((AppWindow)window).removeHidePanelIcon();
 		}
 	}
 	
@@ -147,12 +165,16 @@ public class ActionPane extends Pane {
 		content_pane.getChildren().add(ibtn_create);
 	}
 	
-	private void createFindConfPanel() {
+	private void createSearchConfPanel() {
 		TextField tf_conf_title = new TextField();
 		//
 		ImageButton ibtn_search = new ImageButton(Utils.IMG_SEARCH_CONF_ICON, Utils.HINT_SEARCH, Utils.ACT_SEARCH);
 		
-		tf_conf_title.setPromptText("Nazwa konferencji");
+		if( pane_state == PaneState.SEARCH_CONF)
+			tf_conf_title.setPromptText("Nazwa konferencji");
+		else
+			tf_conf_title.setPromptText("Nazwa pliku");
+		
 		tf_conf_title.setLayoutX(50.0); tf_conf_title.setLayoutY(20.0);
 		tf_conf_title.setPrefWidth(200.0);
 		tf_conf_title.setStyle("-fx-text-fill: rgb(222, 135, 205); "
@@ -171,7 +193,7 @@ public class ActionPane extends Pane {
 		content_pane.getChildren().add(ibtn_search);
 	}
 	
-	public void onBtnAction(Button _btn) {
+	private void onBtnAction(Button _btn) {
 		if( _btn.getText().equals("Stwórz") ) {	// TODO: zmieniæ 
 			// wys³aæ zapytanie do servera
 			// odebraæ wiadomoœæ od servera
@@ -186,16 +208,6 @@ public class ActionPane extends Pane {
 	
 	private void onBtnExited(ImageButton _ibtn) {
 		((AppWindow)window).removeTextFromStatusBar();
-	}
-	
-	public void hide() {
-		fade_info.play(false);
-		translate_info.play(false);
-		
-		if( is_visible ) {
-			is_visible = false;
-			((AppWindow)window).removeHidePanelIcon();
-		}
 	}
 	
 	private void onHideBtnMouseEntered(MouseEvent _ev) {
