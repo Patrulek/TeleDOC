@@ -17,6 +17,7 @@ import com.pp.iwm.teledoc.objects.FileTree;
 import com.pp.iwm.teledoc.objects.User;
 
 import javafx.event.ActionEvent;
+import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -79,7 +80,7 @@ public class AppWindow extends Window {
 	public void addHidePanelIcon() {
 		ImageButton ibtn = new ImageButton(Utils.IMG_HIDE_PANEL, Utils.HINT_HIDE_PANEL, Utils.ACT_HIDE_PANEL);
 		ibtn.addEventHandler(ActionEvent.ACTION, ev -> action_pane.hide());
-		dockbar.addIcon(ibtn);
+		dockbar.addIconAndFitInBar(ibtn);
 	}
 	
 	public void removeHidePanelIcon() {
@@ -87,11 +88,11 @@ public class AppWindow extends Window {
 	}
 	
 	private void onCreateNewConference(ImageButton _ibtn, boolean _from_file) {
-		action_pane.changePaneState(PaneState.NEW_CONF);
+		action_pane.changePaneStateAndRefresh(PaneState.NEW_CONF);
 	}
 	
 	private void onSearchConference(ImageButton _ibtn) {
-		action_pane.changePaneState(PaneState.SEARCH_CONF);
+		action_pane.changePaneStateAndRefresh(PaneState.SEARCH_CONF);
 	}
 	
 	private void onUploadFile(ImageButton _ibtn) {
@@ -103,7 +104,7 @@ public class AppWindow extends Window {
 	}
 	
 	private void onSearchFile(ImageButton _ibtn) {
-		action_pane.changePaneState(PaneState.SEARCH_FILE);
+		action_pane.changePaneStateAndRefresh(PaneState.SEARCH_FILE);
 	}
 	
 	private void onShowHelp(ImageButton _ibtn) {
@@ -119,17 +120,18 @@ public class AppWindow extends Window {
 		lbl_user.setText(str);
 	}
 	
-	private void onWindowBackgroundMousePressed(MouseEvent ev) {
-		mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
+	private void onWindowBackgroundMousePressed(MouseEvent _ev) {
+		mouse_pos = new Point2D(_ev.getScreenX(), _ev.getScreenY());
 	}
 	
-	private void onWindowBackgroundMouseDragged(MouseEvent ev) {
-		if( (ev.getSceneY() < 24 && !is_dragged) || is_dragged  ) {
+	private void onWindowBackgroundMouseDragged(MouseEvent _ev) {
+		if( _ev.getSceneY() < 24  || is_dragged ) {
 			is_dragged = true;
-			stage.setX(stage.getX() + ev.getScreenX() - mouse_pos.x);
-			stage.setY(stage.getY() + ev.getScreenY() - mouse_pos.y);
-			mouse_pos = new Point((int)ev.getScreenX(), (int)ev.getScreenY());
+			stage.setX(stage.getX() + _ev.getScreenX() - mouse_pos.getX());
+			stage.setY(stage.getY() + _ev.getScreenY() - mouse_pos.getY());
 		}
+		
+		mouse_pos = new Point2D(_ev.getScreenX(), _ev.getScreenY());
 	}
 	
 	private void onWindowBackgroundMouseReleased(MouseEvent ev) {
@@ -137,8 +139,8 @@ public class AppWindow extends Window {
 	}
 	
 	private void onDockbarMouseMoved(MouseEvent _ev) {
-		int selected_icon = dockbar.getSelectedIconIndex();
-		int old_selected_icon = dockbar.getOldSelectedIconIndex();
+		int selected_icon = dockbar.getHoveredIconIndex();
+		int old_selected_icon = dockbar.getOldHoveredIconIndex();
 		List<ImageButton> all_icons = dockbar.getIcons();
 		
 		if( old_selected_icon != selected_icon ) {
@@ -159,49 +161,49 @@ public class AppWindow extends Window {
 	}
 	
 	private void onDockbarMouseExited(MouseEvent _ev) {
-		dockbar.resetSelection();
+		dockbar.resetHoveredIndex();
 		removeTextFromStatusBar();
 	}
 	
 	private void populateDockbar() {
 		// new conference
 		ImageButton btn_1 = new ImageButton(Utils.IMG_NEW_CONF_ICON, Utils.HINT_CREATE_NEW_CONF, Utils.ACT_NEW_CONF);
-		dockbar.addIcon(btn_1);
+		dockbar.addIconAndFitInBar(btn_1);
 		btn_1.setOnAction(ev -> onCreateNewConference(btn_1, false));
 		
 		// find conference
 		ImageButton btn_2 = new ImageButton(Utils.IMG_SEARCH_CONF_ICON, Utils.HINT_SEARCH_CONF, Utils.ACT_FIND_CONF);
-		dockbar.addIcon(btn_2);
+		dockbar.addIconAndFitInBar(btn_2);
 		btn_2.setOnAction(ev -> onSearchConference(btn_2));
 		
 		// upload file
 		ImageButton btn_3 = new ImageButton(Utils.IMG_UPLOAD_ICON, Utils.HINT_UPLOAD_FILE, Utils.ACT_UPLOAD_FILE);
-		dockbar.addIcon(btn_3);
+		dockbar.addIconAndFitInBar(btn_3);
 		btn_3.setOnAction(ev -> onUploadFile(btn_3));
 		
 		// download file
 		ImageButton btn_4 = new ImageButton(Utils.IMG_DOWNLOAD_ICON, Utils.HINT_DOWNLOAD_FILE, Utils.ACT_DOWNLOAD_FILE);
-		dockbar.addIcon(btn_4);
+		dockbar.addIconAndFitInBar(btn_4);
 		btn_4.setOnAction(ev -> onDownloadFile(btn_4));
 		
 		// new conference from file
 		ImageButton btn_5 = new ImageButton(Utils.IMG_NEW_CONF_FROM_FILE_ICON, Utils.HINT_CREATE_CONF_FROM_FILE, Utils.ACT_NEW_CONF_FROM_FILE);
-		dockbar.addIcon(btn_5);
+		dockbar.addIconAndFitInBar(btn_5);
 		btn_5.setOnAction(ev -> onCreateNewConference(btn_5, true));
 		
 		// find file
 		ImageButton btn_6 = new ImageButton(Utils.IMG_SEARCH_FILE_ICON, Utils.HINT_SEARCH_FILE, Utils.ACT_FIND_FILE);
-		dockbar.addIcon(btn_6);
+		dockbar.addIconAndFitInBar(btn_6);
 		btn_6.setOnAction(ev -> onSearchFile(btn_6));
 		
 		// help
 		ImageButton btn_7 = new ImageButton(Utils.IMG_HELP_ICON, Utils.HINT_HELP, Utils.ACT_SHOW_HELP);
-		dockbar.addIcon(btn_7);
+		dockbar.addIconAndFitInBar(btn_7);
 		btn_7.setOnAction(ev -> onShowHelp(btn_7));
 		
 		// logout
 		ImageButton btn_8 = new ImageButton(Utils.IMG_LOGOUT_ICON, Utils.HINT_LOGOUT, Utils.ACT_LOGOUT);
-		dockbar.addIcon(btn_8);
+		dockbar.addIconAndFitInBar(btn_8);
 		btn_8.setOnAction(ev -> onLogout());
 	}
 
@@ -211,9 +213,9 @@ public class AppWindow extends Window {
 		stage.initStyle(StageStyle.TRANSPARENT);
 		
 		// window background
-		rect_window_background = new Rectangle(1024, 600);
+		rect_window_background = new Rectangle(1026, 602);
 		rect_window_background.setFill(Utils.PRIMARY_DARK_COLOR);
-		rect_window_background.setLayoutX(2.0); rect_window_background.setLayoutY(2.0);
+		rect_window_background.setLayoutX(1.0); rect_window_background.setLayoutY(1.0);
 		rect_window_background.setStroke(Color.rgb(45, 81, 90));
 		rect_window_background.setStrokeWidth(2.0);
 		rect_window_background.setOnMousePressed(ev -> onWindowBackgroundMousePressed(ev));
@@ -256,19 +258,19 @@ public class AppWindow extends Window {
 		action_pane = new ActionPane(this);
 		action_pane.setLayoutX(252.0); action_pane.setLayoutY(582.0);
 		
-		// add elements
-		root.getChildren().add(rect_window_background);
-		root.getChildren().add(file_pane);
-		root.getChildren().add(action_pane);
-		root.getChildren().add(status_bar);
-		root.getChildren().add(dockbar);
-
-		root.getChildren().add(lbl_user);
-		root.getChildren().add(ibtn_exit);
-		
+		// conf panel
 		conf_pane = new ConferencePanel(this);
 		conf_pane.setLayoutX(17.0); conf_pane.setLayoutY(56.0);
-		root.getChildren().add(conf_pane);
+		
+		// add elements
+		root.getChildren().addAll(rect_window_background, 
+									file_pane,
+									action_pane,
+									status_bar,
+									dockbar,
+									lbl_user,
+									ibtn_exit,
+									conf_pane);
 		
 		stage.setScene(scene);
 	}

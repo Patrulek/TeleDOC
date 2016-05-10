@@ -1,31 +1,27 @@
 package com.pp.iwm.teledoc.windows;
 
-import java.awt.Point;
-
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.Utils;
 import com.pp.iwm.teledoc.objects.ImageManager;
 
-import javafx.scene.Group;
-import javafx.scene.ImageCursor;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class LoginWindow extends Window {
+public class LoginWindow extends Window implements ChangeListener<Boolean> {
 	
 	// =====================================================
 	// FIELDS
 	// =====================================================
-	
 	
 	// UI ELEMENTS
 	private Rectangle rect_window_background;
@@ -115,22 +111,24 @@ public class LoginWindow extends Window {
 	}
 	
 	private void onWindowBackgroundMousePressed(MouseEvent _ev) {
-		mouse_pos = new Point((int)_ev.getScreenX(), (int)_ev.getScreenY());
+		mouse_pos = new Point2D(_ev.getScreenX(), _ev.getScreenY());
 	}
 	
 	private void onWindowBackgroundMouseReleased(MouseEvent _ev) {
 		is_dragged = false;
 	}
 	
-	private void onWindowBackgroundMoseDragged(MouseEvent _ev) {
-		if( (!is_dragged && _ev.getSceneY() < 24) || is_dragged ) {
+	private void onWindowBackgroundMouseDragged(MouseEvent _ev) {
+		if( _ev.getSceneY() < 24 || is_dragged) {
 			is_dragged = true;
-			stage.setX(stage.getX() + _ev.getScreenX() - mouse_pos.x);
-			stage.setY(stage.getY() + _ev.getScreenY() - mouse_pos.y);
-			mouse_pos = new Point((int)_ev.getScreenX(), (int)_ev.getScreenY());
+			stage.setX(stage.getX() + _ev.getScreenX() - mouse_pos.getX());
+			stage.setY(stage.getY() + _ev.getScreenY() - mouse_pos.getY());
 		}
+		
+		mouse_pos = new Point2D(_ev.getScreenX(), _ev.getScreenY());
 	}
 	
+	// TODO hardcoded
 	private void setLblErrColor(int _color_type) {
 		switch( _color_type ) {
 			case 0:			// czerwony
@@ -138,6 +136,9 @@ public class LoginWindow extends Window {
 				break;
 			case 1:			// zielony
 				lbl_error.setStyle("-fx-text-fill: rgb(100, 205, 100); -fx-alignment: center");
+				break;
+			case 2:			// zolty
+				lbl_error.setStyle("-fx-text-fill: rgb(120, 120, 40); -fx-alignment: center;");
 				break;
 		}
 	}
@@ -148,13 +149,13 @@ public class LoginWindow extends Window {
 		stage.initStyle(StageStyle.TRANSPARENT);
 		
 		// window background
-		rect_window_background = new Rectangle(400, 385);
+		rect_window_background = new Rectangle(402, 387);
 		rect_window_background.setFill(Utils.PRIMARY_DARK_COLOR);
-		rect_window_background.setLayoutX(2.0); rect_window_background.setLayoutY(2.0);
+		rect_window_background.setLayoutX(1.0); rect_window_background.setLayoutY(1.0);
 		rect_window_background.setStroke(Color.rgb(45, 81, 90));
 		rect_window_background.setStrokeWidth(2.0);
 		rect_window_background.setOnMousePressed(ev -> onWindowBackgroundMousePressed(ev));
-		rect_window_background.setOnMouseDragged(ev -> onWindowBackgroundMoseDragged(ev));
+		rect_window_background.setOnMouseDragged(ev -> onWindowBackgroundMouseDragged(ev));
 		rect_window_background.setOnMouseReleased(ev -> onWindowBackgroundMouseReleased(ev));
 		
 		// cross btn
@@ -213,32 +214,50 @@ public class LoginWindow extends Window {
 		ibtn_register.setLayoutX(58.0); ibtn_register.setLayoutY(297.0);
 		ibtn_register.setPrefWidth(64.0);
 		ibtn_register.setOnAction(ev -> openRegisterWindow());
+		ibtn_register.addListenerForHoverProperty(this);
 		
 		ibtn_reset_password = new ImageButton(Utils.IMG_RESET_PASS_ICON, Utils.HINT_RESET_PASS, Utils.ACT_RESET_PASS);
 		ibtn_reset_password.setLayoutX(160.0); ibtn_reset_password.setLayoutY(297.0);
 		ibtn_reset_password.setPrefWidth(64.0);
 		ibtn_reset_password.setOnAction(ev -> resetPassword());
+		ibtn_reset_password.addListenerForHoverProperty(this);
 		
 		ibtn_login = new ImageButton(Utils.IMG_LOGIN_ICON, Utils.HINT_LOGIN, Utils.ACT_LOGIN);
 		ibtn_login.setLayoutX(262.0); ibtn_login.setLayoutY(297.0);
 		ibtn_login.setPrefWidth(64.0);
 		ibtn_login.setOnAction(ev -> loginToApplication());
+		ibtn_login.addListenerForHoverProperty(this);
 
 		// add elements
-		root.getChildren().add(rect_window_background);
-		root.getChildren().add(ibtn_exit);
-		root.getChildren().add(iv_logo);
-		root.getChildren().add(iv_email);
-		root.getChildren().add(tf_email);
-		root.getChildren().add(iv_password);
-		root.getChildren().add(pf_password);
-		root.getChildren().add(lbl_error);
-		root.getChildren().add(ibtn_register);
-		root.getChildren().add(ibtn_reset_password);
-		root.getChildren().add(ibtn_login);
+		root.getChildren().addAll(rect_window_background,
+									ibtn_exit,
+									iv_logo,
+									iv_email,
+									tf_email,
+									iv_password,
+									pf_password,
+									lbl_error,
+									ibtn_register,
+									ibtn_reset_password,
+									ibtn_login);
 		
 		tf_email.requestFocus();
 		
 		stage.setScene(scene);
+	}
+
+	@Override
+	public void changed(ObservableValue<? extends Boolean> _observable, Boolean _old_value, Boolean _new_value) {
+		if( ibtn_login.isHover() ) {
+			setLblErrColor(2);
+			lbl_error.setText("Zaloguj");
+		} else if( ibtn_register.isHover() ) {
+			setLblErrColor(2);
+			lbl_error.setText("Zarejestruj");
+		} else if( ibtn_reset_password.isHover() ) {
+			setLblErrColor(2);
+			lbl_error.setText("Przypomnij has³o");
+		} else
+			lbl_error.setText("");
 	}
 }

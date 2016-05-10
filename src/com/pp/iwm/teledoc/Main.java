@@ -3,9 +3,9 @@ package com.pp.iwm.teledoc;
 import com.pp.iwm.teledoc.gui.Utils;
 import com.pp.iwm.teledoc.objects.ImageManager;
 import com.pp.iwm.teledoc.windows.AppWindow;
+import com.pp.iwm.teledoc.windows.ConfWindow;
 import com.pp.iwm.teledoc.windows.LoginWindow;
 import com.pp.iwm.teledoc.windows.Window;
-import com.sun.java.swing.plaf.windows.resources.windows;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -30,7 +30,7 @@ public class Main extends Application {
 	
 	@Override
 	public void start(Stage _primaryStage) throws Exception {
-		main_window = new AppWindow();
+		main_window = new ConfWindow();
 		main_window.show();
 	}
 	 
@@ -66,5 +66,21 @@ public class Main extends Application {
 		ImageManager.instance().loadImage(Utils.IMG_HIDE_PANEL, "/assets/hide_panel.png");
 		ImageManager.instance().loadImage(Utils.IMG_HIDE_PANEL_SMALL, "/assets/hide_panel_small.png");
 		ImageManager.instance().loadImage(Utils.IMG_PARENT_FOLDER_SMALL, "/assets/parent_folder.png");
+		ImageManager.instance().loadImage(Utils.IMG_MICROPHONE_ON, "/assets/microphone_on.png");
+		ImageManager.instance().loadImage(Utils.IMG_MICROPHONE_OFF, "/assets/microphone_off.png");
+		ImageManager.instance().loadImage(Utils.IMG_CAMERA_ON, "/assets/camera_on.png");
+		ImageManager.instance().loadImage(Utils.IMG_CAMERA_OFF, "/assets/camera_off.png");
+		ImageManager.instance().loadImage(Utils.IMG_CHAT, "/assets/chat_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_CHAT_NEW, "/assets/chat_new_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_MEMBERS, "/assets/members_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_MEMBERS_NEW, "/assets/members_icon_new.png");
+		ImageManager.instance().loadImage(Utils.IMG_LINE, "/assets/line_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_LINE2, "/assets/line_icon_2.png");
+		ImageManager.instance().loadImage(Utils.IMG_ANNOTATION, "/assets/add_annotation.png");
+		ImageManager.instance().loadImage(Utils.IMG_POINTER_ON, "/assets/pointer_on.png");
+		ImageManager.instance().loadImage(Utils.IMG_POINTER_OFF, "/assets/pointer_off.png");
+		ImageManager.instance().loadImage(Utils.IMG_DISTANCE, "/assets/distance_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_IMAGE_PANEL, "/assets/image_panel_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_PICK_VIDEO, "/assets/pick_video.png");
 	}
 }

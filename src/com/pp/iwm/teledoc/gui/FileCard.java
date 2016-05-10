@@ -16,8 +16,8 @@ public class FileCard extends VBox {
 	
 	private ImageView iv_icon;
 	private Label lbl_name;
-	private FileExplorer file_explorer = null;
-	private File file = null;
+	private FileExplorer file_explorer;
+	private File file;
 	
 	// ==========================================
 	// METHODS
@@ -27,6 +27,11 @@ public class FileCard extends VBox {
 		file_explorer = _file_explorer;
 		file = _file;
 		
+		createLayout();
+		setHandlers();
+	}
+	
+	private void createLayout() {
 		iv_icon = file.isFolder() ? new ImageView("/assets/folder_icon.png") : new ImageView("/assets/image_icon.png");
 		
 		lbl_name = new Label(file.getName());
@@ -38,7 +43,9 @@ public class FileCard extends VBox {
 		
 		getChildren().add(iv_icon);
 		getChildren().add(lbl_name);
-		
+	}
+	
+	private void setHandlers() {
 		setOnMouseClicked(ev -> onMouseClicked(ev));
 		setOnMouseEntered(ev -> onMouseEntered());
 		setOnMouseExited(ev -> onMouseExited());

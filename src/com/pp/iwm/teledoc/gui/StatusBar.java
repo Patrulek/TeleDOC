@@ -19,10 +19,14 @@ public class StatusBar extends Pane {
 	// ===================================
 	
 	public StatusBar() {
+		texts = new Stack<>();
+		createLayout();
+	}
+	
+	// TODO hardcoded size
+	private void createLayout() {
 		setPrefWidth(1024.0); setPrefHeight(20.0);
 		setStyle("-fx-background-color: rgb(45, 81, 90);");
-		
-		texts = new Stack<>();
 		
 		lbl_hint = new Label("");
 		lbl_hint.setLayoutX(10.0); lbl_hint.setLayoutY(3.0);

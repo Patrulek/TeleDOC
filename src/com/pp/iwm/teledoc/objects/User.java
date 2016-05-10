@@ -40,6 +40,7 @@ public class User {
 		 */
 	}
 	
+	
 	public void setWindow(Window _window) {
 		window = _window;
 	}

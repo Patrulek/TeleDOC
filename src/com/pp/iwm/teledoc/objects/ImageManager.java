@@ -29,14 +29,14 @@ public class ImageManager {
 	
 	public void loadImage(Integer _key, Image _img) {
 		if( images.containsValue(_img) ) {
-			System.out.println("B³¹d: Próbujesz wczytaæ drugi raz ten sam obraz!");
+			System.out.println("(" + _key + ") B³¹d: Próbujesz wczytaæ drugi raz ten sam obraz!");
 			Platform.exit();
 		}
 			
 		if( !images.containsKey(_key) )
 			images.put(_key, _img);
 		else 
-			System.out.println("Uwaga: Próbujesz nadpisaæ wczytany wczeœniej obraz!");
+			System.out.println("(" + _key + ") Uwaga: Próbujesz nadpisaæ wczytany wczeœniej obraz!");
 	}
 	
 	public void loadImage(Integer _key, String _img_path) {

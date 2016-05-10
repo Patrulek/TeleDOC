@@ -2,7 +2,7 @@ package com.pp.iwm.teledoc.objects;
 
 import java.util.List;
 
-public class Conference {
+public class Conference {	// TODO struktura, a nie obiekt
 	
 	// ==================================
 	// FIELDS
@@ -10,8 +10,8 @@ public class Conference {
 	
 	private String title;
 	private String description;
-	private List<User> members;
 	private User chairman;
+	private List<User> members;
 	// private List<ImageHistory> images;
 	private boolean is_open;
 	

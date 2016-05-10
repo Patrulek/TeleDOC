@@ -1,21 +1,19 @@
 package com.pp.iwm.teledoc.objects;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class File {
+public class File {		// TODO struktura a nie obiekt
 	
 	// ======================================
 	// FIELDS 
 	// ======================================
-	
-	private String name;
-	private boolean is_folder;
+
 	private String path;
-	private File parent = null;
-	private Map<String, File> children = null;
+	private String filename;
+	private boolean is_folder;
+	private File parent;
+	private Map<String, File> children;
 	
 	public File(String _path, File _parent) {
 		path = _path;
@@ -29,9 +27,26 @@ public class File {
 		
 		if( is_folder ) {
 			int pos2 = path.lastIndexOf("/", pos - 1);
-			name = path.substring(pos2 + 1);
+			filename = path.substring(pos2 + 1);
 		} else
-			name = path.substring(pos + 1);
+			filename = path.substring(pos + 1);
+	}
+	
+	public void removeFile(String _file_path) {
+		if( !is_folder )
+			return;
+		
+		if( children.containsKey(_file_path) )
+			children.remove(_file_path);
+	}
+	
+	// TODO requires testing
+	public void removeFile(File _file) {
+		if( !is_folder )
+			return;
+		
+		if( children.containsValue(_file) )
+			children.remove(_file.getName());
 	}
 	
 	public String getPath() {
@@ -47,11 +62,11 @@ public class File {
 	}
 	
 	public String getName() {
-		return name;
+		return filename;
 	}
 	
 	public File getParent() {
-		return parent;
+		return parent == null ? this : parent;
 	}
 	
 	@Override

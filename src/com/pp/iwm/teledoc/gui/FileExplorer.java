@@ -31,25 +31,32 @@ public class FileExplorer extends Pane {
 	private Pane simple_pane;
 	private ScrollPane scroll_pane;
 	
-	private FileTree file_tree = null;
-	private FileCard selected_card = null;
-	private FileCard hovered_card = null;
-	private List<FileCard> files = null;
+	private FileTree file_tree;
+	private FileCard selected_card;
+	private FileCard hovered_card;
+	private List<FileCard> files;
 	
-	private int max_cards_in_row = 0;
-	private double cards_gap = 20.0;
-	private double icon_size = 32.0;
+	private int max_cards_in_row;
+	private double cards_gap;
+	private double icon_size;
 	
 	// ==========================================
 	// METHODS
 	// ==========================================
 	
 	public FileExplorer(Window _window) {
-		setPrefSize(759.0, 548.0);
+		max_cards_in_row = 0;
+		cards_gap = 20.0;
+		icon_size = 32.0;
+		files = new ArrayList<>();
 		window = _window;
 		
-		files = new ArrayList<>();
+		createLayout();
 		recalcMaxCardsInRow();
+	}
+	
+	private void createLayout() {
+		setPrefSize(759.0, 548.0);
 		
 		header_pane = new Pane();
 		header_pane.setStyle("-fx-background-color: rgb(45, 81, 90);");
@@ -62,7 +69,7 @@ public class FileExplorer extends Pane {
 		
 		btn_back = new ImageButton(Utils.IMG_PARENT_FOLDER_SMALL, Utils.HINT_PARENT_FOLDER, Utils.ACT_PARENT_FOLDER);
 		btn_back.customizeZoomAnimation(1.15, 1.0, 200, 200);
-		btn_back.enableFadeAnimation(false);
+		btn_back.disableFadeAnimation();
 		btn_back.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onBtnMouseEntered(btn_back));
 		btn_back.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onBtnMouseExited(btn_back));
 		btn_back.addEventHandler(ActionEvent.ACTION, ev -> onBtnMouseClicked(btn_back));
@@ -87,19 +94,33 @@ public class FileExplorer extends Pane {
 		getChildren().add(header_pane);
 		getChildren().add(scroll_pane);
 	}
+
+	// TODO hardcoded numbers
+	private void recalcMaxCardsInRow() {
+		max_cards_in_row = (int)(719.0 / (icon_size + cards_gap));
+	}
 	
-	
-	// do optymalizacji
+	// TODO do optymalizacji
 	public void refreshView() {
-		files.clear();
-		simple_pane.getChildren().clear();
-		int j = 0;
-		
-		for( Entry<String, File> entry : file_tree.getCurrentRoot().getChildren().entrySet() ) {
+		clearView();
+		refreshCurrentFolder();
+		sortFiles();
+		relocateFilesInExplorer();
+	}
+	
+	private void refreshCurrentFolder() {
+		for( Entry<String, File> entry : file_tree.getFilesForCurrentFolder().entrySet() ) {
 			FileCard fc1 = new FileCard(this, entry.getValue());
 			files.add(fc1);
 		}
-		
+	}
+	
+	private void clearView() {
+		files.clear();
+		simple_pane.getChildren().clear();
+	}
+	
+	private void sortFiles() {
 		java.util.Collections.sort(files, new Comparator<FileCard>() {
 			@Override
 			public int compare(FileCard fc1, FileCard fc2) {
@@ -114,7 +135,9 @@ public class FileExplorer extends Pane {
 				}
 			}
 		});
-		
+	}
+	
+	private void relocateFilesInExplorer() {
 		for( int i = 0; i < files.size(); i++ ) {
 			double x = (i % max_cards_in_row) * (icon_size + cards_gap) + 40.0 ;
 			double y = (i / max_cards_in_row) * (icon_size + cards_gap * 2);
@@ -133,16 +156,14 @@ public class FileExplorer extends Pane {
 	}
 	
 	public void onCardChoose(FileCard _choosed_card) {
-		String str = _choosed_card.getFile().getName();
+		File choosed_file = _choosed_card.getFile();
 		
-		if( _choosed_card.getFile().isFolder() )
-			if( file_tree.getCurrentRoot().getChildren() != null && !file_tree.getCurrentRoot().getChildren().isEmpty() ) {
-				file_tree.setCurrentRoot(file_tree.getCurrentRoot().getChildren().get(str));
-				updateLabelPath();
-				refreshView();
-			}
-		else
-			; // wyœwietl plik
+		if( choosed_file.isFolder() ) {
+			file_tree.goIntoFolder(choosed_file);
+			updateLabelPath();
+			refreshView();
+		} else
+			; // TODO wyœwietl plik
 	}
 	
 	public void onCardHover(FileCard _hovered_card) {
@@ -157,10 +178,6 @@ public class FileExplorer extends Pane {
 		((AppWindow)window).removeTextFromStatusBar();
 	}
 	
-	private void recalcMaxCardsInRow() {
-		max_cards_in_row = (int)(719.0 / (icon_size + cards_gap));
-	}
-	
 	private void onScrollPaneMouseClicked() {
 		if( selected_card != null && hovered_card == null) {
 			selected_card.setNormalStyle();
@@ -170,13 +187,13 @@ public class FileExplorer extends Pane {
 	
 	private void onBtnMouseClicked(ImageButton _ibtn) {
 		if( _ibtn == btn_back ) {
-			if( file_tree.getCurrentRoot().getParent() != null ) {
+			if( file_tree.hasCurrentFolderAParent() ) {
 				if( selected_card != null ) {
 					selected_card = null;
 					removeTextFromStatusBar();
 				}
 				
-				file_tree.setCurrentRoot(file_tree.getCurrentRoot().getParent()); 
+				file_tree.goParentFolderIfExist();
 				updateLabelPath();
 				refreshView();
 			}
@@ -184,7 +201,7 @@ public class FileExplorer extends Pane {
 	}
 	
 	private void updateLabelPath() {
-		lbl_path.setText(file_tree.getCurrentRoot().getPath());
+		lbl_path.setText(file_tree.getCurrentFolder().getPath());
 	}
 	
 	private void onBtnMouseEntered(ImageButton _ibtn) {

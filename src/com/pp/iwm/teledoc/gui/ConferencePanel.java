@@ -20,7 +20,7 @@ public class ConferencePanel extends Pane {
 	// FIELDS
 	// =========================================
 	
-	private boolean is_open_tab_active = true;
+	private boolean is_open_tab_active;
 	
 	private HBox header;
 	private Pane open_conf_tab;
@@ -34,8 +34,8 @@ public class ConferencePanel extends Pane {
 	private ScrollPane closed_conf_scrollp;
 	private VBox closed_conf_contentp;
 
-	private ConferenceCard selected_card = null;
-	private ConferenceCard hovered_card = null;
+	private ConferenceCard selected_card;
+	private ConferenceCard hovered_card;
 	
 	private List<ConferenceCard> open_cards;
 	private List<ConferenceCard> closed_cards;
@@ -48,10 +48,15 @@ public class ConferencePanel extends Pane {
 	
 	public ConferencePanel(Window _window) {
 		super();
+		is_open_tab_active = true;
 		window = _window;
 		open_cards = new ArrayList<>();
 		closed_cards = new ArrayList<>();
 		
+		createLayout();
+	}
+	
+	private void createLayout() {
 		setPrefSize(222.0, 493.0);
 		setStyle("-fx-background-color: transparent;");
 		
@@ -110,7 +115,6 @@ public class ConferencePanel extends Pane {
 		open_conf_tab.getChildren().add(lbl_open_conf);
 		closed_conf_tab.getChildren().add(lbl_closed_conf);
 	}
-	
 
 	public void addConf(Conference _conf) {
 		if( _conf == null )
@@ -127,7 +131,7 @@ public class ConferencePanel extends Pane {
 		}
 	}
 	
-	public void clearConf() {
+	public void clearConf() {	// TODO
 		open_cards.clear();
 		open_conf_contentp.getChildren().clear();
 		
@@ -139,6 +143,13 @@ public class ConferencePanel extends Pane {
 		if( _conf == null )
 			return;
 		
+		if( _conf.isOpen() )
+			removeConfFromOpen(_conf);
+		else 
+			removeConfFromClosed(_conf);
+	}
+	
+	private void removeConfFromOpen(Conference _conf) {
 		for( ConferenceCard conf_card : open_cards ) {
 			if( conf_card.getConference().equals(_conf) ) {
 				open_conf_contentp.getChildren().remove(conf_card);
@@ -146,7 +157,9 @@ public class ConferencePanel extends Pane {
 				return;
 			}
 		}
-		
+	}
+	
+	private void removeConfFromClosed(Conference _conf) {
 		for( ConferenceCard conf_card : closed_cards ) {
 			if( conf_card.getConference().equals(_conf) ) {
 				closed_conf_contentp.getChildren().remove(conf_card);

@@ -51,8 +51,19 @@ public class Utils {
 	public static final int ACT_HIDE_PANEL = 1016;
 	public static final int ACT_CREATE = 1017;
 	public static final int ACT_SEARCH = 1018;
+	public static final int ACT_MICROPHONE = 1019;
+	public static final int ACT_CAMERA = 1020;
+	public static final int ACT_CHAT = 1021;
+	public static final int ACT_MEMBERS = 1022;
+	public static final int ACT_LINE = 1023;
+	public static final int ACT_LINE2 = 1024;
+	public static final int ACT_ANNOTATION = 1025;
+	public static final int ACT_POINTER = 1026;
+	public static final int ACT_DISTANCE = 1027;
+	public static final int ACT_IMAGE_PANEL = 1028;
+	public static final int ACT_PICK_VIDEO = 1029;
 	
-	public static final int ACT_EXIT_APP = 1022;
+	public static final int ACT_EXIT_APP = 1030;
 	
 	// PROMPTS
 	public static final String PROMPT_EMAIL = "Email";
@@ -81,6 +92,23 @@ public class Utils {
 	public static final String HINT_SEARCH_FILE = "Wyszukaj plik";
 	public static final String HINT_HELP = "Pomoc";
 	public static final String HINT_LOGOUT = "Wyloguj";
+	public static final String HINT_LEAVE_CONF = "Opuœæ konferencjê";
+	public static final String HINT_MICROPHONE_ON = "Wy³¹cz mikrofon";
+	public static final String HINT_MICROPHONE_OFF = "W³¹cz mikrofon";
+	public static final String HINT_CAMERA_ON = "Wy³¹cz kamerê";
+	public static final String HINT_CAMERA_OFF = "W³¹cz kamerê";
+	public static final String HINT_CHAT = "Czat";
+	public static final String HINT_CHAT_NEW = "Czat: nowa wiadomoœæ";
+	public static final String HINT_MEMBERS = "Uczestnicy";
+	public static final String HINT_MEMBERS_NEW = "Uczestnicy: nowa osoba";
+	public static final String HINT_LINE = "Rysuj liniê";
+	public static final String HINT_LINE2 = "Rysuj ³aman¹";
+	public static final String HINT_ANNOTATION = "Dodaj adnotacjê";
+	public static final String HINT_POINTER_ON = "Wy³¹cz wskaŸnik";
+	public static final String HINT_POINTER_OFF = "W³¹cz wskaŸnik";
+	public static final String HINT_DISTANCE = "Oblicz odleg³oœæ";
+	public static final String HINT_IMAGE_PANEL = "Wyœwietl panel z otwartymi obrazami";
+	public static final String HINT_PICK_VIDEO = "Oderwij i powiêksz obraz z kamery";
 	
 	// MESSAGES
 	public static final String MSG_INPUT_EMAIL = "Podaj swój email";
@@ -116,4 +144,27 @@ public class Utils {
 	public static final int IMG_HIDE_PANEL_SMALL = 2023;
 	public static final int IMG_HIDE_PANEL = 2024;
 	public static final int IMG_PARENT_FOLDER_SMALL = 2025;
+	public static final int IMG_MICROPHONE_ON = 2026;
+	public static final int IMG_MICROPHONE_OFF = 2027;
+	public static final int IMG_CAMERA_ON = 2028;
+	public static final int IMG_CAMERA_OFF = 2029;
+	public static final int IMG_CHAT = 2030;
+	public static final int IMG_CHAT_NEW = 2031;
+	public static final int IMG_MEMBERS = 2032;
+	public static final int IMG_MEMBERS_NEW = 2033;
+	public static final int IMG_LINE = 2034;
+	public static final int IMG_LINE2 = 2035;
+	public static final int IMG_ANNOTATION = 2036;
+	public static final int IMG_POINTER_ON = 2037;
+	public static final int IMG_POINTER_OFF = 2038;
+	public static final int IMG_DISTANCE = 2039;
+	public static final int IMG_IMAGE_PANEL = 2040;
+	public static final int IMG_PICK_VIDEO = 2041;
+	
+	
+	// other utils
+	
+	public static boolean isStringEmpty(String _str) {
+		return _str.trim().equals("");
+	}
 }

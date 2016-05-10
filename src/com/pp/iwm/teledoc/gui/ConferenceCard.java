@@ -17,8 +17,8 @@ public class ConferenceCard extends Pane {
 	private Label lbl_founder;
 	private ImageButton ibtn_action;
 	private ImageButton ibtn_information;
-	private ConferencePanel conf_pane = null;
-	private Conference conf = null;
+	private ConferencePanel conf_pane;
+	private Conference conf;
 	
 	// =========================================
 	// METHODS
@@ -29,6 +29,11 @@ public class ConferenceCard extends Pane {
 		conf_pane = _conf_pane;
 		conf = _conf;
 		
+		createLayout();
+		setHandlers();
+	}
+	
+	private void createLayout() {
 		setPrefWidth(220.0); setPrefHeight(50.0);
 		
 		lbl_title = new Label(conf.getTitle());
@@ -64,10 +69,12 @@ public class ConferenceCard extends Pane {
 		getChildren().add(lbl_founder);
 		getChildren().add(ibtn_action);
 		getChildren().add(ibtn_information);
-		
-		setOnMouseClicked(event -> onMouseClicked());
-		setOnMouseEntered(event -> onMouseEntered());
-		setOnMouseExited(event -> onMouseExited());
+	}
+	
+	private void setHandlers() {
+		setOnMouseClicked(ev -> onMouseClicked());
+		setOnMouseEntered(ev -> onMouseEntered());
+		setOnMouseExited(ev -> onMouseExited());
 	}
 	
 	public void setNormalStyle() {
@@ -95,7 +102,7 @@ public class ConferenceCard extends Pane {
 	}
 	
 	private void onButtonAction(ImageButton _ibtn) {
-		;
+		
 	}
 	
 	private void onButtonMouseEntered(ImageButton _ibtn) {

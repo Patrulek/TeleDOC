@@ -1,25 +1,23 @@
 package com.pp.iwm.teledoc.windows;
 
-import java.awt.Point;
-
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.Utils;
 import com.pp.iwm.teledoc.objects.ImageManager;
 
-import javafx.scene.Group;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Point2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-public class RegisterWindow extends Window {
+public class RegisterWindow extends Window implements ChangeListener<Boolean> {
 	
 	// ================================================================
 	// FIELDS
@@ -53,6 +51,7 @@ public class RegisterWindow extends Window {
 	
 	private boolean validateTextFields() {
 		if( tf_email.getText().equals("") || tf_name.equals("") || tf_surname.equals("") || pf_password.getText().equals("")) {
+			lbl_error.setStyle("-fx-text-fill: rgb(205, 100, 100); -fx-alignment: center");
 			lbl_error.setText(Utils.MSG_FILL_ALL_FIELDS);
 			return false;
 		}
@@ -64,6 +63,7 @@ public class RegisterWindow extends Window {
 		String email = tf_email.getText();
 		
 		if( !email.contains("@") || !email.contains(".") ) {
+			lbl_error.setStyle("-fx-text-fill: rgb(205, 100, 100); -fx-alignment: center");
 			lbl_error.setText(Utils.MSG_INCORRECT_MAIL);
 			return false;
 		}
@@ -73,6 +73,7 @@ public class RegisterWindow extends Window {
 	
 	private boolean validatePassword() {
 		if( pf_password.getText().length() < 6 ) {
+			lbl_error.setStyle("-fx-text-fill: rgb(205, 100, 100); -fx-alignment: center");
 			lbl_error.setText(Utils.MSG_PASS_TOO_SHORT);
 			return false;
 		}
@@ -111,7 +112,7 @@ public class RegisterWindow extends Window {
 	}
 	
 	private void onWindowBackgroundMousePressed(MouseEvent _ev) {
-		mouse_pos = new Point((int)_ev.getScreenX(), (int)_ev.getScreenY());
+		mouse_pos = new Point2D(_ev.getScreenX(), _ev.getScreenY());
 	}
 	
 	private void onWindowBackgroundMouseReleased(MouseEvent _ev) {
@@ -119,12 +120,13 @@ public class RegisterWindow extends Window {
 	}
 	
 	private void onWindowBackgroundMoseDragged(MouseEvent _ev) {
-		if( (!is_dragged && _ev.getSceneY() < 24) || is_dragged ) {
+		if( _ev.getSceneY() < 24 || is_dragged ) {
 			is_dragged = true;
-			stage.setX(stage.getX() + _ev.getScreenX() - mouse_pos.x);
-			stage.setY(stage.getY() + _ev.getScreenY() - mouse_pos.y);
-			mouse_pos = new Point((int)_ev.getScreenX(), (int)_ev.getScreenY());
+			stage.setX(stage.getX() + _ev.getScreenX() - mouse_pos.getX());
+			stage.setY(stage.getY() + _ev.getScreenY() - mouse_pos.getY());
 		}
+		
+		mouse_pos = new Point2D(_ev.getScreenX(), _ev.getScreenY());
 	}
 
 	@Override
@@ -133,9 +135,9 @@ public class RegisterWindow extends Window {
 		stage.initStyle(StageStyle.TRANSPARENT);
 		
 		// window background
-		rect_window_background = new Rectangle(400, 485);
+		rect_window_background = new Rectangle(402, 487);
 		rect_window_background.setFill(Utils.PRIMARY_DARK_COLOR);
-		rect_window_background.setLayoutX(2.0); rect_window_background.setLayoutY(2.0);
+		rect_window_background.setLayoutX(1.0); rect_window_background.setLayoutY(1.0);
 		rect_window_background.setStroke(Color.rgb(45, 81, 90));
 		rect_window_background.setStrokeWidth(2.0);
 		rect_window_background.setOnMousePressed(ev -> onWindowBackgroundMousePressed(ev));
@@ -233,30 +235,44 @@ public class RegisterWindow extends Window {
 		ibtn_back.setLayoutX(99.0); ibtn_back.setLayoutY(397.0);
 		ibtn_back.setPrefWidth(64.0);
 		ibtn_back.setOnAction(ev -> openLoginWindow(false));
+		ibtn_back.addListenerForHoverProperty(this);
 		
 		ibtn_register = new ImageButton(Utils.IMG_REGISTER_ICON, Utils.HINT_REGISTER, Utils.ACT_REGISTER);
 		ibtn_register.setLayoutX(221.0); ibtn_register.setLayoutY(397.0);
 		ibtn_register.setPrefWidth(64.0);
 		ibtn_register.setOnAction(ev -> registerAccount());
-		
+		ibtn_register.addListenerForHoverProperty(this);
 		
 		// add elements
-		root.getChildren().add(rect_window_background);
-		root.getChildren().add(ibtn_exit);
-		root.getChildren().add(iv_logo);
-		root.getChildren().add(iv_name);
-		root.getChildren().add(tf_name);
-		root.getChildren().add(iv_surname);
-		root.getChildren().add(tf_surname);
-		root.getChildren().add(iv_email);
-		root.getChildren().add(tf_email);
-		root.getChildren().add(iv_password);
-		root.getChildren().add(pf_password);
-		root.getChildren().add(lbl_error);
-		root.getChildren().add(ibtn_register);
-		root.getChildren().add(ibtn_back);
+		root.getChildren().addAll(rect_window_background,
+									ibtn_exit,
+									iv_logo,
+									iv_name,
+									tf_name,
+									iv_surname,
+									tf_surname,
+									iv_email,
+									tf_email,
+									iv_password,
+									pf_password,
+									lbl_error,
+									ibtn_register,
+									ibtn_back);
 		
 		tf_name.requestFocus();
 		stage.setScene(scene);
+	}
+
+	// TODO 
+	@Override
+	public void changed(ObservableValue<? extends Boolean> _observable, Boolean _old_value, Boolean _new_value) {
+		if( ibtn_back.isHover() ) {
+			lbl_error.setStyle("-fx-text-fill: rgb(120, 120, 40); -fx-alignment: center");
+			lbl_error.setText("Powrót");
+		} else if( ibtn_register.isHover() ) {
+			lbl_error.setStyle("-fx-text-fill: rgb(120, 120, 40); -fx-alignment: center");
+			lbl_error.setText("Zarejestruj");
+		} else
+			lbl_error.setText("");
 	}
 }
