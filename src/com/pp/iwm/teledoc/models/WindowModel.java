@@ -1,6 +1,5 @@
 package com.pp.iwm.teledoc.models;
 
-import com.pp.iwm.teledoc.objects.User;
 import com.pp.iwm.teledoc.windows.Window;
 
 import javafx.geometry.Point2D;
@@ -12,7 +11,6 @@ public class WindowModel {
 	// ===========================
 	
 	protected Point2D mouse_pos;
-	protected User user;
 	protected boolean is_dragged;
 	protected Window window;
 	
@@ -22,7 +20,6 @@ public class WindowModel {
 	
 	public WindowModel(Window _window) {
 		mouse_pos = new Point2D(0.0, 0.0);
-		user = new User();
 		is_dragged = false;
 		window = _window;
 	}

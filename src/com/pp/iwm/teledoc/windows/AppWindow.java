@@ -13,9 +13,9 @@ import com.pp.iwm.teledoc.gui.FileExplorer;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.StatusBar;
 import com.pp.iwm.teledoc.models.AppWindowModel;
+import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.objects.Conference;
 import com.pp.iwm.teledoc.objects.FileTree;
-import com.pp.iwm.teledoc.objects.User;
 import com.pp.iwm.teledoc.utils.Utils;
 
 import javafx.event.ActionEvent;

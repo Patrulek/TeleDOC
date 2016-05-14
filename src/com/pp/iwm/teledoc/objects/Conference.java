@@ -2,6 +2,8 @@ package com.pp.iwm.teledoc.objects;
 
 import java.util.List;
 
+import com.pp.iwm.teledoc.network.User;
+
 public class Conference {	// TODO struktura, a nie obiekt
 	
 	// ==================================

@@ -1,7 +1,12 @@
 package com.pp.iwm.teledoc.windows;
 
+import com.esotericsoftware.kryonet.Connection;
 import com.pp.iwm.teledoc.layouts.LoginWindowLayout;
 import com.pp.iwm.teledoc.models.LoginWindowModel;
+import com.pp.iwm.teledoc.network.User;
+import com.pp.iwm.teledoc.network.User.NetworkListener;
+import com.pp.iwm.teledoc.network.User.State;
+import com.pp.iwm.teledoc.network.packets.LoginResponse;
 import com.pp.iwm.teledoc.utils.Utils;
 
 import javafx.application.Platform;
@@ -9,10 +14,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-public class LoginWindow extends Window implements ChangeListener<Boolean> {
+public class LoginWindow extends Window implements ChangeListener<Boolean>, NetworkListener {
 	
 	// =====================================================
 	// FIELDS
@@ -27,37 +31,28 @@ public class LoginWindow extends Window implements ChangeListener<Boolean> {
 	
 	public LoginWindow() {
 		super();
+		User.instance().setListener(this);
 	}
 
 	private void openRegisterWindow() {
-		openWindowAndHideCurrent(new RegisterWindow());
+		if( User.instance().getState() != State.CONNECTING )
+			openWindowAndHideCurrent(new RegisterWindow());
 	}
 
 	private void openAppWindow() {
 		openWindowAndHideCurrent(new AppWindow());
 	}
 	
-	private void sendDataToServer() {
-		/*
-		 * if( !canConnect() )
-		 * 		show_error();
-		 * else
-		 * 		send_data();
-		 * 
-		 */
+	private void tryToLogIn() {
+		String email = window_layout.tf_email.getText().trim();
+		String password = window_layout.pf_password.getText().trim();
 		
-		// hack alert
-		if( Utils.isTextFieldEqual(window_layout.tf_email, "dev") && Utils.isTextFieldEqual(window_layout.pf_password, "dev") )
-			openAppWindow();
+		User.instance().logIn(email, password);
 	}
 	
-	private void readDataFromServer() {
-		/*
-		 * if( incorrect email/password )
-		 * 		show_error();
-		 * else
-		 * 		openAppWindow(user_email);
-		 */
+	private void tryToConnect() {
+		Thread t = new Thread(() -> User.instance().connectToServer());
+		t.start();
 	}
 	
 	private void resetPassword() {
@@ -81,10 +76,6 @@ public class LoginWindow extends Window implements ChangeListener<Boolean> {
 		}
 		
 		return true;
-	}
-	
-	private boolean canConnect() {
-		return false;
 	}
 
 	@Override
@@ -125,7 +116,7 @@ public class LoginWindow extends Window implements ChangeListener<Boolean> {
 		window_layout.clearErrorLabelText();
 		
 		if( validateTextFields() )
-			sendDataToServer();
+			tryToConnect();
 	}
 	
 	private void onWindowBackgroundMousePressed(MouseEvent _ev) {
@@ -159,5 +150,50 @@ public class LoginWindow extends Window implements ChangeListener<Boolean> {
 	protected void createLayout() {
 		window_layout = new LoginWindowLayout(this);
 		layout = window_layout;
+	}
+
+	@Override
+	public void onStateChanged(State _state) {
+		Platform.runLater(() -> {
+			if( _state == State.CONNECTION_FAILURE ) {
+				window_layout.changeErrorLabelText("Server offline");
+				window_layout.setErrorLabelTextColor(0);
+				// TODO haxor
+				if( Utils.isTextFieldEqual(window_layout.tf_email, "dev") && Utils.isTextFieldEqual(window_layout.pf_password, "dev") )
+					loginSuccess();
+			} else if( _state == State.CONNECTING ) {
+				window_layout.changeErrorLabelText("£¹czenie z serverem");
+				window_layout.setErrorLabelTextColor(2);
+			} else if( _state == State.CONNECTED ) {
+				tryToLogIn();
+				window_layout.changeErrorLabelText("£¹czenie z baz¹ danych");
+				window_layout.setErrorLabelTextColor(2);
+			}
+		});
+	}
+
+	@Override
+	public void onReceive(Connection _connection, Object _message) {
+		if( _message instanceof LoginResponse )
+			onLoginResponseReceive((LoginResponse)_message);
+	}
+	
+	private void onLoginResponseReceive(LoginResponse _response) {
+		System.out.println(window_layout.tf_email.getText().trim());
+		if( _response.getId() != -1 ) // -1 nie znaleziono usera w bazie
+			loginSuccess();
+		else
+			loginFailed();
+	}
+
+	private void loginSuccess() {
+		window_layout.changeErrorLabelText("Uda³o siê zalogowaæ");
+		window_layout.setErrorLabelTextColor(1);
+		openAppWindow();
+	}
+	
+	private void loginFailed() {
+		window_layout.changeErrorLabelText("Niepoprawid³owe dane");
+		window_layout.setErrorLabelTextColor(0);
 	}
 }
