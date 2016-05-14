@@ -1,5 +1,6 @@
-package com.pp.iwm.teledoc.gui;
+package com.pp.iwm.teledoc.utils;
 
+import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -166,5 +167,23 @@ public class Utils {
 	
 	public static boolean isStringEmpty(String _str) {
 		return _str.trim().equals("");
+	}
+	
+	public static boolean isTextFieldEmpty(TextField _tf) {
+		return _tf.getText().trim().equals("");
+	}
+	
+	public static boolean isTextFieldEqual(TextField _tf, String _text) {
+		return _tf.getText().trim().equals(_text);
+	}
+	
+	public static boolean isTextFieldLongerThan(TextField _tf, int _length) {
+		return _tf.getText().trim().length() > _length;
+	}
+	
+	public static boolean isTextFieldAnEmail(TextField _tf) {
+		String str = _tf.getText().trim();
+		
+		return str.contains("@") && str.contains(".") && str.lastIndexOf(".") > str.lastIndexOf("@");
 	}
 }

@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -34,7 +35,7 @@ public class Annotation	extends DrawableObject {
 	private DrawablePane drawable_pane;
 	
 	// TODO temp
-	private Pane annotation_text_pane;
+	private ScrollPane annotation_text_pane;
 	
 	// ======================================
 	// METHODS
@@ -59,15 +60,15 @@ public class Annotation	extends DrawableObject {
 	// TODO temp
 	private void createTextPane(Point2D _pos) {
 		// TODO mo¿liwoœæ nie wyœwietlania siê ca³ego tekstu / zmiast pane scroll pane
-		annotation_text_pane = new Pane();
 		Label l = new Label(text);
 		l.setWrapText(true);
 		l.setAlignment(Pos.TOP_LEFT);
 		l.setPrefSize(240.0, 60.0);
 		l.setMaxSize(240.0, 240.0);
 		l.setStyle("-fx-text-fill: rgb(140, 140, 120);");
-		annotation_text_pane.setStyle("-fx-background-color: rgb(30, 54, 60, 0.85);");
-		annotation_text_pane.getChildren().add(l);
+		annotation_text_pane = new ScrollPane(l);
+		annotation_text_pane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
+		annotation_text_pane.setStyle("-fx-background-color: rgb(30, 54, 60, 0.85); -fx-background: rgb(30, 54, 60, 0.85);");
 	
 		if( _pos.getY() - RADIUS * 2 - 60.0 < 0 ) {
 			if( _pos.getY() + RADIUS * 2 + 60.0 < 744.0 )
@@ -84,11 +85,11 @@ public class Annotation	extends DrawableObject {
 		else
 			annotation_text_pane.setLayoutX(_pos.getX() - 120.0);
 		
-		drawable_pane.getConfWindow().getRootElement().getChildren().add(annotation_text_pane);
+		drawable_pane.getConfWindow().showAnnotationPane(annotation_text_pane);
 	}
 	
 	private void destroyTextPane() {
-		drawable_pane.getConfWindow().getRootElement().getChildren().remove(annotation_text_pane);
+		drawable_pane.getConfWindow().hideAnnotationPane(annotation_text_pane);
 		annotation_text_pane = null;
 	}
 	
@@ -102,10 +103,10 @@ public class Annotation	extends DrawableObject {
 		double x = position.getX();
 		double y = position.getY();
 		
-		if( x + RADIUS > viewport_bounds.getMaxX() )
+		if( x * scale + RADIUS > viewport_bounds.getMaxX() )
 			x = viewport_bounds.getMaxX() - RADIUS;
 		
-		if( y + RADIUS > viewport_bounds.getMaxY() )
+		if( y * scale + RADIUS > viewport_bounds.getMaxY() )
 			y = viewport_bounds.getMaxY() - RADIUS;
 		
 		position = new Point2D(x, y);

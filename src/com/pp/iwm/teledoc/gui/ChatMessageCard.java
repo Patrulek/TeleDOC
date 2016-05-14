@@ -1,6 +1,7 @@
 package com.pp.iwm.teledoc.gui;
 
 import com.pp.iwm.teledoc.objects.ChatMessage;
+import com.pp.iwm.teledoc.utils.Utils;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;

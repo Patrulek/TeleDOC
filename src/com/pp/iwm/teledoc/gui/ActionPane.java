@@ -2,6 +2,8 @@ package com.pp.iwm.teledoc.gui;
 
 import com.pp.iwm.teledoc.animations.FadeAnimation;
 import com.pp.iwm.teledoc.animations.TranslateAnimation;
+import com.pp.iwm.teledoc.layouts.AppWindowLayout;
+import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.AppWindow;
 import com.pp.iwm.teledoc.windows.Window;
 
@@ -21,7 +23,7 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 	// FIELDS
 	// ========================================
 	
-	private Window window;
+	private AppWindowLayout layout;
 	private Pane content_pane;
 	private ImageButton btn_hide;
 	
@@ -40,10 +42,10 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 	// METHODS
 	// ============================================
 	
-	public ActionPane(Window _window) {
+	public ActionPane(AppWindowLayout _layout) {
 		is_visible = false;
 		pane_state = PaneState.UNDEFINED;
-		window = _window;
+		layout = _layout;
 			
 		createLayout();
 		addAnimations();
@@ -81,7 +83,7 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 		fade_animation_content_pane.customize(1.0, 0.0, 200, 150);
 	}
 	
-	public void changePaneStateAndRefresh(PaneState _pane_state) {
+	public void changeStateAndRefresh(PaneState _pane_state) {
 		if( pane_state != _pane_state ) {
 			pane_state = _pane_state;
 			recreate();
@@ -96,7 +98,7 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 		
 		if( !is_visible ) {
 			is_visible = true;
-			((AppWindow)window).addHidePanelIcon();
+			layout.addHidePanelIcon();
 		}
 	}
 	
@@ -106,7 +108,7 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 		
 		if( is_visible ) {
 			is_visible = false;
-			((AppWindow)window).removeHidePanelIcon();
+			layout.removeHidePanelIcon();
 		}
 	}
 	
@@ -213,19 +215,19 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 	}
 	
 	private void onBtnEntered(ImageButton _ibtn) {
-		((AppWindow)window).addTextToStatusBar(_ibtn.getHint());
+		layout.addTextToStatusBar(_ibtn.getHint());
 	}
 	
 	private void onBtnExited(ImageButton _ibtn) {
-		((AppWindow)window).removeTextFromStatusBar();
+		layout.removeTextFromStatusBar();
 	}
 	
 	private void onHideBtnMouseEntered(MouseEvent _ev) {
-		((AppWindow)window).addTextToStatusBar(btn_hide.getHint());
+		layout.addTextToStatusBar(btn_hide.getHint());
 	}
 	
 	private void onHideBtnMouseExited(MouseEvent _ev) {
-		((AppWindow)window).removeTextFromStatusBar();
+		layout.removeTextFromStatusBar();
 	}
 	
 	private void onHideBtnAction(ActionEvent _ev) {

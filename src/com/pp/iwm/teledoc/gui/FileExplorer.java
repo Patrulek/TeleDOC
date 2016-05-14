@@ -5,8 +5,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.pp.iwm.teledoc.layouts.AppWindowLayout;
 import com.pp.iwm.teledoc.objects.File;
 import com.pp.iwm.teledoc.objects.FileTree;
+import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.AppWindow;
 import com.pp.iwm.teledoc.windows.Window;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
@@ -24,7 +26,7 @@ public class FileExplorer extends Pane {
 	// FIELDS
 	// =========================================
 
-	private Window window;
+	private AppWindowLayout layout;
 	private Pane header_pane;
 	private ImageButton btn_back;
 	private Label lbl_path;
@@ -44,12 +46,12 @@ public class FileExplorer extends Pane {
 	// METHODS
 	// ==========================================
 	
-	public FileExplorer(Window _window) {
+	public FileExplorer(AppWindowLayout _layout) {
 		max_cards_in_row = 0;
 		cards_gap = 20.0;
 		icon_size = 32.0;
 		files = new ArrayList<>();
-		window = _window;
+		layout = _layout;
 		
 		createLayout();
 		recalcMaxCardsInRow();
@@ -171,11 +173,11 @@ public class FileExplorer extends Pane {
 	}
 
 	public void addTextToStatusBar(String _text) {
-		((AppWindow)window).addTextToStatusBar(_text);
+		layout.addTextToStatusBar(_text);
 	}
 	
 	public void removeTextFromStatusBar() {
-		((AppWindow)window).removeTextFromStatusBar();
+		layout.removeTextFromStatusBar();
 	}
 	
 	private void onScrollPaneMouseClicked() {

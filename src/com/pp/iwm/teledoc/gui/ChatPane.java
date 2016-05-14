@@ -6,7 +6,8 @@ import java.util.List;
 
 import com.pp.iwm.teledoc.animations.FadeAnimation;
 import com.pp.iwm.teledoc.objects.ChatMessage;
-import com.pp.iwm.teledoc.objects.InputUtils;
+import com.pp.iwm.teledoc.utils.InputUtils;
+import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.Window;
 
 import javafx.application.Platform;
@@ -84,7 +85,7 @@ public class ChatPane extends Pane implements ChangeListener<Number> {	// najpie
 		getChildren().add(scroll_pane);
 		getChildren().add(text_area);
 		
-		Platform.runLater(() -> text_area.lookup(".content").setStyle("-fx-background-color: rgb(45, 81, 90);"));
+		//Platform.runLater(() -> text_area.lookup(".content").setStyle("-fx-background-color: rgb(45, 81, 90);"));
 
 		setOpacity(0.0);
 		setVisible(false);
@@ -165,7 +166,7 @@ public class ChatPane extends Pane implements ChangeListener<Number> {	// najpie
 	}
 	
 	private void onKeyReleased(KeyEvent _ev) {
-		if( InputUtils.onKeyEnter(_ev) ) {
+		if( InputUtils.onEnter(_ev) ) {
 			if( InputUtils.withShift(_ev) )
 				appendLine();
 			else if( !Utils.isStringEmpty(text_area.getText()) ) {

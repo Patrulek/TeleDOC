@@ -1,6 +1,7 @@
 package com.pp.iwm.teledoc.gui;
 
 import com.pp.iwm.teledoc.objects.Conference;
+import com.pp.iwm.teledoc.utils.Utils;
 
 import javafx.event.ActionEvent;
 import javafx.scene.control.Label;

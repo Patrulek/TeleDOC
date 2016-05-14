@@ -1,7 +1,7 @@
 package com.pp.iwm.teledoc;
 	
-import com.pp.iwm.teledoc.gui.Utils;
 import com.pp.iwm.teledoc.objects.ImageManager;
+import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.AppWindow;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 import com.pp.iwm.teledoc.windows.LoginWindow;
@@ -17,7 +17,7 @@ public class Main extends Application {
 	// FIELDS
 	// =====================================
 	
-	Window main_window = null;
+	Window main_window;
 	
 	// =====================================
 	// METHODS

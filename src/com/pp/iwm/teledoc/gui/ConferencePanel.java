@@ -3,7 +3,9 @@ package com.pp.iwm.teledoc.gui;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pp.iwm.teledoc.layouts.AppWindowLayout;
 import com.pp.iwm.teledoc.objects.Conference;
+import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.AppWindow;
 import com.pp.iwm.teledoc.windows.Window;
 
@@ -40,16 +42,16 @@ public class ConferencePanel extends Pane {
 	private List<ConferenceCard> open_cards;
 	private List<ConferenceCard> closed_cards;
 	
-	private Window window;
+	private AppWindowLayout layout;
 	
 	// ===========================================
 	// METHODS 
 	// ===========================================
 	
-	public ConferencePanel(Window _window) {
+	public ConferencePanel(AppWindowLayout _layout) {
 		super();
 		is_open_tab_active = true;
-		window = _window;
+		layout = _layout;
 		open_cards = new ArrayList<>();
 		closed_cards = new ArrayList<>();
 		
@@ -190,11 +192,11 @@ public class ConferencePanel extends Pane {
 	}
 	
 	public void addTextToStatusBar(String _text) {
-		((AppWindow)window).addTextToStatusBar(_text);
+		layout.addTextToStatusBar(_text);
 	}
 	
 	public void removeTextFromStatusBar() {
-		((AppWindow)window).removeTextFromStatusBar();
+		layout.removeTextFromStatusBar();
 	}
 	
 	private void onTabMouseEntered(Pane _tab) {

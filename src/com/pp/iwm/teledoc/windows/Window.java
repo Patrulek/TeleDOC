@@ -1,13 +1,10 @@
 package com.pp.iwm.teledoc.windows;
 
-import com.pp.iwm.teledoc.gui.Utils;
-import com.pp.iwm.teledoc.objects.ImageManager;
-import com.pp.iwm.teledoc.objects.User;
+import com.pp.iwm.teledoc.layouts.WindowLayout;
+import com.pp.iwm.teledoc.models.WindowModel;
 
-import javafx.geometry.Point2D;
+import javafx.application.Platform;
 import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 public abstract class Window {
 	
@@ -15,50 +12,39 @@ public abstract class Window {
 	// FIELDS
 	// ===================================
 	
-	protected Stage stage;
-	protected Group root;
-	protected Scene scene;
-	protected Point2D mouse_pos;
-	protected User user = null;
-	
-	protected boolean is_dragged = false;
+	protected WindowLayout layout;
+	protected WindowModel model;
 	
 	// ===================================
 	// METHODS
 	// ===================================
 	
 	public Window() {
-		stage = new Stage();
-		stage.getIcons().add(ImageManager.instance().getImage(Utils.IMG_APP_ICON));
-		root = new Group();
-		mouse_pos = new Point2D(0.0, 0.0);
-		createStage();
+		createModel();
+		createLayout();
+		initEventHandlers();
 	}
 	
-	public void setUser(User _user) {
-		user = _user;
-	}
+	protected abstract void createModel();
+	protected abstract void createLayout();
+	protected abstract void initEventHandlers();
 	
 	public void show() {
-		stage.show();
+		layout.show();
 	}
 	
 	public void hide() {
-		stage.hide();
+		layout.hide();
 	}
 	
-	protected void openWindow(Window _new_window, boolean _hide_current) {
+	protected void openWindow(Window _new_window) {
 		_new_window.show();
-		
-		if( _hide_current ) {
-			root.getChildren().clear();
-			hide();
-		}
 	}
 	
-	protected abstract void createStage();
-	
-	public Group getRootElement() {
-		return root;
+	protected void openWindowAndHideCurrent(Window _new_window) {
+		Group root = layout.root;
+		_new_window.show();
+		root.getChildren().clear();
+		hide();
 	}
 }

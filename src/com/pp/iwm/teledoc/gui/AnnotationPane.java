@@ -1,7 +1,7 @@
 package com.pp.iwm.teledoc.gui;
 
 import com.pp.iwm.teledoc.animations.FadeAnimation;
-import com.pp.iwm.teledoc.objects.InputUtils;
+import com.pp.iwm.teledoc.utils.InputUtils;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 import com.pp.iwm.teledoc.windows.Window;
 
@@ -131,7 +131,7 @@ public class AnnotationPane extends Pane {
 	}
 	
 	private void onKeyEnter(KeyEvent _ev) {
-		if( InputUtils.onKeyEnter(_ev) ) {
+		if( InputUtils.onEnter(_ev) ) {
 			if( InputUtils.withShift(_ev) )
 				text_area.appendText("\n");
 			else {
