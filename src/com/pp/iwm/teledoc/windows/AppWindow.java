@@ -1,35 +1,42 @@
 package com.pp.iwm.teledoc.windows;
 
-import java.awt.Point;
+import java.io.File;
 import java.util.List;
-import java.util.Set;
 
-import com.pp.iwm.teledoc.gui.ActionPane;
+import javax.swing.JOptionPane;
+
+import com.esotericsoftware.kryonet.Connection;
 import com.pp.iwm.teledoc.gui.ActionPane.PaneState;
-import com.pp.iwm.teledoc.layouts.AppWindowLayout;
-import com.pp.iwm.teledoc.gui.ConferencePanel;
+import com.pp.iwm.teledoc.gui.ConferenceCard;
 import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.FileExplorer;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.StatusBar;
+import com.pp.iwm.teledoc.layouts.AppWindowLayout;
 import com.pp.iwm.teledoc.models.AppWindowModel;
+import com.pp.iwm.teledoc.network.NetworkClient;
 import com.pp.iwm.teledoc.network.User;
+import com.pp.iwm.teledoc.network.User.NetworkListener;
+import com.pp.iwm.teledoc.network.User.State;
+import com.pp.iwm.teledoc.network.packets.AllGroupsResponse;
+import com.pp.iwm.teledoc.network.packets.CreateGroupResponse;
+import com.pp.iwm.teledoc.network.packets.Group;
+import com.pp.iwm.teledoc.network.packets.JoinToGroupResponse;
 import com.pp.iwm.teledoc.objects.Conference;
 import com.pp.iwm.teledoc.objects.FileTree;
 import com.pp.iwm.teledoc.utils.Utils;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Point2D;
-import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
-public class AppWindow extends Window {
+public class AppWindow extends Window implements NetworkListener {
 	
 	// ===========================================
 	// FIELDS
@@ -44,6 +51,8 @@ public class AppWindow extends Window {
 	
 	public AppWindow() {
 		super();
+		User.instance().setListener(this);
+		User.instance().loadDataFromDB();
 	}
 	
 	public void addConf(Conference _conf) {
@@ -71,7 +80,27 @@ public class AppWindow extends Window {
 	}
 	
 	private void onUploadFile() {
-		// open system explorer
+		openFileChooser();
+	}
+	
+	private void openFileChooser() {
+		FileChooser fc = new FileChooser();
+		fc.setTitle("Wybierz plik, który chcesz wgraæ na server");
+		fc.getExtensionFilters().add(new ExtensionFilter("Pliki obrazów", "*.png", "*.jpg"));
+		File selected_file = fc.showOpenDialog(window_layout.stage);
+		
+		if( selected_file != null ) {
+			if( Utils.isFileSizeGreaterThan(selected_file, NetworkClient.FILESIZE_LIMIT) )
+				JOptionPane.showMessageDialog(null, "Maksymalny rozmiar pliku wynosi " + NetworkClient.FILESIZE_LIMIT + " MB"); // TODO messagebox przystosowany do appki
+			else
+				startUploading(selected_file);
+		}
+	}
+	
+	private void startUploading(File _file) {
+		double filesize = _file.length()/Utils.BYTES_PER_MEGABYTE;
+		filesize = Math.round(filesize * 10.0) / 10.0;
+		System.out.println("Przesy³anie pliku: " + _file.getName() + " o rozmiarze " + filesize + " MB"); // TODO uzupelnic
 	}
 	
 	private void onDownloadFile() {
@@ -87,6 +116,7 @@ public class AppWindow extends Window {
 	}
 	
 	private void onLogout() {
+		User.instance().logOut();
 		openWindowAndHideCurrent(new LoginWindow());
 	}
 	
@@ -153,6 +183,39 @@ public class AppWindow extends Window {
 		window_model = new AppWindowModel(this);
 		model = window_model;
 	}
+	
+	private void onActionPaneHideBtnMouseEntered(MouseEvent _ev) {
+		window_layout.addTextToStatusBar(window_layout.action_pane.getHideBtn().getHint());
+	}
+	
+	private void onActionPaneHideBtnMouseExited(MouseEvent _ev) {
+		window_layout.removeTextFromStatusBar();
+	}
+	
+	private void onActionPaneHideBtnAction(ActionEvent _ev) {
+		window_layout.action_pane.hide();
+	}
+	
+	private void onActionPaneActionBtnAction(ImageButton _ibtn) {
+		PaneState state = window_layout.action_pane.getState();
+		
+		if( state == PaneState.NEW_CONF )
+			User.instance().createNewConference(window_layout.action_pane.getConfTitle());
+	}
+	
+	private void onActionPaneActionBtnEntered(ImageButton _ibtn) {
+		window_layout.addTextToStatusBar(_ibtn.getHint());
+	}
+	
+	private void onActionPaneActionBtnExited(ImageButton _ibtn) {
+		window_layout.removeTextFromStatusBar();
+	}
+	
+	@Override
+	public void hide() {
+		User.instance().logOut();
+		super.hide();
+	}
 
 	@Override
 	protected void initEventHandlers() {
@@ -161,6 +224,16 @@ public class AppWindow extends Window {
 		Label lbl_user = window_layout.lbl_user;
 		Dockbar dockbar = window_layout.dockbar;
 		StatusBar status_bar = window_layout.status_bar;
+		ImageButton ibtn_hide = window_layout.action_pane.getHideBtn();
+		ImageButton ibtn_action = window_layout.action_pane.getActionBtn();
+
+		ibtn_hide.addEventHandler(ActionEvent.ACTION, ev -> onActionPaneHideBtnAction(ev));
+		ibtn_hide.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onActionPaneHideBtnMouseEntered(ev));
+		ibtn_hide.addEventHandler(MouseEvent.MOUSE_EXITED, ev-> onActionPaneHideBtnMouseExited(ev));
+		
+		ibtn_action.setOnAction(event -> onActionPaneActionBtnAction(ibtn_action));
+		ibtn_action.addEventFilter(MouseEvent.MOUSE_ENTERED, ev -> onActionPaneActionBtnEntered(ibtn_action));
+		ibtn_action.addEventFilter(MouseEvent.MOUSE_EXITED, ev -> onActionPaneActionBtnExited(ibtn_action));
 		
 		background.setOnMousePressed(ev -> onWindowBackgroundMousePressed(ev));
 		background.setOnMouseDragged(ev -> onWindowBackgroundMouseDragged(ev));
@@ -186,5 +259,99 @@ public class AppWindow extends Window {
 		dockbar.getIcons().get(6).setOnAction(ev -> onShowHelp());
 		dockbar.getIcons().get(7).setOnAction(ev -> onLogout());
 	}
+
+	@Override
+	public void onStateChanged(State _state) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onReceive(Connection _connection, Object _message) {
+		if( User.instance().isConnected() ) {
+			if( _message instanceof AllGroupsResponse )
+				onAllGroupsResponseReceive((AllGroupsResponse)_message);
+			else if( _message instanceof CreateGroupResponse )
+				onCreateGroupResponseReceive((CreateGroupResponse)_message);
+			else if( _message instanceof JoinToGroupResponse )
+				onJoinToGroupResponseReceive((JoinToGroupResponse)_message);
+		}
+	}
 	
+	private void onAllGroupsResponseReceive(AllGroupsResponse _response) {
+		List<Group> conferences = _response.getGroups();
+		Platform.runLater(() -> addLoadedConferences(conferences));
+	}
+	
+	private void onCreateGroupResponseReceive(CreateGroupResponse _response) {
+		if( !_response.getAnswer() ) // nie uda³o siê utworzyæ grupy
+			JOptionPane.showMessageDialog(null, "Nie uda³o siê utworzyæ grupy");	// TODO zmieniæ message box'a na aplikacyjny komunikat
+		else {
+			User.instance().joinToConference(_response.getGroupName());
+			
+			// TODO przenieœæ <tam gdzie siê da> ranlejtery do najbardziej wewnêtrznych klas
+			Platform.runLater(() -> {
+				Conference c = new Conference(_response.getGroupName(), "temp_desc", null, User.instance().getName(), true);
+				window_layout.conf_pane.addConf(c);
+			});
+		}
+	}
+	
+	private void onJoinToGroupResponseReceive(JoinToGroupResponse _response) {
+		if( !_response.getAnswer() ) // nie uda³o siê do³¹czyæ
+			JOptionPane.showMessageDialog(null, "Nie uda³o siê do³¹czyæ do grupy");  // TODO zmieniæ
+		else
+			Platform.runLater(() -> openWindowAndHideCurrent(new ConfWindow()));
+	}
+	
+	private void addLoadedConferences(List<Group> _conferences) {
+		for( Group conf : _conferences ) {
+			Conference c = new Conference(conf.getName(), "temp_desc", null, conf.getOwner(), /* TODO temp */ true);
+			window_layout.conf_pane.addConf(c);
+		}
+	}
+	
+	public void onConferenceCardAdded(ConferenceCard _card) {
+		ImageButton ibtn_join = _card.getJoinBtn();
+		ImageButton ibtn_details = _card.getDetailsBtn();
+		
+		ibtn_join.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onButtonMouseEntered(ibtn_join));
+		ibtn_join.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onButtonMouseExited(ibtn_join));
+		ibtn_join.addEventHandler(ActionEvent.ACTION, ev -> onButtonAction(ibtn_join));
+		
+		ibtn_details.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onButtonMouseEntered(ibtn_details));
+		ibtn_details.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onButtonMouseExited(ibtn_details));
+		ibtn_details.addEventHandler(ActionEvent.ACTION, ev -> onButtonAction(ibtn_details));
+	}
+	
+	private void onButtonAction(ImageButton _ibtn) {
+		if( _ibtn.getAction() == Utils.ACT_JOIN_CONF )
+			onJoinConference();
+		else if( _ibtn.getAction() == Utils.ACT_OPEN_CONF )
+			onOpenConference();
+		else if( _ibtn.getAction() == Utils.ACT_CONF_DETAILS )
+			onConferenceDetails();
+	}
+	
+	private void onJoinConference() {
+		String conf_title = window_layout.conf_pane.getHoveredCard().getConference().getTitle();
+		User.instance().joinToConference(conf_title);
+	}
+
+	// TODO podmieniæ te 2 funkcje
+	private void onOpenConference() {
+		System.out.println("Otwórz ponownie konferencjê");
+	}
+	
+	private void onConferenceDetails() {
+		System.out.println("Wyœwietl szczegó³y konferencji");
+	}
+	
+	private void onButtonMouseEntered(ImageButton _ibtn) {
+		window_layout.conf_pane.addTextToStatusBarFromBtn(_ibtn);
+	}
+	
+	private void onButtonMouseExited(ImageButton _ibtn) {
+		window_layout.conf_pane.removeTextFromStatusBar();
+	}
 }

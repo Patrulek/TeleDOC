@@ -58,6 +58,7 @@ public class ConfWindowLayout extends WindowLayout {
 	public void create() {
 		Scene scene = new Scene(root, 1366, 768, Color.rgb(0, 0, 0, 0));
 		stage.initStyle(StageStyle.TRANSPARENT);
+		stage.setOnCloseRequest(ev -> ev.consume());
 		
 		createBackground();
 		createStatusBar();

@@ -1,11 +1,16 @@
 package com.pp.iwm.teledoc.utils;
 
+import java.io.File;
+
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
 public class Utils {
+	public static final double BYTES_PER_MEGABYTE = 1048576.0;
+	public static final double BYTES_PER_KILOBYTE = 1024.0;
+	
 	// COLORS
 	public static final Color PRIMARY_COLOR = Color.rgb(30, 54, 60);
 	public static final Color PRIMARY_DARK_COLOR = Color.rgb(15, 27, 30);
@@ -185,5 +190,9 @@ public class Utils {
 		String str = _tf.getText().trim();
 		
 		return str.contains("@") && str.contains(".") && str.lastIndexOf(".") > str.lastIndexOf("@");
+	}
+	
+	public static boolean isFileSizeGreaterThan(File _file, double _megabytes) {
+		return _file.length() > _megabytes * BYTES_PER_MEGABYTE;
 	}
 }

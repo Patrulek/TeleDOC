@@ -30,7 +30,7 @@ public class Main extends Application {
 	
 	@Override
 	public void start(Stage _primaryStage) throws Exception {
-		main_window = new ConfWindow();
+		main_window = new LoginWindow();
 		main_window.show();
 	}
 	 

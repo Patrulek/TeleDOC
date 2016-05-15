@@ -14,6 +14,7 @@ public class Conference {	// TODO struktura, a nie obiekt
 	private String description;
 	private User chairman;
 	private List<User> members;
+	private String chairman_str;			// TODO temp solution
 	// private List<ImageHistory> images;
 	private boolean is_open;
 	
@@ -21,11 +22,11 @@ public class Conference {	// TODO struktura, a nie obiekt
 	// METHODS 
 	// ====================================
 	
-	public Conference(String _title, String _description, List<User> _members, User _chairman, boolean _is_open) {
+	public Conference(String _title, String _description, List<User> _members, String _chairman, boolean _is_open) {
 		title = _title;
 		description = _description;
 		members = _members;
-		chairman = _chairman;
+		chairman_str = _chairman;
 		is_open = _is_open;
 	}
 	
@@ -48,6 +49,10 @@ public class Conference {	// TODO struktura, a nie obiekt
 
 	public User getChairman() {
 		return chairman;
+	}
+	
+	public String getChairmanStr() {
+		return chairman_str;
 	}
 
 

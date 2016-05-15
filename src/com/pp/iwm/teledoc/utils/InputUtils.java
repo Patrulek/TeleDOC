@@ -20,7 +20,7 @@ public class InputUtils {
 	public static boolean onDigit1(KeyEvent _ev) { return _ev.getCode() == KeyCode.DIGIT1; }
 	public static boolean onDigit2(KeyEvent _ev) { return _ev.getCode() == KeyCode.DIGIT2; }
 	public static boolean onDigit3(KeyEvent _ev) { return _ev.getCode() == KeyCode.DIGIT3; }
-	
+	public static boolean onF4(KeyEvent _ev) { return _ev.getCode() == KeyCode.F4; }
 	
 	// modifier checking
 	public static boolean withShift(KeyEvent _ev) { return _ev.isShiftDown(); }

@@ -131,6 +131,8 @@ public class ConferencePanel extends Pane {
 			closed_cards.add(conf_card);
 			closed_conf_contentp.getChildren().add(conf_card);
 		}
+		
+		layout.conferenceCardAdded(conf_card);
 	}
 	
 	public void clearConf() {	// TODO
@@ -193,6 +195,11 @@ public class ConferencePanel extends Pane {
 	
 	public void addTextToStatusBar(String _text) {
 		layout.addTextToStatusBar(_text);
+	}
+	
+	public void addTextToStatusBarFromBtn(ImageButton _ibtn) {
+		String s = _ibtn.getHint() + hovered_card.getTitleLabel().getText();
+		layout.addTextToStatusBar(s);
 	}
 	
 	public void removeTextFromStatusBar() {

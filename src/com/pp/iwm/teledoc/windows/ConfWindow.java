@@ -2,6 +2,7 @@ package com.pp.iwm.teledoc.windows;
 
 import java.util.List;
 
+import com.esotericsoftware.kryonet.Connection;
 import com.pp.iwm.teledoc.drawables.Annotation;
 import com.pp.iwm.teledoc.drawables.Annotation.State;
 import com.pp.iwm.teledoc.drawables.DrawableBrokenLine;
@@ -18,6 +19,8 @@ import com.pp.iwm.teledoc.gui.StatusBar;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.models.ConfWindowModel;
 import com.pp.iwm.teledoc.models.ConfWindowModel.UserContext;
+import com.pp.iwm.teledoc.network.User;
+import com.pp.iwm.teledoc.network.User.NetworkListener;
 import com.pp.iwm.teledoc.objects.ImageManager;
 import com.pp.iwm.teledoc.utils.InputUtils;
 
@@ -34,7 +37,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 
-public class ConfWindow extends Window implements ChangeListener<Number> {
+public class ConfWindow extends Window implements ChangeListener<Number>, NetworkListener {
 
 	
 	// =========================================
@@ -44,14 +47,13 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	private ConfWindowModel window_model;
 	private ConfWindowLayout window_layout;
 	
-	
-	
 	// =========================================
 	// METHODS
 	// =========================================
 	
 	public ConfWindow() {
 		ImageManager.instance().loadImage(2099, "/assets/big_image.jpg");
+		User.instance().setListener(this);
 	}
 	
 	public void changeCanvasLayerVisibility(LayersToDraw _layers_to_draw) {
@@ -312,8 +314,15 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	private void onHotkeyAction(KeyEvent _ev) {
 		if( InputUtils.withControl(_ev) )
 			onHotkeyWithControlDown(_ev);
+		else if( InputUtils.withAlt(_ev) )
+			onHotkeyWithAltDown(_ev);
 		else if( InputUtils.withoutModifiers(_ev) )
 			onHotkeyWithoutModifiers(_ev);
+	}
+	
+	private void onHotkeyWithAltDown(KeyEvent _ev) {
+		if( InputUtils.onF4(_ev) )
+			onLeaveConference();
 	}
 	
 	private void onHotkeyWithControlDown(KeyEvent _ev) {
@@ -411,7 +420,8 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	}
 	
 	public void onLeaveConference() {
-		Platform.exit();
+		User.instance().leaveConference();
+		Platform.runLater(() -> openWindowAndHideCurrent(new AppWindow()));
 	}
 	
 	public void onImagePanelAction() {
@@ -431,5 +441,17 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		double y_offset = InputUtils.onArrowUp(_ev) ? -0.1 : InputUtils.onArrowDown(_ev) ? 0.1 : 0.0;
 		Point2D offset = new Point2D(x_offset, y_offset);
 		navigateCanvas(offset);
+	}
+
+	@Override
+	public void onStateChanged(com.pp.iwm.teledoc.network.User.State _state) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onReceive(Connection _connection, Object _message) {
+		// TODO Auto-generated method stub
+		
 	}
 }

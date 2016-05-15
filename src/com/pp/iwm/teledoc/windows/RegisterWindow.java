@@ -1,16 +1,23 @@
 package com.pp.iwm.teledoc.windows;
 
+import com.esotericsoftware.kryonet.Connection;
 import com.pp.iwm.teledoc.layouts.RegisterWindowLayout;
 import com.pp.iwm.teledoc.models.RegisterWindowModel;
+import com.pp.iwm.teledoc.network.User;
+import com.pp.iwm.teledoc.network.User.NetworkListener;
+import com.pp.iwm.teledoc.network.User.State;
+import com.pp.iwm.teledoc.network.packets.LoginResponse;
+import com.pp.iwm.teledoc.network.packets.RegisterResponse;
 import com.pp.iwm.teledoc.utils.Utils;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
-public class RegisterWindow extends Window implements ChangeListener<Boolean> {
+public class RegisterWindow extends Window implements ChangeListener<Boolean>, NetworkListener {
 	
 	// ================================================================
 	// FIELDS
@@ -23,6 +30,11 @@ public class RegisterWindow extends Window implements ChangeListener<Boolean> {
 	// =================================================================
 	// METHODS
 	// =================================================================
+	
+	public RegisterWindow() {
+		super();
+		User.instance().setListener(this);
+	}
 	
 	private void openLoginWindow(boolean _register_success) {
 		openWindowAndHideCurrent(new LoginWindow());
@@ -59,34 +71,30 @@ public class RegisterWindow extends Window implements ChangeListener<Boolean> {
 		return true;
 	}
 	
-	private boolean canConnect() {
-		return false;
-	}
-	
-	private void sendDataToServer() {
-		/*
-		 * if( !canConnect() )
-		 * 		show_error();
-		 * else
-		 * 		send_data();
-		 * 
-		 */
-	}
-	
 	private void registerAccount() {
 		window_layout.clearErrorLabelText();
 		
-		if( validateTextFields() && validateEmail() && validatePassword() )
-			sendDataToServer();
+		if( validateTextFields() && validateEmail() && validatePassword() ) {
+			if( User.instance().getState() != State.CONNECTED && User.instance().getState() != State.RECONNECTED )
+				tryToConnect();
+			else
+				tryToRegister();	// TODO hack
+		} else if( Utils.isTextFieldEqual(window_layout.tf_email, "dev") && Utils.isTextFieldEqual(window_layout.pf_password, "dev")
+					&& Utils.isTextFieldEqual(window_layout.tf_name, "dev") && Utils.isTextFieldEqual(window_layout.tf_surname, "dev") )
+			registerSuccess();
 	}
 	
-	private void readDataFromServer() {
-		/*
-		 * if( email_already_exists )
-		 * 		show_error();
-		 * else
-		 * 		openLoginWindow(register_success);
-		 */
+	private void tryToConnect() {
+		User.instance().connectToServer();
+	}
+	
+	private void tryToRegister() {
+		String name = window_layout.tf_name.getText().trim();
+		String surname = window_layout.tf_surname.getText().trim();
+		String email = window_layout.tf_email.getText().trim();
+		String password = window_layout.pf_password.getText().trim();
+		
+		User.instance().register(name, surname, email, password);
 	}
 	
 	private void onWindowBackgroundMousePressed(MouseEvent _ev) {
@@ -149,5 +157,52 @@ public class RegisterWindow extends Window implements ChangeListener<Boolean> {
 		
 		window_layout.ibtn_register.setOnAction(ev -> registerAccount());
 		window_layout.ibtn_register.addListenerForHoverProperty(this);
+	}
+
+	@Override
+	public void onStateChanged(State _state) {
+		Platform.runLater(() -> {
+			if( _state == State.CONNECTION_FAILURE ) {
+				window_layout.changeErrorLabelText("Server offline");
+				window_layout.setErrorLabelTextColor(0);
+			} else if( _state == State.CONNECTING ) {
+				window_layout.changeErrorLabelText("£¹czenie z serverem");
+				window_layout.setErrorLabelTextColor(2);
+			} else if( _state == State.CONNECTED ) {
+				tryToRegister();
+				window_layout.changeErrorLabelText("Trwa rejestracja");
+				window_layout.setErrorLabelTextColor(2);
+			} else if( _state == State.DISCONNECTED ) {
+				window_layout.changeErrorLabelText("Utracono po³¹czenie");
+				window_layout.setErrorLabelTextColor(0);
+			}
+		});
+	}
+	
+	private void registerSuccess() {
+		Platform.runLater(() -> {
+			window_layout.setErrorLabelTextColor(1);
+			window_layout.changeErrorLabelText("Rejestracja zakoñczona powodzeniem");
+		});
+	}
+	
+	private void registerFailed() {
+		Platform.runLater(() -> {
+			window_layout.setErrorLabelTextColor(0);
+			window_layout.changeErrorLabelText("Istnieje ju¿ u¿ytkownik o takim adresie email");
+		});
+	}
+
+	@Override
+	public void onReceive(Connection _connection, Object _message) {
+		if( _message instanceof RegisterResponse )
+			onRegisterResponseReceive((RegisterResponse)_message);
+	}
+	
+	private void onRegisterResponseReceive(RegisterResponse _response) {
+		if( _response.getAnswer() )  // zarejestrowano pomyœlnie
+			registerSuccess();
+		else
+			registerFailed();
 	}
 }

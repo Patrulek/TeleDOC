@@ -119,7 +119,7 @@ public class LoginWindowLayout extends WindowLayout {
 	
 	private void createErrorLabel() {
 		lbl_error = new Label();
-		lbl_error.setLayoutX(57.0); lbl_error.setLayoutY(262.0);
+		lbl_error.setLayoutX(53.0); lbl_error.setLayoutY(262.0);
 		lbl_error.setPrefWidth(300.0);
 		lbl_error.setFont(Utils.LBL_FONT);
 		lbl_error.setText("");

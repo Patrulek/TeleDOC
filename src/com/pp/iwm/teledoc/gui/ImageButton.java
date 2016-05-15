@@ -51,6 +51,14 @@ public class ImageButton extends Button {
 		setHoverAnimation(true);
 	}
 	
+	public void changeButton(int _image_key, String _hint, int _action) {
+		image_key = _image_key;
+		hint = _hint;
+		action = _action;
+		
+		setGraphic(new ImageView(ImageManager.instance().getImage(image_key)));
+	}
+	
 	public void addListenerForHoverProperty(ChangeListener<? super Boolean> _listener) {
 		hoverProperty().addListener(_listener);
 	}
@@ -148,10 +156,6 @@ public class ImageButton extends Button {
 	}
 	
 	public String getHint() {
-		return hint;
-	}
-	
-	public String Hint() {
 		return hint;
 	}
 	

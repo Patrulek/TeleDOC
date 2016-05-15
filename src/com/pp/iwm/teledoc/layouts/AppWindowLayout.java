@@ -1,11 +1,13 @@
 package com.pp.iwm.teledoc.layouts;
 
 import com.pp.iwm.teledoc.gui.ActionPane;
+import com.pp.iwm.teledoc.gui.ConferenceCard;
 import com.pp.iwm.teledoc.gui.ConferencePanel;
 import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.FileExplorer;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.StatusBar;
+import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.AppWindow;
 import com.pp.iwm.teledoc.windows.Window;
@@ -60,7 +62,8 @@ public class AppWindowLayout extends WindowLayout {
 	}
 	
 	private void createTitleLabel() {
-		lbl_user = new Label("Patryk Lewandowski (moj.mail@gmail.com)");
+		String title = User.instance().getName() + " " + User.instance().getSurname() + " (" + User.instance().getEmail() + ")";
+		lbl_user = new Label(title);
 		lbl_user.setLayoutX(22.0); lbl_user.setLayoutY(14.0);
 		lbl_user.setFont(Utils.LBL_FONT);
 		lbl_user.setStyle("-fx-text-fill: rgb(140, 140, 170); -fx-font-weight: normal;");
@@ -142,6 +145,7 @@ public class AppWindowLayout extends WindowLayout {
 	public void create() {
 		Scene scene = new Scene(root, 1028, 604, Color.rgb(0, 0, 0, 0));
 		stage.initStyle(StageStyle.TRANSPARENT);
+		stage.setOnCloseRequest(ev -> { app_window.hide(); ev.consume(); });		// TODO byæ mo¿e przenieœæ do AppWindow
 		
 		createBackground();
 		createExitIcon();
@@ -177,5 +181,9 @@ public class AppWindowLayout extends WindowLayout {
 	
 	public void changeTitleBarText(String _text) {
 		lbl_user.setText(_text);
+	}
+	
+	public void conferenceCardAdded(ConferenceCard _card) {
+		app_window.onConferenceCardAdded(_card);
 	}
 }

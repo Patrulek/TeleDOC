@@ -43,6 +43,17 @@ public class LoginWindow extends Window implements ChangeListener<Boolean>, Netw
 		openWindowAndHideCurrent(new AppWindow());
 	}
 	
+	private void loginToApplication() {
+		window_layout.clearErrorLabelText();
+		
+		if( validateTextFields() ) {
+			if( User.instance().getState() != State.CONNECTED && User.instance().getState() != State.RECONNECTED )
+				tryToConnect();
+			else
+				tryToLogIn();
+		}
+	}
+	
 	private void tryToLogIn() {
 		String email = window_layout.tf_email.getText().trim();
 		String password = window_layout.pf_password.getText().trim();
@@ -51,8 +62,7 @@ public class LoginWindow extends Window implements ChangeListener<Boolean>, Netw
 	}
 	
 	private void tryToConnect() {
-		Thread t = new Thread(() -> User.instance().connectToServer());
-		t.start();
+		User.instance().connectToServer();
 	}
 	
 	private void resetPassword() {
@@ -112,12 +122,6 @@ public class LoginWindow extends Window implements ChangeListener<Boolean>, Netw
 		window_layout.ibtn_login.addListenerForHoverProperty(this);
 	}
 	
-	private void loginToApplication() {
-		window_layout.clearErrorLabelText();
-		
-		if( validateTextFields() )
-			tryToConnect();
-	}
 	
 	private void onWindowBackgroundMousePressed(MouseEvent _ev) {
 		model.setMousePos(new Point2D(_ev.getScreenX(), _ev.getScreenY()));
@@ -158,9 +162,6 @@ public class LoginWindow extends Window implements ChangeListener<Boolean>, Netw
 			if( _state == State.CONNECTION_FAILURE ) {
 				window_layout.changeErrorLabelText("Server offline");
 				window_layout.setErrorLabelTextColor(0);
-				// TODO haxor
-				if( Utils.isTextFieldEqual(window_layout.tf_email, "dev") && Utils.isTextFieldEqual(window_layout.pf_password, "dev") )
-					loginSuccess();
 			} else if( _state == State.CONNECTING ) {
 				window_layout.changeErrorLabelText("£¹czenie z serverem");
 				window_layout.setErrorLabelTextColor(2);
@@ -168,32 +169,42 @@ public class LoginWindow extends Window implements ChangeListener<Boolean>, Netw
 				tryToLogIn();
 				window_layout.changeErrorLabelText("£¹czenie z baz¹ danych");
 				window_layout.setErrorLabelTextColor(2);
+			} else if( _state == State.DISCONNECTED ) {
+				window_layout.changeErrorLabelText("Utracono po³¹czenie");
+				window_layout.setErrorLabelTextColor(0);
 			}
 		});
 	}
 
 	@Override
 	public void onReceive(Connection _connection, Object _message) {
-		if( _message instanceof LoginResponse )
+		if( _message instanceof LoginResponse && User.instance().getState() == State.CONNECTED )
 			onLoginResponseReceive((LoginResponse)_message);
 	}
 	
 	private void onLoginResponseReceive(LoginResponse _response) {
-		System.out.println(window_layout.tf_email.getText().trim());
 		if( _response.getId() != -1 ) // -1 nie znaleziono usera w bazie
-			loginSuccess();
+			loginSuccess(_response);
 		else
 			loginFailed();
 	}
 
-	private void loginSuccess() {
-		window_layout.changeErrorLabelText("Uda³o siê zalogowaæ");
-		window_layout.setErrorLabelTextColor(1);
-		openAppWindow();
+	private void loginSuccess(LoginResponse _response) {
+		User.instance().setName(_response.getName());
+		User.instance().setSurname(_response.getSurname());
+		User.instance().setEmail(_response.getEmail());
+		
+		Platform.runLater(() -> {
+			window_layout.changeErrorLabelText("Uda³o siê zalogowaæ");
+			window_layout.setErrorLabelTextColor(1);
+			openAppWindow();
+		});
 	}
 	
 	private void loginFailed() {
-		window_layout.changeErrorLabelText("Niepoprawid³owe dane");
-		window_layout.setErrorLabelTextColor(0);
+		Platform.runLater(() -> {
+			window_layout.changeErrorLabelText("Niepoprawid³owe dane");
+			window_layout.setErrorLabelTextColor(0);
+		});
 	}
 }

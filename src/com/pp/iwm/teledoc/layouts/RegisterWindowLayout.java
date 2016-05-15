@@ -131,8 +131,8 @@ public class RegisterWindowLayout extends WindowLayout {
 	
 	private void createErrorLabel() {
 		lbl_error = new Label();
-		lbl_error.setLayoutX(57.0); lbl_error.setLayoutY(362.0);
-		lbl_error.setPrefWidth(300.0);
+		lbl_error.setLayoutX(40.0); lbl_error.setLayoutY(362.0);
+		lbl_error.setPrefWidth(326.0);
 		lbl_error.setFont(Utils.LBL_FONT);
 		lbl_error.setText("");
 		lbl_error.setStyle("-fx-text-fill: rgb(205, 100, 100);"

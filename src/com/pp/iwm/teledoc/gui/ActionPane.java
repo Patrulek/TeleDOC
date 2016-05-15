@@ -9,6 +9,8 @@ import com.pp.iwm.teledoc.windows.Window;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
@@ -25,14 +27,16 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 	
 	private AppWindowLayout layout;
 	private Pane content_pane;
-	private ImageButton btn_hide;
+	private ImageButton ibtn_hide;
+	private ImageButton ibtn_action;
+	private StringProperty conf_title;
 	
 	private TranslateAnimation translate_animation;
 	private FadeAnimation fade_animation;
 	private FadeAnimation fade_animation_content_pane;
 	
 	private boolean is_visible;
-	private PaneState pane_state;
+	private PaneState state;
 	
 	public enum PaneState {
 		UNDEFINED, NEW_CONF, SEARCH_CONF, SEARCH_FILE;
@@ -44,8 +48,9 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 	
 	public ActionPane(AppWindowLayout _layout) {
 		is_visible = false;
-		pane_state = PaneState.UNDEFINED;
+		state = PaneState.UNDEFINED;
 		layout = _layout;
+		conf_title = new SimpleStringProperty();
 			
 		createLayout();
 		addAnimations();
@@ -60,16 +65,15 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 		content_pane.setStyle("-fx-background-color: transparent;");
 		content_pane.setPrefSize(759.0, 60.0);
 		
-		btn_hide = new ImageButton(Utils.IMG_HIDE_PANEL_SMALL, Utils.HINT_HIDE_PANEL, Utils.ACT_HIDE_PANEL);
-		btn_hide.setLayoutX(720.0); btn_hide.setLayoutY(5.0);
-		btn_hide.disableFadeAnimation();
-		btn_hide.customizeZoomAnimation(1.15, 1.0, 250, 400);
-		btn_hide.addEventHandler(ActionEvent.ACTION, ev -> onHideBtnAction(ev));
-		btn_hide.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onHideBtnMouseEntered(ev));
-		btn_hide.addEventHandler(MouseEvent.MOUSE_EXITED, ev-> onHideBtnMouseExited(ev));
+		ibtn_hide = new ImageButton(Utils.IMG_HIDE_PANEL_SMALL, Utils.HINT_HIDE_PANEL, Utils.ACT_HIDE_PANEL);
+		ibtn_hide.setLayoutX(720.0); ibtn_hide.setLayoutY(5.0);
+		ibtn_hide.disableFadeAnimation();
+		ibtn_hide.customizeZoomAnimation(1.15, 1.0, 250, 400);
+		
+		ibtn_action = new ImageButton(Utils.IMG_NEW_CONF_ICON, Utils.HINT_CREATE, Utils.ACT_CREATE);
 
 		getChildren().add(content_pane);
-		getChildren().add(btn_hide);
+		getChildren().add(ibtn_hide);
 	}
 	
 	private void addAnimations() {
@@ -84,8 +88,8 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 	}
 	
 	public void changeStateAndRefresh(PaneState _pane_state) {
-		if( pane_state != _pane_state ) {
-			pane_state = _pane_state;
+		if( state != _pane_state ) {
+			state = _pane_state;
 			recreate();
 		}
 		
@@ -120,7 +124,7 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 	private void changePanel() {
 		content_pane.getChildren().clear();
 		
-		switch( pane_state ) {
+		switch( state ) {
 			case NEW_CONF:
 				createNewConfPanel();
 				
@@ -140,7 +144,7 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 	private void createNewConfPanel() {
 		TextField tf_conf_title = new TextField();
 		PasswordField pf_password = new PasswordField();
-		ImageButton ibtn_create = new ImageButton(Utils.IMG_NEW_CONF_ICON, Utils.HINT_CREATE, Utils.ACT_CREATE);
+		ibtn_action.changeButton(Utils.IMG_NEW_CONF_ICON, Utils.HINT_CREATE, Utils.ACT_CREATE);
 		
 		tf_conf_title.setPromptText("Nazwa konferencji");
 		tf_conf_title.setLayoutX(50.0); tf_conf_title.setLayoutY(20.0);
@@ -151,7 +155,7 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 				+ "-fx-highlight-fill: rgb(15, 27, 30); "
 				+ "-fx-background-color: rgb(30, 54, 60); ");
 		tf_conf_title.setFont(Utils.TF_FONT_SMALL);
-		
+		conf_title.bind(tf_conf_title.textProperty());
 		
 		pf_password.setPromptText("Has³o (opcjonalne)");
 		pf_password.setLayoutX(300.0); pf_password.setLayoutY(20.0);
@@ -163,22 +167,19 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 				+ "-fx-background-color: rgb(30, 54, 60); ");
 		pf_password.setFont(Utils.TF_FONT_SMALL);
 		
-		ibtn_create.setLayoutX(530.0); ibtn_create.setLayoutY(11.0);
-		ibtn_create.setOnAction(event -> onBtnAction(ibtn_create));
-		ibtn_create.addEventFilter(MouseEvent.MOUSE_ENTERED, ev -> onBtnEntered(ibtn_create));
-		ibtn_create.addEventFilter(MouseEvent.MOUSE_EXITED, ev -> onBtnExited(ibtn_create));
+		ibtn_action.setLayoutX(530.0); ibtn_action.setLayoutY(11.0);
 		
 		content_pane.getChildren().add(tf_conf_title);
 		content_pane.getChildren().add(pf_password);
-		content_pane.getChildren().add(ibtn_create);
+		content_pane.getChildren().add(ibtn_action);
 	}
 	
 	private void createSearchConfPanel() {
 		TextField tf_conf_title = new TextField();
 		//
-		ImageButton ibtn_search = new ImageButton(Utils.IMG_SEARCH_CONF_ICON, Utils.HINT_SEARCH, Utils.ACT_SEARCH);
+		ibtn_action.changeButton(Utils.IMG_SEARCH_CONF_ICON, Utils.HINT_SEARCH, Utils.ACT_SEARCH);
 		
-		if( pane_state == PaneState.SEARCH_CONF)
+		if( state == PaneState.SEARCH_CONF)
 			tf_conf_title.setPromptText("Nazwa konferencji");
 		else
 			tf_conf_title.setPromptText("Nazwa pliku");
@@ -192,19 +193,13 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 				+ "-fx-background-color: rgb(30, 54, 60); ");
 		tf_conf_title.setFont(Utils.TF_FONT_SMALL);
 		
-		ibtn_search.setLayoutX(280.0); ibtn_search.setLayoutY(11.0);
-		ibtn_search.setOnAction(event -> onBtnAction(ibtn_search));
-		ibtn_search.addEventFilter(MouseEvent.MOUSE_ENTERED, ev -> onBtnEntered(ibtn_search));
-		ibtn_search.addEventFilter(MouseEvent.MOUSE_EXITED, ev -> onBtnExited(ibtn_search));
+		ibtn_action.setLayoutX(280.0); ibtn_action.setLayoutY(11.0);
 		
 		content_pane.getChildren().add(tf_conf_title);
-		content_pane.getChildren().add(ibtn_search);
+		content_pane.getChildren().add(ibtn_action);
 	}
 	
-	private void onBtnAction(Button _btn) {
-		if( _btn.getText().equals("Stwórz") ) 
-			onCreateConfAction();
-	}
+	
 	
 	private void onCreateConfAction() {
 		// TODO: zmieniæ 
@@ -214,23 +209,19 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 					// wyœwietliæ error jeœli nie uda³o siê nawi¹zaæ po³¹czenia
 	}
 	
-	private void onBtnEntered(ImageButton _ibtn) {
-		layout.addTextToStatusBar(_ibtn.getHint());
+	public ImageButton getHideBtn() {
+		return ibtn_hide;
 	}
 	
-	private void onBtnExited(ImageButton _ibtn) {
-		layout.removeTextFromStatusBar();
+	public ImageButton getActionBtn() {
+		return ibtn_action;
 	}
 	
-	private void onHideBtnMouseEntered(MouseEvent _ev) {
-		layout.addTextToStatusBar(btn_hide.getHint());
+	public PaneState getState() {
+		return state;
 	}
 	
-	private void onHideBtnMouseExited(MouseEvent _ev) {
-		layout.removeTextFromStatusBar();
-	}
-	
-	private void onHideBtnAction(ActionEvent _ev) {
-		hide();
+	public String getConfTitle() {
+		return conf_title.get();
 	}
 }

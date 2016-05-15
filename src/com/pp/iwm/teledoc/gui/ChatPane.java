@@ -85,7 +85,7 @@ public class ChatPane extends Pane implements ChangeListener<Number> {	// najpie
 		getChildren().add(scroll_pane);
 		getChildren().add(text_area);
 		
-		//Platform.runLater(() -> text_area.lookup(".content").setStyle("-fx-background-color: rgb(45, 81, 90);"));
+		Platform.runLater(() -> text_area.lookup(".content").setStyle("-fx-background-color: rgb(45, 81, 90);"));
 
 		setOpacity(0.0);
 		setVisible(false);
