@@ -37,7 +37,8 @@ public class User extends Listener {
 	
 	private static User user;
 	private NetworkListener listener;
-	// private List<Image> used_images;
+	private List<Integer> used_images;
+	private int current_image;
 	
 	// =======================================
 	// METHODS
@@ -87,6 +88,7 @@ public class User extends Listener {
 		state = State.DISCONNECTED;
 		closed_conferences = new ArrayList<>();
 		open_conferences = new ArrayList<>();
+		used_images = new ArrayList<>();
 		file_tree = new FileTree();
 		client = new NetworkClient();
 	}
@@ -171,6 +173,10 @@ public class User extends Listener {
 		client.sendLogoutRequest(email);
 	}
 	
+	public void sendChatMessage(String _message) {
+		client.sendGroupMessageRequest(email, _message);
+	}
+	
 	// updateConferences()
 	// removeNotExistingConferences()
 	// addNewConferences()
@@ -216,5 +222,29 @@ public class User extends Listener {
 	public interface NetworkListener {
 		public void onStateChanged(State _state);
 		public void onReceive(Connection _connection, Object _message);
+	}
+	
+	public void addUsedImage(Integer _image_key) {
+		used_images.add(_image_key);
+	}
+	
+	public void removeUsedImage(Integer _image_key) {
+		used_images.remove(_image_key);
+	}
+	
+	public void removeUsedImages() {
+		used_images.clear();
+	}
+	
+	public List<Integer> getUsedImages() {
+		return used_images;
+	}
+	
+	public void setCurrentImage(int _current_image) {
+		current_image = _current_image;
+	}
+	
+	public int getCurrentImage() {
+		return current_image;
 	}
 }

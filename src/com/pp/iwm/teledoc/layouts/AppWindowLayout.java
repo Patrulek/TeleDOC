@@ -12,6 +12,7 @@ import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.AppWindow;
 import com.pp.iwm.teledoc.windows.Window;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
@@ -145,7 +146,7 @@ public class AppWindowLayout extends WindowLayout {
 	public void create() {
 		Scene scene = new Scene(root, 1028, 604, Color.rgb(0, 0, 0, 0));
 		stage.initStyle(StageStyle.TRANSPARENT);
-		stage.setOnCloseRequest(ev -> { app_window.hide(); ev.consume(); });		// TODO byæ mo¿e przenieœæ do AppWindow
+		stage.setOnCloseRequest(ev -> { app_window.hide(); Platform.exit(); ev.consume(); });		// TODO byæ mo¿e przenieœæ do AppWindow
 		
 		createBackground();
 		createExitIcon();

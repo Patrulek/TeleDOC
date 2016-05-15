@@ -58,14 +58,14 @@ public class ChatMessageCard extends VBox {		// TODO czy chat_pane jest tu w ogó
 		getChildren().add(lbl_message);
 	}
 	
-	public void setOddStyle() {
+	public void setEvenStyle() {
 		setStyle("-fx-background-color: rgb(30, 54, 60);");
 		lbl_date.setStyle("-fx-text-fill: rgb(160, 160, 200); -fx-font-weight: bold;");
 		lbl_username.setStyle("-fx-text-fill: rgb(160, 160, 200); -fx-font-weight: bold;");
 		lbl_message.setStyle("-fx-text-fill: rgb(160, 160, 200);");
 	}
 	
-	public void setEvenStyle() {
+	public void setOddStyle() {
 		setStyle("-fx-background-color: rgb(45, 81, 90);");
 		lbl_date.setStyle("-fx-text-fill: rgb(210, 210, 240); -fx-font-weight: bold;");
 		lbl_username.setStyle("-fx-text-fill: rgb(210, 210, 240); -fx-font-weight: bold;");

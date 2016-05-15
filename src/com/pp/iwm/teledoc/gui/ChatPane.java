@@ -46,22 +46,6 @@ public class ChatPane extends Pane implements ChangeListener<Number> {	// najpie
 		
 		createLayout();
 		addAnimation();
-		
-		tempAddMessages();
-	}
-	
-	// TODO temp
-	private void tempAddMessages() {
-		List<ChatMessage> msgs = new ArrayList<>();
-		
-		for( int i = 0; i < 100; i++ ) {
-			ChatMessage msg = new ChatMessage(new Date(), "Patryk Lewandowski", "LOREM LOREM LOREM LOREM LOREM LOREM LOREM "
-					+ "LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM "
-					+ "LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM ");
-			msgs.add(msg);
-		}
-		
-		addMessages(msgs);
 	}
 	
 	private void createLayout() {
@@ -80,7 +64,6 @@ public class ChatPane extends Pane implements ChangeListener<Number> {	// najpie
 		text_area.setWrapText(true);
 		text_area.setFont(Utils.TF_FONT_SMALL);
 		text_area.setStyle("-fx-text-fill: rgb(210, 210, 240);");
-		text_area.addEventFilter(KeyEvent.KEY_RELEASED, ev -> onKeyReleased(ev));
 		
 		getChildren().add(scroll_pane);
 		getChildren().add(text_area);
@@ -165,29 +148,24 @@ public class ChatPane extends Pane implements ChangeListener<Number> {	// najpie
 		return text_area.isFocused();
 	}
 	
-	private void onKeyReleased(KeyEvent _ev) {
-		if( InputUtils.onEnter(_ev) ) {
-			if( InputUtils.withShift(_ev) )
-				appendLine();
-			else if( !Utils.isStringEmpty(text_area.getText()) ) {
-				newMessage();
-				_ev.consume();
-			}
-		}
-	}
-	
-	private void appendLine() {
+	public void appendLine() {
 		text_area.appendText("\n");
-	}
-	
-	private void newMessage() {
-		ChatMessage msg = new ChatMessage(new Date(), "ja", text_area.getText());
-		addMessage(msg);
-		text_area.setText("");
 	}
 
 	@Override
 	public void changed(ObservableValue<? extends Number> _observable, Number _old, Number _new) {
 		scroll_pane.setVvalue(1.0);
+	}
+	
+	public TextArea getTextArea() {
+		return text_area;
+	}
+	
+	public void clearTextArea() {
+		text_area.setText("");
+	}
+	
+	public String getTextFromTextArea() {
+		return text_area.getText();
 	}
 }

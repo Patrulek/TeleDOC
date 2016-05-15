@@ -147,4 +147,11 @@ public class NetworkClient {
 		request.setEmail(_email);
 		client.sendTCP(request);
 	}
+	
+	public void sendGroupMessageRequest(String _email, String _message) {
+		GroupMessageRequest request = new GroupMessageRequest();
+		request.setEmail(_email);
+		request.setMessage(_message);
+		client.sendTCP(request);
+	}
 }

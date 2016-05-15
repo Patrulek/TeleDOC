@@ -29,6 +29,10 @@ public class ScaleAnimation {
 		scale_anim.setNode(_node_to_animate);
 	}
 	
+	public void stop() {
+		scale_anim.stop();
+	}
+	
 	public void playForward() {
 		play(true);
 	}

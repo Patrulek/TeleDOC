@@ -29,6 +29,10 @@ public class FadeAnimation {
 		fade_anim.setNode(_node_to_animate);
 	}
 	
+	public void stop() {
+		fade_anim.stop();
+	}
+	
 	public void playForward() {
 		play(true);
 	}

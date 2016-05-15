@@ -262,8 +262,10 @@ public class AppWindow extends Window implements NetworkListener {
 
 	@Override
 	public void onStateChanged(State _state) {
-		// TODO Auto-generated method stub
-		
+		if( _state == State.DISCONNECTED ) {
+			JOptionPane.showMessageDialog(null, "Brak po³¹czenia z serverem");
+			onLogout();
+		}
 	}
 
 	@Override

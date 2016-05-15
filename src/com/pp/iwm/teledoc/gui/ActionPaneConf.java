@@ -2,29 +2,26 @@ package com.pp.iwm.teledoc.gui;
 
 import com.pp.iwm.teledoc.animations.FadeAnimation;
 import com.pp.iwm.teledoc.animations.TranslateAnimation;
-import com.pp.iwm.teledoc.gui.ActionPane.PaneState;
+import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.utils.Utils;
-import com.pp.iwm.teledoc.windows.AppWindow;
-import com.pp.iwm.teledoc.windows.ConfWindow;
-import com.pp.iwm.teledoc.windows.Window;
 
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Button;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 
 // TODO zmergowac z ActionPane
-public class ActionPaneConf extends Pane {
+public class ActionPaneConf extends Pane implements ChangeListener<Boolean> {
 	
 	// =========================================
 	// FIELDS
 	// =========================================
 	
-	private Window window;
+	private ConfWindowLayout layout;
 	private Pane content_pane;
 	private ImageButton btn_hide;
 	
@@ -32,33 +29,39 @@ public class ActionPaneConf extends Pane {
 	private FadeAnimation fade_animation;
 	private FadeAnimation fade_animation_content_pane;
 	
+	private ThumbnailPanel thumbnail_panel;
+	private Thread opacity_thread;
+	
 	private boolean is_visible;
 	private PaneState pane_state;
+	private double last_active;
 	
 	private Pane color_preview[];
 	
 	public enum PaneState {
-		UNDEFINED, DRAW_LINE
+		UNDEFINED, DRAW_LINE, LOADED_IMAGES
 	}
 	
 	// ===========================================
 	// METHODS
 	// ===========================================
 	
-	public ActionPaneConf(Window _window) {
+	public ActionPaneConf(ConfWindowLayout _layout) {
 		is_visible = false;
 		pane_state = PaneState.UNDEFINED;
-		window = _window;
+		layout = _layout;
 		color_preview = new Pane[5];
 			
 		createLayout();
 		addAnimations();
+		launchOpacityThread();
 	}
 	
 	private void createLayout() {
 		setStyle("-fx-background-color: rgb(15, 27, 30);");
 		setPrefSize(1362.0, 60.0);
 		setOpacity(0.0);
+		hoverProperty().addListener(this);
 		
 		content_pane = new Pane();
 		content_pane.setStyle("-fx-background-color: transparent;");
@@ -71,6 +74,8 @@ public class ActionPaneConf extends Pane {
 		btn_hide.addEventHandler(ActionEvent.ACTION, ev -> onHideBtnAction(ev));
 		btn_hide.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onHideBtnMouseEntered(ev));
 		btn_hide.addEventHandler(MouseEvent.MOUSE_EXITED, ev-> onHideBtnMouseExited(ev));
+		
+		thumbnail_panel = new ThumbnailPanel(layout);
 
 		getChildren().add(content_pane);
 		getChildren().add(btn_hide);
@@ -97,8 +102,10 @@ public class ActionPaneConf extends Pane {
 	}
 	
 	public void show() {
+		fade_animation.customize(1.0, 0.0, 550, 150);
 		fade_animation.playForward();
 		translate_animation.playForward();
+		last_active = System.currentTimeMillis();
 		
 		if( !is_visible ) {
 			is_visible = true;
@@ -107,6 +114,7 @@ public class ActionPaneConf extends Pane {
 	}
 	
 	public void hide() {
+		fade_animation.customize(1.0, 0.0, 550, 150);
 		fade_animation.playBackward();
 		translate_animation.playBackward();
 		
@@ -127,6 +135,10 @@ public class ActionPaneConf extends Pane {
 		switch( pane_state ) {
 			case DRAW_LINE:
 				createNewDrawLinePanel();
+				break;
+			case LOADED_IMAGES:
+				createLoadedImagesPanel();
+				break;
 				
 			default:
 		}
@@ -135,9 +147,18 @@ public class ActionPaneConf extends Pane {
 		fade_animation_content_pane.playForward();
 	}
 	
+	private void createLoadedImagesPanel() {
+		thumbnail_panel.loadThumbnails();
+		content_pane.getChildren().add(thumbnail_panel);
+	}
+	
 	private void createNewDrawLinePanel() {
-		if( color_preview[0] != null )
+		if( color_preview[0] != null ) {
+			for( int i = 0; i < 5; i++ )
+				content_pane.getChildren().add(color_preview[i]);
+			
 			return;
+		}
 		
 		for( int i = 0; i < 5; i++ )  {
 			color_preview[i] = new Pane();
@@ -192,5 +213,49 @@ public class ActionPaneConf extends Pane {
 		
 		Color c = i == 0 ? Color.RED : i == 1 ? Color.GREEN : i == 2 ? Color.BLUE : i == 3 ? Color.YELLOW : Color.ORANGE;
 		//((ConfWindow)window).setCurrentColor(c);
+	}
+
+	@Override	// TODO potrzeba dostroiæ
+	public void changed(ObservableValue<? extends Boolean> _observable, Boolean _old, Boolean _new) {
+		if( !_old && _new ) {
+			fade_animation.stop();
+			fade_animation.customize(1.0, getOpacity(), 400, 400);
+			fade_animation.playForward();
+		} else if( _old && !_new ) {
+			last_active = System.currentTimeMillis();
+		}
+	}
+	
+	public void stopOpacityThread() {
+		opacity_thread.interrupt();
+	}
+	
+	private void launchOpacityThread() {
+		if( opacity_thread == null )
+			opacity_thread = new Thread(() -> {
+				while( !opacity_thread.isInterrupted() ) {
+					//System.out.println(last_active);
+					double time = last_active + 1;
+						
+					while( System.currentTimeMillis() - time < 2500.0 ) {
+						try { Thread.sleep(50); } 
+						catch (InterruptedException e) { return; }
+					}
+						
+					if( last_active > time || isHover() )
+						continue;
+						
+					fade_animation.stop();
+					fade_animation.customize(0.33, getOpacity(), 700, 700);
+					fade_animation.playForward();
+					
+					while( time == last_active + 1 ) {
+						try { Thread.sleep(50); }
+						catch (InterruptedException e) { return; }
+					}
+				}
+			});
+			
+		opacity_thread.start();
 	}
 }

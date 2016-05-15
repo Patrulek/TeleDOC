@@ -1,5 +1,6 @@
 package com.pp.iwm.teledoc.windows;
 
+import java.util.Date;
 import java.util.List;
 
 import com.esotericsoftware.kryonet.Connection;
@@ -21,8 +22,14 @@ import com.pp.iwm.teledoc.models.ConfWindowModel;
 import com.pp.iwm.teledoc.models.ConfWindowModel.UserContext;
 import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.network.User.NetworkListener;
+import com.pp.iwm.teledoc.network.packets.AllGroupsResponse;
+import com.pp.iwm.teledoc.network.packets.CreateGroupResponse;
+import com.pp.iwm.teledoc.network.packets.GroupMessageResponse;
+import com.pp.iwm.teledoc.network.packets.JoinToGroupResponse;
+import com.pp.iwm.teledoc.objects.ChatMessage;
 import com.pp.iwm.teledoc.objects.ImageManager;
 import com.pp.iwm.teledoc.utils.InputUtils;
+import com.pp.iwm.teledoc.utils.Utils;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -52,8 +59,9 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 	// =========================================
 	
 	public ConfWindow() {
-		ImageManager.instance().loadImage(2099, "/assets/big_image.jpg");
+		ImageManager.instance().loadImageForUser(2099, "/assets/big_image.jpg");
 		User.instance().setListener(this);
+		User.instance().setCurrentImage(2099);
 	}
 	
 	public void changeCanvasLayerVisibility(LayersToDraw _layers_to_draw) {
@@ -168,6 +176,27 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 		
 		window_layout.root.addEventFilter(KeyEvent.KEY_RELEASED, ev -> onHotkeyAction(ev));
 		window_layout.chat_pane.opacityProperty().addListener(this);
+		
+		window_layout.chat_pane.getTextArea().addEventFilter(KeyEvent.KEY_PRESSED, ev -> onChatTextAreaKeyPressed(ev));
+	}
+	
+	private void onChatTextAreaKeyPressed(KeyEvent _ev) {
+		ChatPane chat_pane = window_layout.chat_pane;
+		String message = chat_pane.getTextFromTextArea();
+		
+		if( InputUtils.onEnter(_ev) ) {
+			if( InputUtils.withShift(_ev) )
+				chat_pane.appendLine();
+			else if( !Utils.isStringEmpty(message) ) {
+				sendNewMessage(message);
+				_ev.consume();
+			}
+		}
+	}
+	
+	private void sendNewMessage(String _message) {
+		User.instance().sendChatMessage(_message);
+		window_layout.chat_pane.clearTextArea();
 	}
 	
 	private void onCanvasScroll(ScrollEvent _ev) {
@@ -196,23 +225,20 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 			
 			scroll_pane.setHvalue(x_translation);
 			scroll_pane.setVvalue(y_translation);
-			mouse_pos = new_pos;
+
+			window_model.setMousePos(new_pos);
 		}
 	}
 	
 	private void onMousePressed(MouseEvent _ev) {
-		Point2D mouse_pos = window_model.getMousePos();
 		DrawablePane drawable_pane = window_layout.drawable_pane;
 		ScrollPane scroll_pane = window_layout.scroll_pane;
 		StatusBar status_bar = window_layout.status_bar;
 		AnnotationPane annotation_pane = window_layout.annotation_pane;
 		UserContext user_context = window_model.user_context;
-		Point2D temp1 = window_model.temp1;
-		Point2D temp2 = window_model.temp2;
-		DrawableBrokenLine temp_broken_line = window_model.temp_broken_line;
-		Annotation temp_annotation = window_model.temp_annotation;
 		
-		mouse_pos = new Point2D(_ev.getSceneX(), _ev.getSceneY());
+		window_model.setMousePos(new Point2D(_ev.getSceneX(), _ev.getSceneY()));
+		Point2D mouse_pos = window_model.getMousePos();
 		double canvas_w = drawable_pane.getWidth();
 		double canvas_h = drawable_pane.getHeight();
 		double x_pos = mouse_pos.getX() + scroll_pane.getHvalue() * (canvas_w - scroll_pane.getViewportBounds().getWidth()) - 4; // 2 - ramka okna która ma 2 pigzy
@@ -221,55 +247,55 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 		y_pos /= drawable_pane.getScale();
 		 
 		if( user_context == UserContext.DRAWING_LINE && _ev.getButton() == MouseButton.PRIMARY ) {	// TODO dodaæ anulowanie rysowania
-			if( temp1 == null)
-				temp1 = new Point2D(x_pos, y_pos);
-			else if( temp2 == null ) {
-				temp2 = new Point2D(x_pos, y_pos);
-				DrawableLine line = new DrawableLine(temp1, temp2, Color.RED, drawable_pane);
-				drawable_pane.addLine(line);
-				temp1 = temp2 = null;
+			if( window_model.temp1 == null)
+				window_model.temp1 = new Point2D(x_pos, y_pos);
+			else if( window_model.temp2 == null ) {
+				window_model.temp2 = new Point2D(x_pos, y_pos);
+				window_model.temp_line = new DrawableLine(window_model.temp1, window_model.temp2, Color.RED, drawable_pane);
+				drawable_pane.addLine(window_model.temp_line);
+				window_model.temp1 = window_model.temp2 = null;
 				changeUserContext(UserContext.DOING_NOTHING);
 			}
 		} else if( user_context == UserContext.DRAWING_BROKEN_LINE ) {
 			if( _ev.getButton() == MouseButton.PRIMARY ) {
-				if( temp1 == null )
-					temp1 = new Point2D(x_pos, y_pos);
-				else if( temp2 == null ) {
-					temp2 = new Point2D(x_pos, y_pos);
+				if( window_model.temp1 == null )
+					window_model.temp1 = new Point2D(x_pos, y_pos);
+				else if( window_model.temp2 == null ) {
+					window_model.temp2 = new Point2D(x_pos, y_pos);
 					 
-					if( temp_broken_line == null ) {
-						temp_broken_line = new DrawableBrokenLine(temp1, temp2, Color.BLUE, drawable_pane);
-						drawable_pane.addBrokenLine(temp_broken_line);
+					if( window_model.temp_broken_line == null ) {
+						window_model.temp_broken_line = new DrawableBrokenLine(window_model.temp1, window_model.temp2, Color.BLUE, drawable_pane);
+						drawable_pane.addBrokenLine(window_model.temp_broken_line);
 					} else
-						temp_broken_line.addLine(temp1, temp2);
+						window_model.temp_broken_line.addLine(window_model.temp1, window_model.temp2);
 					 
-					temp1 = temp2;
-					temp2 = null;
+					window_model.temp1 = window_model.temp2;
+					window_model.temp2 = null;
 				}
 			} else if( _ev.getButton() == MouseButton.SECONDARY ) {
-				temp1 = temp2 = null;
-				temp_broken_line = null;
+				window_model.temp1 = window_model.temp2 = null;
+				window_model.temp_broken_line = null;
 				changeUserContext(UserContext.DOING_NOTHING);
 			}
 		} else if( user_context == UserContext.GETTING_DISTANCE ) { // dodaæ anulowanie obliczania
 			if( _ev.getButton() == MouseButton.PRIMARY ) {
-				if( temp1 == null )
-					temp1 = new Point2D(x_pos, y_pos);
-				else if( temp2 == null ) {
-					temp2 = new Point2D(x_pos, y_pos);
+				if( window_model.temp1 == null )
+					window_model.temp1 = new Point2D(x_pos, y_pos);
+				else if( window_model.temp2 == null ) {
+					window_model.temp2 = new Point2D(x_pos, y_pos);
 					status_bar.removeText();
-					status_bar.addText("Odleg³oœæ pomiêdzy " + temp1 + " oraz " + temp2 + " = " + temp1.distance(temp2));
-					temp1 = temp2 = null;
+					status_bar.addText("Odleg³oœæ pomiêdzy " + window_model.temp1 + " oraz " + window_model.temp2 + " = " + window_model.temp1.distance(window_model.temp2));
+					window_model.temp1 = window_model.temp2 = null;
 				}
 			}
 		} else if( user_context == UserContext.ADDING_ANNOTATION ) {
 			if( _ev.getButton() == MouseButton.PRIMARY ) {
 				annotation_pane.showAtLocation(mouse_pos, -1.0, false);
 				window_model.temp1 = new Point2D(x_pos, y_pos);
-				if( temp_annotation == null ) {
+				if( window_model.temp_annotation == null ) {
 					createTempAnnotation();
 				} else {
-					temp_annotation.changePosition(temp1);
+					window_model.temp_annotation.changePosition(window_model.temp1);
 				}
 				 
 				 
@@ -405,6 +431,7 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 	
 	public void onDrawMultipleLines() {
 		changeUserContext(UserContext.DRAWING_BROKEN_LINE);
+		window_layout.action_pane.changePaneStateAndRefresh(PaneState.DRAW_LINE);
 	}
 	
 	public void onInteractiveCursorAction() {
@@ -421,11 +448,12 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 	
 	public void onLeaveConference() {
 		User.instance().leaveConference();
+		window_layout.action_pane.stopOpacityThread();
 		Platform.runLater(() -> openWindowAndHideCurrent(new AppWindow()));
 	}
 	
 	public void onImagePanelAction() {
-		
+		window_layout.action_pane.changePaneStateAndRefresh(PaneState.LOADED_IMAGES);
 	}
 	
 	public void onAddAnnotation() {
@@ -451,7 +479,16 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 
 	@Override
 	public void onReceive(Connection _connection, Object _message) {
-		// TODO Auto-generated method stub
-		
+		System.out.println(_message);
+		if( User.instance().isConnected() ) {
+			if( _message instanceof GroupMessageResponse )
+				onGroupMessageResponseReceive((GroupMessageResponse)_message);
+		}
+	}
+	
+	private void onGroupMessageResponseReceive(GroupMessageResponse _response) {
+		System.out.println("No elo");
+		ChatMessage message = new ChatMessage(new Date(), _response.getAuthorName() + " " + _response.getAuthorSurname(), _response.getMessage());
+		Platform.runLater(() -> window_layout.chat_pane.addMessage(message));
 	}
 }

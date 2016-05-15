@@ -166,7 +166,7 @@ public class ConfWindowLayout extends WindowLayout {
 	}
 	
 	private void createActionPane() {
-		action_pane = new ActionPaneConf(window);
+		action_pane = new ActionPaneConf(this);
 		action_pane.setLayoutX(2.0); action_pane.setLayoutY(746.0);
 	}
 	

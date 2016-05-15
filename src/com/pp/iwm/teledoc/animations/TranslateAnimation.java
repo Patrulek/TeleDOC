@@ -29,6 +29,10 @@ public class TranslateAnimation {
 		translate_anim.setNode(_node_to_animate);
 	}
 	
+	public void stop() {
+		translate_anim.stop();
+	}
+	
 	public void playForward() {
 		play(true);
 	}
