@@ -11,6 +11,7 @@ public class WindowModel {
 	// ===========================
 	
 	protected Point2D mouse_pos;
+	protected Point2D prev_mouse_pos;
 	protected boolean is_dragged;
 	protected Window window;
 	
@@ -20,6 +21,7 @@ public class WindowModel {
 	
 	public WindowModel(Window _window) {
 		mouse_pos = new Point2D(0.0, 0.0);
+		prev_mouse_pos = new Point2D(0.0, 0.0);
 		is_dragged = false;
 		window = _window;
 	}
@@ -28,7 +30,12 @@ public class WindowModel {
 		return mouse_pos;
 	}
 	
+	public Point2D getMouseDelta() {
+		return mouse_pos.subtract(prev_mouse_pos);
+	}
+	
 	public void setMousePos(Point2D _mouse_pos) {
+		prev_mouse_pos = mouse_pos;
 		mouse_pos = _mouse_pos;
 	}
 	

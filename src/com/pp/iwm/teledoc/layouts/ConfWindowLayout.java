@@ -158,7 +158,7 @@ public class ConfWindowLayout extends WindowLayout {
 	}
 	
 	private void createDrawablePane() {
-		drawable_pane = new DrawablePane(window);
+		drawable_pane = new DrawablePane((ConfWindow)window);
 	}
 	
 	private void createAnnotationPane() {

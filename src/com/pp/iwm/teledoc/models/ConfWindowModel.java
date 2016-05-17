@@ -37,6 +37,7 @@ public class ConfWindowModel extends WindowModel {
 	public Color chosen_color;
 	
 	public List<DrawableObject> drawables;
+	public DrawableObject selected_drawable;
 	
 	// ==================================
 	// METHODS

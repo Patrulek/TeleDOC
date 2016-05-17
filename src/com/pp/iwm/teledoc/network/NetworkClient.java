@@ -34,7 +34,7 @@ public class NetworkClient {
 	
 	public static final double FILESIZE_LIMIT = 10.0; 	// w MB 
 
-	private final String SERVER_ADDRESS = "192.168.0.6";
+	private final String SERVER_ADDRESS = "192.168.0.6";	// 192.168.0.6 <- wirualka
 	private final int TIMEOUT = 5000;
 	private final int TCP_PORT = 33000;
 	private final int UDP_PORT = 32000;

@@ -19,4 +19,9 @@ public abstract class DrawableObject {
 	public DrawableObject() {}
 	
 	public abstract void rescale();
+	public abstract void onSelected();
+	public abstract void onDeselected();
+	public abstract void onMouseEntered();
+	public abstract void onMouseExited();
+	public abstract void onChanged();
 }

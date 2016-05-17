@@ -1,6 +1,8 @@
 package com.pp.iwm.teledoc.utils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
@@ -194,5 +196,28 @@ public class Utils {
 	
 	public static boolean isFileSizeGreaterThan(File _file, double _megabytes) {
 		return _file.length() > _megabytes * BYTES_PER_MEGABYTE;
+	}
+	
+	public static Color mixColors(Color _color1, Color _color2) {
+		List<Color> colors = new ArrayList<>();
+		colors.add(_color1); colors.add(_color2);
+		return mixColors(colors);
+	}
+	
+	public static Color mixColors(List<Color> _colors) {
+		if( _colors == null || _colors.isEmpty() )
+			return Color.BLACK;
+		
+		double r = 0.0, g = 0.0, b = 0.0, a = 0.0;
+		int s = _colors.size();
+		
+		for( Color c : _colors ) {
+			r += c.getRed();
+			g += c.getGreen();
+			b += c.getBlue();
+			a += c.getOpacity();
+		}
+		
+		return new Color(r / s, g / s, b / s, a / s);
 	}
 }

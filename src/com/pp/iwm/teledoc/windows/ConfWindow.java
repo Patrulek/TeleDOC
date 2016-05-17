@@ -58,6 +58,25 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 	// METHODS
 	// =========================================
 	
+	public Point2D getCanvasMouseDelta() {
+		return window_model.getMouseDelta().multiply(1.0 / window_layout.drawable_pane.getScale());
+	}
+	
+	public Point2D getCanvasMousePos() {
+		DrawablePane drawable_pane = window_layout.drawable_pane;
+		ScrollPane scroll_pane = window_layout.scroll_pane;
+		Point2D mouse_pos = window_model.getMousePos();
+		
+		double canvas_w = drawable_pane.getWidth();
+		double canvas_h = drawable_pane.getHeight();
+		double x_pos = mouse_pos.getX() + scroll_pane.getHvalue() * (canvas_w - scroll_pane.getViewportBounds().getWidth()) - 4; // 2 - ramka okna która ma 2 pigzy
+		double y_pos = mouse_pos.getY() + scroll_pane.getVvalue() * (canvas_h - scroll_pane.getViewportBounds().getHeight()) - 3; //
+		x_pos /= drawable_pane.getScale();
+		y_pos /= drawable_pane.getScale();
+		
+		return new Point2D(x_pos, y_pos);
+	}
+	
 	public ConfWindow() {
 		ImageManager.instance().loadImageForUser(2099, "/assets/big_image.jpg");
 		User.instance().setListener(this);
@@ -210,9 +229,9 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 		Point2D mouse_pos = window_model.getMousePos();
 		DrawablePane drawable_pane = window_layout.drawable_pane;
 		ScrollPane scroll_pane = window_layout.scroll_pane;
+		Point2D new_pos = new Point2D(_ev.getSceneX(), _ev.getSceneY());
 		
 		if( _ev.getButton() == MouseButton.MIDDLE ) {
-			Point2D new_pos = new Point2D(_ev.getSceneX(), _ev.getSceneY());
 			Point2D diff = mouse_pos.subtract(new_pos);
 			double canvas_w = drawable_pane.getWidth();
 			double canvas_h = drawable_pane.getHeight();
@@ -225,9 +244,9 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 			
 			scroll_pane.setHvalue(x_translation);
 			scroll_pane.setVvalue(y_translation);
-
-			window_model.setMousePos(new_pos);
 		}
+		
+		window_model.setMousePos(new_pos);
 	}
 	
 	private void onMousePressed(MouseEvent _ev) {
@@ -239,18 +258,13 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 		
 		window_model.setMousePos(new Point2D(_ev.getSceneX(), _ev.getSceneY()));
 		Point2D mouse_pos = window_model.getMousePos();
-		double canvas_w = drawable_pane.getWidth();
-		double canvas_h = drawable_pane.getHeight();
-		double x_pos = mouse_pos.getX() + scroll_pane.getHvalue() * (canvas_w - scroll_pane.getViewportBounds().getWidth()) - 4; // 2 - ramka okna która ma 2 pigzy
-		double y_pos = mouse_pos.getY() + scroll_pane.getVvalue() * (canvas_h - scroll_pane.getViewportBounds().getHeight()) - 3; //
-		x_pos /= drawable_pane.getScale();
-		y_pos /= drawable_pane.getScale();
+		Point2D canvas_mouse_pos = getCanvasMousePos();
 		 
 		if( user_context == UserContext.DRAWING_LINE && _ev.getButton() == MouseButton.PRIMARY ) {	// TODO dodaæ anulowanie rysowania
 			if( window_model.temp1 == null)
-				window_model.temp1 = new Point2D(x_pos, y_pos);
+				window_model.temp1 = canvas_mouse_pos;
 			else if( window_model.temp2 == null ) {
-				window_model.temp2 = new Point2D(x_pos, y_pos);
+				window_model.temp2 = canvas_mouse_pos;
 				window_model.temp_line = new DrawableLine(window_model.temp1, window_model.temp2, Color.RED, drawable_pane);
 				drawable_pane.addLine(window_model.temp_line);
 				window_model.temp1 = window_model.temp2 = null;
@@ -259,9 +273,9 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 		} else if( user_context == UserContext.DRAWING_BROKEN_LINE ) {
 			if( _ev.getButton() == MouseButton.PRIMARY ) {
 				if( window_model.temp1 == null )
-					window_model.temp1 = new Point2D(x_pos, y_pos);
+					window_model.temp1 = canvas_mouse_pos;
 				else if( window_model.temp2 == null ) {
-					window_model.temp2 = new Point2D(x_pos, y_pos);
+					window_model.temp2 = canvas_mouse_pos;
 					 
 					if( window_model.temp_broken_line == null ) {
 						window_model.temp_broken_line = new DrawableBrokenLine(window_model.temp1, window_model.temp2, Color.BLUE, drawable_pane);
@@ -280,9 +294,9 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 		} else if( user_context == UserContext.GETTING_DISTANCE ) { // dodaæ anulowanie obliczania
 			if( _ev.getButton() == MouseButton.PRIMARY ) {
 				if( window_model.temp1 == null )
-					window_model.temp1 = new Point2D(x_pos, y_pos);
+					window_model.temp1 = canvas_mouse_pos;
 				else if( window_model.temp2 == null ) {
-					window_model.temp2 = new Point2D(x_pos, y_pos);
+					window_model.temp2 = canvas_mouse_pos;
 					status_bar.removeText();
 					status_bar.addText("Odleg³oœæ pomiêdzy " + window_model.temp1 + " oraz " + window_model.temp2 + " = " + window_model.temp1.distance(window_model.temp2));
 					window_model.temp1 = window_model.temp2 = null;
@@ -291,7 +305,7 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 		} else if( user_context == UserContext.ADDING_ANNOTATION ) {
 			if( _ev.getButton() == MouseButton.PRIMARY ) {
 				annotation_pane.showAtLocation(mouse_pos, -1.0, false);
-				window_model.temp1 = new Point2D(x_pos, y_pos);
+				window_model.temp1 = canvas_mouse_pos;
 				if( window_model.temp_annotation == null ) {
 					createTempAnnotation();
 				} else {
@@ -334,7 +348,7 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 	}
 	
 	public void hideAnnotationPane(ScrollPane _annotation_text_pane) {
-		window_layout.root.getChildren().add(_annotation_text_pane);
+		window_layout.root.getChildren().remove(_annotation_text_pane);
 	}
 	
 	private void onHotkeyAction(KeyEvent _ev) {

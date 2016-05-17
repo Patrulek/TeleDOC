@@ -244,10 +244,12 @@ public class ActionPaneConf extends Pane implements ChangeListener<Boolean> {
 						
 					if( last_active > time || isHover() )
 						continue;
-						
-					fade_animation.stop();
-					fade_animation.customize(0.33, getOpacity(), 700, 700);
-					fade_animation.playForward();
+					
+					if( is_visible ) {
+						fade_animation.stop();
+						fade_animation.customize(0.33, getOpacity(), 700, 700);
+						fade_animation.playForward();
+					}
 					
 					while( time == last_active + 1 ) {
 						try { Thread.sleep(50); }
