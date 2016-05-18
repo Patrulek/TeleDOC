@@ -52,17 +52,14 @@ public class AnnotationPane extends Pane {
 		text_area = new TextArea();
 		text_area.setPrefSize(290, 50);
 		text_area.setLayoutX(5); text_area.setLayoutY(5);
-		text_area.setOnKeyPressed(ev -> onKeyEnter(ev));
 		
 		btn_submit = new Button("Dodaj");
 		btn_submit.setPrefSize(142, 20);
 		btn_submit.setLayoutX(5); btn_submit.setLayoutY(60);
-		btn_submit.setOnAction(ev -> onBtnSubmitAction());
 		
 		btn_cancel = new Button("Anuluj");
 		btn_cancel.setPrefSize(143, 20);
 		btn_cancel.setLayoutX(152); btn_cancel.setLayoutY(60);
-		btn_cancel.setOnAction(ev -> onBtnCancelAction());
 		
 		getChildren().add(text_area);
 		getChildren().add(btn_submit);
@@ -124,24 +121,17 @@ public class AnnotationPane extends Pane {
 		fade_animation.setOnFinished(null);
 	}
 	
-	private void onBtnSubmitAction() {
-		String text = text_area.getText().trim();
-		((ConfWindow)window).onAnnotationSubmit(text);
-		text_area.setText("");
+	
+	
+	public Button getBtnSubmit() {
+		return btn_submit;
 	}
 	
-	private void onKeyEnter(KeyEvent _ev) {
-		if( InputUtils.onEnter(_ev) ) {
-			if( InputUtils.withShift(_ev) )
-				text_area.appendText("\n");
-			else {
-				onBtnSubmitAction();
-				_ev.consume();
-			}
-		}
+	public Button getBtnCancel() {
+		return btn_cancel;
 	}
 	
-	private void onBtnCancelAction() {
-		((ConfWindow)window).onAnnotationCancel();
+	public TextArea getTextArea() {
+		return text_area;
 	}
 }

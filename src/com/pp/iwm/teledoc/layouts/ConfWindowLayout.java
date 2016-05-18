@@ -1,5 +1,8 @@
 package com.pp.iwm.teledoc.layouts;
 
+import java.util.List;
+
+import com.pp.iwm.teledoc.drawables.DrawableObject;
 import com.pp.iwm.teledoc.gui.ActionPaneConf;
 import com.pp.iwm.teledoc.gui.AnnotationPane;
 import com.pp.iwm.teledoc.gui.ChatPane;
@@ -14,6 +17,7 @@ import com.pp.iwm.teledoc.windows.ConfWindow;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
@@ -158,7 +162,7 @@ public class ConfWindowLayout extends WindowLayout {
 	}
 	
 	private void createDrawablePane() {
-		drawable_pane = new DrawablePane((ConfWindow)window);
+		drawable_pane = new DrawablePane(this);
 	}
 	
 	private void createAnnotationPane() {

@@ -33,7 +33,6 @@ public class Annotation	extends DrawableObject {
 	private Bounds viewport_bounds;
 	private State state;
 	private DrawablePane drawable_pane;
-	private boolean is_dragged;
 	
 	// TODO temp
 	private ScrollPane annotation_text_pane;
@@ -72,8 +71,8 @@ public class Annotation	extends DrawableObject {
 			is_dragged = true;
 			destroyTextPane();
 		}
-		
-		Point2D delta = drawable_pane.getPaneMouseDelta();
+
+		Point2D delta = listener.onDragged(this);
 		changePosition(position.add(delta));
 		
 		
@@ -109,13 +108,13 @@ public class Annotation	extends DrawableObject {
 		else
 			annotation_text_pane.setLayoutX(_pos.getX() - 120.0);
 		
-		drawable_pane.getConfWindow().showAnnotationPane(annotation_text_pane);
+		//drawable_pane.getConfWindow().showAnnotationPane(annotation_text_pane);
 		}
 	}
 	
 	private void destroyTextPane() {
 		if( annotation_text_pane != null ) {
-			drawable_pane.getConfWindow().hideAnnotationPane(annotation_text_pane);
+			//drawable_pane.getConfWindow().hideAnnotationPane(annotation_text_pane);
 			annotation_text_pane = null;
 		}
 	}
@@ -143,7 +142,6 @@ public class Annotation	extends DrawableObject {
 	
 	@Override
 	public void rescale() {
-		double scale = drawable_pane.getScale();
 		circle.setCenterX(scale * position.getX());
 		circle.setCenterY(scale * position.getY());
 	}
@@ -157,6 +155,8 @@ public class Annotation	extends DrawableObject {
 	}
 	
 	public void onMouseEntered(MouseEvent _ev) {
+		onMouseEntered();
+		
 		if( state == State.DRAWN && !is_dragged ) {
 			Color c = color.invert();
 			circle.setFill(c);
@@ -165,38 +165,36 @@ public class Annotation	extends DrawableObject {
 		} 
 	}
 	
-	public void onMouseExited() {
-		if( state == State.DRAWN && !is_dragged ) {
-			circle.setFill(color);
-			destroyTextPane();
-		}
-	}
-	
 	public Circle getCircle() {
 		return circle;
 	}
 
 	@Override
 	public void onSelected() {
-		// TODO Auto-generated method stub
-		
+		listener.onSelected(this);
 	}
-
+	
 	@Override
 	public void onMouseEntered() {
-		// TODO Auto-generated method stub
+		listener.onMouseEntered(this);
+	}
+	
+	@Override
+	public void onMouseExited() {
+		listener.onMouseExited(this);
 		
+		if( state == State.DRAWN && !is_dragged ) {
+			circle.setFill(color);
+			destroyTextPane();
+		}
 	}
 
 	@Override
 	public void onChanged() {
-		// TODO Auto-generated method stub
-		
+		listener.onChanged(this);
 	}
 
 	@Override
 	public void onDeselected() {
-		// TODO Auto-generated method stub
-		
 	}
 }

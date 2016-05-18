@@ -1,10 +1,8 @@
 package com.pp.iwm.teledoc.drawables;
 
 import com.pp.iwm.teledoc.gui.DrawablePane;
-import com.sun.javafx.css.CalculatedValue;
 
 import javafx.geometry.Point2D;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
@@ -54,17 +52,35 @@ public class DrawableLine extends DrawableObject {
 		init();
 	}
 	
+	private void onLineDragReleased() {
+		if( is_dragged )
+			is_dragged = false;
+	}
+	
+	private void onLineDragged() {
+		if( !is_dragged )
+			is_dragged = true;
+
+		Point2D delta = listener.onDragged(this);
+		from = from.add(delta);
+		to = to.add(delta);
+		rescale();
+		
+		onChanged();
+	}
+	
 	private void init() {
 		line.setStrokeWidth(2.0);
 		line.setOnMouseEntered(ev -> onMouseEntered());
 		line.setOnMouseExited(ev -> onMouseExited());
 		line.setOnMouseClicked(ev -> onSelected());
+		line.setOnMouseDragged(ev -> onLineDragged());
+		line.setOnMouseReleased(ev -> onLineDragReleased());
 		rescale();
 	}
 	
 	@Override
 	public void rescale() {
-		scale = drawable_pane.getScale();
 		rescaleLine();
 		rescaleSelectors();
 		
@@ -108,8 +124,9 @@ public class DrawableLine extends DrawableObject {
 
 	@Override
 	public void onSelected() {
-		is_selected = true;
+		listener.onSelected(this);
 		drawable_pane.setSelectedDrawable(this);
+		is_selected = true;
 		calculateSelectorsPosition();
 		showSelectorsAtPane();
 	}
@@ -118,26 +135,28 @@ public class DrawableLine extends DrawableObject {
 	@Override
 	public void onDeselected() {
 		is_selected = false;
-		
+		drawable_pane.setSelectedDrawable(null);
 	}
 
 	@Override
 	public void onMouseEntered() {
+		listener.onMouseEntered(this);
 		changeLineColor(original_color.invert());
 	}
 	
 	@Override
 	public void onMouseExited() {
+		listener.onMouseExited(this);
 		restoreColor();
 	}
 
 	@Override
 	public void onChanged() {
-		
+		listener.onChanged(this);
 	}
 	
 	private void onSelectorDragged(MouseEvent _ev, int _index) {
-		Point2D delta = drawable_pane.getPaneMouseDelta();
+		Point2D delta = listener.onDragged(this);
 		
 		if( _index == 0 )
 			changeFrom(from.add(delta));

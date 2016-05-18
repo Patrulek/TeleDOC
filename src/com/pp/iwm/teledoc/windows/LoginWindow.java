@@ -124,18 +124,18 @@ public class LoginWindow extends Window implements ChangeListener<Boolean>, Netw
 	
 	
 	private void onWindowBackgroundMousePressed(MouseEvent _ev) {
-		model.setMousePos(new Point2D(_ev.getScreenX(), _ev.getScreenY()));
+		window_model.setMousePos(new Point2D(_ev.getScreenX(), _ev.getScreenY()));
 	}
 	
 	private void onWindowBackgroundMouseReleased(MouseEvent _ev) {
-		model.setDragged(false);
+		window_model.setDragged(false);
 	}
 	
 	private void onWindowBackgroundMouseDragged(MouseEvent _ev) {
 		Stage stage = window_layout.stage;
 		Point2D mouse_pos = window_model.getMousePos();
 		
-		if( _ev.getSceneY() < 24 || model.isDragged()) {
+		if( _ev.getSceneY() < 24 || window_model.isDragged()) {
 			window_model.setDragged(true);
 			stage.setX(stage.getX() + _ev.getScreenX() - mouse_pos.getX());
 			stage.setY(stage.getY() + _ev.getScreenY() - mouse_pos.getY());

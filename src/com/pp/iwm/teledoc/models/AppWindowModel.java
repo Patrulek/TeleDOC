@@ -10,6 +10,7 @@ public class AppWindowModel extends WindowModel {
 	// ======================================
 	
 	private AppWindow app_window;
+	public boolean is_opening_conf_window;
 	
 	// ======================================
 	// METHODS
@@ -19,5 +20,6 @@ public class AppWindowModel extends WindowModel {
 	public AppWindowModel(Window _window) {
 		super(_window);
 		app_window = (AppWindow) window;
+		is_opening_conf_window = false;
 	}
 }

@@ -213,7 +213,9 @@ public class AppWindow extends Window implements NetworkListener {
 	
 	@Override
 	public void hide() {
-		User.instance().logOut();
+		if( !window_model.is_opening_conf_window )
+			User.instance().logOut();
+		
 		super.hide();
 	}
 
@@ -302,8 +304,10 @@ public class AppWindow extends Window implements NetworkListener {
 	private void onJoinToGroupResponseReceive(JoinToGroupResponse _response) {
 		if( !_response.getAnswer() ) // nie uda³o siê do³¹czyæ
 			JOptionPane.showMessageDialog(null, "Nie uda³o siê do³¹czyæ do grupy");  // TODO zmieniæ
-		else
+		else {
+			window_model.is_opening_conf_window = true;
 			Platform.runLater(() -> openWindowAndHideCurrent(new ConfWindow()));
+		}
 	}
 	
 	private void addLoadedConferences(List<Group> _conferences) {

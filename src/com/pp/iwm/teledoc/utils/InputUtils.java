@@ -2,6 +2,8 @@ package com.pp.iwm.teledoc.utils;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 public class InputUtils {
 	
@@ -27,4 +29,9 @@ public class InputUtils {
 	public static boolean withControl(KeyEvent _ev) { return _ev.isControlDown(); } 
 	public static boolean withAlt(KeyEvent _ev) { return _ev.isAltDown(); }
 	public static boolean withoutModifiers(KeyEvent _ev) { return (!withShift(_ev) && !withControl(_ev) && !withAlt(_ev)); }
+	
+	// mouse buttons
+	public static boolean onLeftBtn(MouseEvent _ev) { return _ev.getButton() == MouseButton.PRIMARY; }
+	public static boolean onRightBtn(MouseEvent _ev) { return _ev.getButton() == MouseButton.SECONDARY; }
+	public static boolean onMiddleBtn(MouseEvent _ev) { return _ev.getButton() == MouseButton.MIDDLE; }
 }

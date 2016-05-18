@@ -56,7 +56,9 @@ public class DrawableBrokenLine extends DrawableObject {
 		line_width = 2.0; // TODO
 		lines = new ArrayList<>();
 		selected_line_index = -1;
-		addLine(_from, _to);
+		
+		Line line = new Line(_from.getX(), _from.getY(), _to.getX(), _to.getY());
+		addLine(line);
 		
 		line_selectors = new Rectangle[2];
 		line_selectors[0] = new Rectangle(SELECTOR_SIZE, SELECTOR_SIZE);
@@ -68,7 +70,7 @@ public class DrawableBrokenLine extends DrawableObject {
 	}
 	
 	private void onSelectorDragged(MouseEvent _ev, int _index) {
-		Point2D delta = drawable_pane.getPaneMouseDelta();
+		Point2D delta = listener.onDragged(this);
 		
 		changeEndPoint(selected_line_index + _index, end_points.get(selected_line_index + _index).add(delta));
 		
@@ -81,24 +83,46 @@ public class DrawableBrokenLine extends DrawableObject {
 		end_points.set(_index, _end_point);
 	}
 	
-	public void addLine(Point2D _from, Point2D _to) {
-		double scale = drawable_pane.getScale();
+	private void onLineDragReleased() {
+		if( is_dragged )
+			is_dragged = false;
+	}
+	
+	private void onLineDragged() {
+		if( !is_dragged )
+			is_dragged = true;
+
+		Point2D delta = listener.onDragged(this);
 		
-		Line line = new Line(scale * _from.getX(), scale * _from.getY(), scale * _to.getX(), scale * _to.getY());
-		line.setStroke(original_color);
-		line.setStrokeWidth(line_width * scale);
-		line.setOnMouseEntered(ev -> onMouseEntered(line));
-		line.setOnMouseExited(ev -> onMouseExited());
-		line.setOnMouseClicked(ev -> onLineSelected(line));
-		lines.add(line);
+		for( int i = 0; i < end_points.size(); i++ )
+			end_points.set(i, end_points.get(i).add(delta));
+		
+		rescale();
+		
+		onChanged();
+	}
+	
+	public void addLine(Line _line) {
+		double scale = drawable_pane.getScale();
+		Point2D from = new Point2D(_line.getStartX(), _line.getStartY());
+		Point2D to = new Point2D(_line.getEndX(), _line.getEndY());
+		
+		_line.setStartX(scale * from.getX()); _line.setStartY(scale * from.getY());
+		_line.setEndX(scale * to.getX()); _line.setEndY(scale * to.getY());
+		_line.setStroke(original_color);
+		_line.setStrokeWidth(line_width * scale);
+		_line.setOnMouseEntered(ev -> onMouseEntered(_line));
+		_line.setOnMouseExited(ev -> onMouseExited());
+		_line.setOnMouseClicked(ev -> onLineSelected(_line));
+		_line.setOnMouseDragged(ev -> onLineDragged());
+		_line.setOnMouseReleased(ev -> onLineDragReleased());
+		lines.add(_line);
 		
 		if( end_points.isEmpty() ) {
-			end_points.add(_from);
-			end_points.add(_to);
+			end_points.add(from);
+			end_points.add(to);
 		} else
-			end_points.add(_to);
-		
-		drawable_pane.updateBrokenLine(line);
+			end_points.add(to);
 	}
 	
 	private void onLineSelected(Line _line) {
@@ -117,7 +141,6 @@ public class DrawableBrokenLine extends DrawableObject {
 	
 	@Override
 	public void rescale() {
-		scale = drawable_pane.getScale();
 		rescaleLines();
 		rescaleSelectors();
 		

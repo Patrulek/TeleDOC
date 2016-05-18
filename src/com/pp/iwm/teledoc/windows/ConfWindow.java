@@ -1,35 +1,22 @@
 package com.pp.iwm.teledoc.windows;
 
-import java.util.Date;
-import java.util.List;
-
-import com.esotericsoftware.kryonet.Connection;
 import com.pp.iwm.teledoc.drawables.Annotation;
 import com.pp.iwm.teledoc.drawables.Annotation.State;
-import com.pp.iwm.teledoc.drawables.DrawableBrokenLine;
-import com.pp.iwm.teledoc.drawables.DrawableLine;
 import com.pp.iwm.teledoc.gui.ActionPaneConf.PaneState;
 import com.pp.iwm.teledoc.gui.AnnotationPane;
 import com.pp.iwm.teledoc.gui.ChatPane;
 import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.DrawablePane;
 import com.pp.iwm.teledoc.gui.ImageButton;
-import com.pp.iwm.teledoc.gui.DrawablePane.LayersToDraw;
 import com.pp.iwm.teledoc.gui.MemberPane;
-import com.pp.iwm.teledoc.gui.StatusBar;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.models.ConfWindowModel;
 import com.pp.iwm.teledoc.models.ConfWindowModel.UserContext;
 import com.pp.iwm.teledoc.network.User;
-import com.pp.iwm.teledoc.network.User.NetworkListener;
-import com.pp.iwm.teledoc.network.packets.AllGroupsResponse;
-import com.pp.iwm.teledoc.network.packets.CreateGroupResponse;
-import com.pp.iwm.teledoc.network.packets.GroupMessageResponse;
-import com.pp.iwm.teledoc.network.packets.JoinToGroupResponse;
-import com.pp.iwm.teledoc.objects.ChatMessage;
 import com.pp.iwm.teledoc.objects.ImageManager;
-import com.pp.iwm.teledoc.utils.InputUtils;
-import com.pp.iwm.teledoc.utils.Utils;
+import com.pp.iwm.teledoc.windows.assistants.ConfWindowDrawableAssistant;
+import com.pp.iwm.teledoc.windows.assistants.ConfWindowInputAssistant;
+import com.pp.iwm.teledoc.windows.assistants.ConfWindowNetworkAssistant;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -39,12 +26,10 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
-import javafx.scene.paint.Color;
 
-public class ConfWindow extends Window implements ChangeListener<Number>, NetworkListener {
+public class ConfWindow extends Window implements ChangeListener<Number> {
 
 	
 	// =========================================
@@ -53,16 +38,29 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 	
 	private ConfWindowModel window_model;
 	private ConfWindowLayout window_layout;
+	private ConfWindowDrawableAssistant drawable_assistant;
+	private ConfWindowNetworkAssistant network_assistant;
+	private ConfWindowInputAssistant input_assistant;
 	
 	// =========================================
 	// METHODS
 	// =========================================
 	
-	public Point2D getCanvasMouseDelta() {
-		return window_model.getMouseDelta().multiply(1.0 / window_layout.drawable_pane.getScale());
+	public ConfWindow() {
+		super();
+		drawable_assistant = new ConfWindowDrawableAssistant(this);
+		window_layout.drawable_pane.setListener(drawable_assistant);
+		
+		network_assistant = new ConfWindowNetworkAssistant(this);
+		User.instance().setListener(network_assistant);
+		
+		input_assistant = new ConfWindowInputAssistant(this);
+		
+		ImageManager.instance().loadImageForUser(2099, "/assets/big_image.jpg");
+		User.instance().setCurrentImage(2099);
 	}
 	
-	public Point2D getCanvasMousePos() {
+	public void mapMousePosToImageMousePos() {
 		DrawablePane drawable_pane = window_layout.drawable_pane;
 		ScrollPane scroll_pane = window_layout.scroll_pane;
 		Point2D mouse_pos = window_model.getMousePos();
@@ -74,36 +72,9 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 		x_pos /= drawable_pane.getScale();
 		y_pos /= drawable_pane.getScale();
 		
-		return new Point2D(x_pos, y_pos);
+		window_model.image_mouse_pos = new Point2D(x_pos, y_pos);
 	}
-	
-	public ConfWindow() {
-		ImageManager.instance().loadImageForUser(2099, "/assets/big_image.jpg");
-		User.instance().setListener(this);
-		User.instance().setCurrentImage(2099);
-	}
-	
-	public void changeCanvasLayerVisibility(LayersToDraw _layers_to_draw) {
-		window_layout.drawable_pane.changeLayer(_layers_to_draw);
-	}
-	
-	public void navigateCanvas(Point2D _offset) {
-		ScrollPane scroll_pane = window_layout.scroll_pane;
-		
-		if( window_layout.chat_pane.isTextAreaFocused() )
-			return;
-		
-		scroll_pane.setHvalue(scroll_pane.getHvalue() + _offset.getX());
-		scroll_pane.setVvalue(scroll_pane.getVvalue() + _offset.getY());
-	}
-	
-	
-	public void createTempAnnotation() {
-		DrawablePane drawable_pane = window_layout.drawable_pane;
-		window_model.temp_annotation = new Annotation("Tutaj wpisz tekst", Color.GREEN, drawable_pane.getBoundsInParent(), window_model.temp1, drawable_pane);
-		drawable_pane.addAnnotation(window_model.temp_annotation);
-	}
-	
+
 	private void enableMicrophone() {
 		
 	}
@@ -112,22 +83,23 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 		
 	}
 	
-	
 	public void changeUserContext(UserContext _context) {
 		window_model.user_context = _context;
 	}
 	
-	public void onAnnotationSubmit(String _text) {
+	public void onAnnotationSubmit() {
+		String text = window_layout.annotation_pane.getTextArea().getText().trim();
 		Annotation tmp_ann = window_model.temp_annotation;
 		
-		if( !_text.equals("") )
-			tmp_ann.setText(_text);
+		if( !text.equals("") )
+			tmp_ann.setText(text);
 		
 		window_layout.annotation_pane.hide();
 		tmp_ann.changeState(State.DRAWN);
 		tmp_ann = null;
 		window_model.temp1 = window_model.temp2 = null;
 		changeUserContext(UserContext.DOING_NOTHING);
+		window_layout.annotation_pane.getTextArea().setText("");
 	}
 	
 	public void onAnnotationCancel() {
@@ -138,209 +110,8 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 		 
 		if( tmp_ann != null ) {
 			window_layout.drawable_pane.removeAnnotation(tmp_ann);
-			tmp_ann = null;
+			window_model.temp_annotation = null;
 		}
-	}
-	
-	@Override
-	protected void createLayout() {
-		window_layout = new ConfWindowLayout(this);
-		layout = window_layout;
-	}
-	
-	@Override
-	public void changed(ObservableValue<? extends Number> _observable, Number _old_value, Number _new_value) {
-		MemberPane member_pane = window_layout.member_pane;
-		
-		if( !window_model.is_chat_hiding )
-			window_model.chat_max_opacity = _new_value.doubleValue();
-		
-		if( _old_value.doubleValue() == 0.0 && _new_value.doubleValue() > 0.0 ) {
-			member_pane.animateToLeft();
-		} else if( (window_model.is_chat_hiding && window_model.chat_max_opacity < 0.7) || 
-				(_old_value.doubleValue() >= 0.7 && _new_value.doubleValue() < 0.7) ) {
-			member_pane.animateToRight(); 
-		}
-	}
-
-	@Override
-	protected void createModel() {
-		window_model = new ConfWindowModel(this);
-		model = window_model;
-	}
-
-	@Override
-	protected void initEventHandlers() {
-		ScrollPane scroll_pane = window_layout.scroll_pane;
-		scroll_pane.addEventFilter(ScrollEvent.SCROLL, ev -> onCanvasScroll(ev));
-		scroll_pane.addEventFilter(MouseEvent.MOUSE_DRAGGED, ev -> onCanvasDragged(ev));
-		scroll_pane.addEventFilter(MouseEvent.MOUSE_PRESSED, ev -> onMousePressed(ev));
-		
-		Dockbar dockbar = window_layout.dockbar;
-		dockbar.addEventFilter(MouseEvent.MOUSE_MOVED, ev -> onDockbarMouseMoved(ev));
-		dockbar.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> onDockbarMouseEntered(ev));
-		dockbar.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onDockbarMouseExited(ev));
-		dockbar.getIcons().get(0).setOnAction(ev -> onDrawLine());
-		dockbar.getIcons().get(1).setOnAction(ev -> onDrawMultipleLines());
-		dockbar.getIcons().get(2).setOnAction(ev -> onInteractiveCursorAction());
-		dockbar.getIcons().get(3).setOnAction(ev -> onAddAnnotation());
-		dockbar.getIcons().get(4).setOnAction(ev -> onImagePanelAction());
-		dockbar.getIcons().get(5).setOnAction(ev -> onCalculateDistance());
-		dockbar.getIcons().get(6).setOnAction(ev -> onUploadImage());
-		dockbar.getIcons().get(7).setOnAction(ev -> onHelpAction());
-		dockbar.getIcons().get(8).setOnAction(ev -> onLeaveConference());
-
-		window_layout.ibtn_chat.addEventHandler(ActionEvent.ACTION, ev -> onChatBtnAction());
-		window_layout.ibtn_members.addEventHandler(ActionEvent.ACTION, ev -> onMembersBtnAction());
-		
-		window_layout.root.addEventFilter(KeyEvent.KEY_RELEASED, ev -> onHotkeyAction(ev));
-		window_layout.chat_pane.opacityProperty().addListener(this);
-		
-		window_layout.chat_pane.getTextArea().addEventFilter(KeyEvent.KEY_PRESSED, ev -> onChatTextAreaKeyPressed(ev));
-	}
-	
-	private void onChatTextAreaKeyPressed(KeyEvent _ev) {
-		ChatPane chat_pane = window_layout.chat_pane;
-		String message = chat_pane.getTextFromTextArea();
-		
-		if( InputUtils.onEnter(_ev) ) {
-			if( InputUtils.withShift(_ev) )
-				chat_pane.appendLine();
-			else if( !Utils.isStringEmpty(message) ) {
-				sendNewMessage(message);
-				_ev.consume();
-			}
-		}
-	}
-	
-	private void sendNewMessage(String _message) {
-		User.instance().sendChatMessage(_message);
-		window_layout.chat_pane.clearTextArea();
-	}
-	
-	private void onCanvasScroll(ScrollEvent _ev) {
-		double rescale_by = _ev.getDeltaY() / 750.0;
-		window_layout.drawable_pane.rescaleBy(rescale_by);
-		
-		_ev.consume();
-	}
-	
-	private void onCanvasDragged(MouseEvent _ev) {
-		Point2D mouse_pos = window_model.getMousePos();
-		DrawablePane drawable_pane = window_layout.drawable_pane;
-		ScrollPane scroll_pane = window_layout.scroll_pane;
-		Point2D new_pos = new Point2D(_ev.getSceneX(), _ev.getSceneY());
-		
-		if( _ev.getButton() == MouseButton.MIDDLE ) {
-			Point2D diff = mouse_pos.subtract(new_pos);
-			double canvas_w = drawable_pane.getWidth();
-			double canvas_h = drawable_pane.getHeight();
-			
-			double x_translation = scroll_pane.getHvalue();
-			x_translation = _ev.isControlDown() ? x_translation + diff.getX() / canvas_w * 2 : x_translation + diff.getX() / canvas_w;
-			
-			double y_translation = scroll_pane.getVvalue();
-			y_translation = _ev.isControlDown() ? y_translation + diff.getY() / canvas_h * 2 : y_translation + diff.getY() / canvas_h;
-			
-			scroll_pane.setHvalue(x_translation);
-			scroll_pane.setVvalue(y_translation);
-		}
-		
-		window_model.setMousePos(new_pos);
-	}
-	
-	private void onMousePressed(MouseEvent _ev) {
-		DrawablePane drawable_pane = window_layout.drawable_pane;
-		ScrollPane scroll_pane = window_layout.scroll_pane;
-		StatusBar status_bar = window_layout.status_bar;
-		AnnotationPane annotation_pane = window_layout.annotation_pane;
-		UserContext user_context = window_model.user_context;
-		
-		window_model.setMousePos(new Point2D(_ev.getSceneX(), _ev.getSceneY()));
-		Point2D mouse_pos = window_model.getMousePos();
-		Point2D canvas_mouse_pos = getCanvasMousePos();
-		 
-		if( user_context == UserContext.DRAWING_LINE && _ev.getButton() == MouseButton.PRIMARY ) {	// TODO dodaæ anulowanie rysowania
-			if( window_model.temp1 == null)
-				window_model.temp1 = canvas_mouse_pos;
-			else if( window_model.temp2 == null ) {
-				window_model.temp2 = canvas_mouse_pos;
-				window_model.temp_line = new DrawableLine(window_model.temp1, window_model.temp2, Color.RED, drawable_pane);
-				drawable_pane.addLine(window_model.temp_line);
-				window_model.temp1 = window_model.temp2 = null;
-				changeUserContext(UserContext.DOING_NOTHING);
-			}
-		} else if( user_context == UserContext.DRAWING_BROKEN_LINE ) {
-			if( _ev.getButton() == MouseButton.PRIMARY ) {
-				if( window_model.temp1 == null )
-					window_model.temp1 = canvas_mouse_pos;
-				else if( window_model.temp2 == null ) {
-					window_model.temp2 = canvas_mouse_pos;
-					 
-					if( window_model.temp_broken_line == null ) {
-						window_model.temp_broken_line = new DrawableBrokenLine(window_model.temp1, window_model.temp2, Color.BLUE, drawable_pane);
-						drawable_pane.addBrokenLine(window_model.temp_broken_line);
-					} else
-						window_model.temp_broken_line.addLine(window_model.temp1, window_model.temp2);
-					 
-					window_model.temp1 = window_model.temp2;
-					window_model.temp2 = null;
-				}
-			} else if( _ev.getButton() == MouseButton.SECONDARY ) {
-				window_model.temp1 = window_model.temp2 = null;
-				window_model.temp_broken_line = null;
-				changeUserContext(UserContext.DOING_NOTHING);
-			}
-		} else if( user_context == UserContext.GETTING_DISTANCE ) { // dodaæ anulowanie obliczania
-			if( _ev.getButton() == MouseButton.PRIMARY ) {
-				if( window_model.temp1 == null )
-					window_model.temp1 = canvas_mouse_pos;
-				else if( window_model.temp2 == null ) {
-					window_model.temp2 = canvas_mouse_pos;
-					status_bar.removeText();
-					status_bar.addText("Odleg³oœæ pomiêdzy " + window_model.temp1 + " oraz " + window_model.temp2 + " = " + window_model.temp1.distance(window_model.temp2));
-					window_model.temp1 = window_model.temp2 = null;
-				}
-			}
-		} else if( user_context == UserContext.ADDING_ANNOTATION ) {
-			if( _ev.getButton() == MouseButton.PRIMARY ) {
-				annotation_pane.showAtLocation(mouse_pos, -1.0, false);
-				window_model.temp1 = canvas_mouse_pos;
-				if( window_model.temp_annotation == null ) {
-					createTempAnnotation();
-				} else {
-					window_model.temp_annotation.changePosition(window_model.temp1);
-				}
-				 
-				 
-			} else if( _ev.getButton() == MouseButton.SECONDARY ) {
-				onAnnotationCancel();
-				changeUserContext(UserContext.DOING_NOTHING);
-			}
-		}
-	}
-	
-	private void onDockbarMouseMoved(MouseEvent _ev) {
-		Dockbar dockbar = window_layout.dockbar;
-		int selected_icon = dockbar.getHoveredIconIndex();
-		int old_selected_icon = dockbar.getOldHoveredIconIndex();
-		List<ImageButton> all_icons = dockbar.getIcons();
-		
-		if( old_selected_icon != selected_icon ) {
-			window_layout.removeTextFromStatusBar();
-			
-			if( selected_icon >= 0 )
-				window_layout.addTextToStatusBar(all_icons.get(selected_icon).getHint());
-		}
-	}
-	
-	private void onDockbarMouseEntered(MouseEvent _ev) {
-		window_layout.addTextToStatusBar("");
-	}
-	
-	private void onDockbarMouseExited(MouseEvent _ev) {
-		window_layout.dockbar.resetHoveredIndex();
-		window_layout.removeTextFromStatusBar();
 	}
 	
 	public void showAnnotationPane(ScrollPane _annotation_text_pane) {
@@ -349,72 +120,6 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 	
 	public void hideAnnotationPane(ScrollPane _annotation_text_pane) {
 		window_layout.root.getChildren().remove(_annotation_text_pane);
-	}
-	
-	private void onHotkeyAction(KeyEvent _ev) {
-		if( InputUtils.withControl(_ev) )
-			onHotkeyWithControlDown(_ev);
-		else if( InputUtils.withAlt(_ev) )
-			onHotkeyWithAltDown(_ev);
-		else if( InputUtils.withoutModifiers(_ev) )
-			onHotkeyWithoutModifiers(_ev);
-	}
-	
-	private void onHotkeyWithAltDown(KeyEvent _ev) {
-		if( InputUtils.onF4(_ev) )
-			onLeaveConference();
-	}
-	
-	private void onHotkeyWithControlDown(KeyEvent _ev) {
-		if( InputUtils.onLetterC(_ev) )
-			onChatBtnAction();
-		else if( InputUtils.onLetterH(_ev) )
-			onHelpAction();
-		else if( InputUtils.onLetterM(_ev) )
-			onMembersBtnAction();
-		else if( InputUtils.onArrowUp(_ev) )
-			goToTopChatPane();
-		else if( InputUtils.onArrowDown(_ev) )
-			goToBottomChatPane();
-		else if( InputUtils.onSpace(_ev) )
-			changeFocus();
-	}
-	
-	private void changeFocus() {
-		ChatPane chat_pane = window_layout.chat_pane;
-		
-		if( chat_pane.isTextAreaFocused() )
-			window_layout.root.requestFocus();
-		else
-			chat_pane.requestFocusForTextArea();
-	}
-	
-	private void goToTopChatPane() {
-		ChatPane chat_pane = window_layout.chat_pane;
-		
-		if( chat_pane.isVisible() )
-			chat_pane.goToTop();
-	}
-	
-	private void goToBottomChatPane() {
-		ChatPane chat_pane = window_layout.chat_pane;
-		
-		if( chat_pane.isVisible() )
-			chat_pane.goToBottom();
-	}
-	
-	private void onHotkeyWithoutModifiers(KeyEvent _ev) {
-		if( InputUtils.onAnyArrow(_ev) ) {
-			navigateCanvas(_ev);
-			_ev.consume();
-		} else if( InputUtils.onDigit0(_ev) )
-			changeCanvasLayerVisibility(LayersToDraw.ONLY_IMAGE);
-		else if( InputUtils.onDigit1(_ev) )
-			changeCanvasLayerVisibility(LayersToDraw.LINES);
-		else if( InputUtils.onDigit2(_ev) )
-			changeCanvasLayerVisibility(LayersToDraw.ANNOTATIONS);
-		else if( InputUtils.onDigit3(_ev) )
-			changeCanvasLayerVisibility(LayersToDraw.DRAW_ALL);
 	}
 	
 	public void onChatBtnAction() {
@@ -478,31 +183,90 @@ public class ConfWindow extends Window implements ChangeListener<Number>, Networ
 		
 	}
 	
-	private void navigateCanvas(KeyEvent _ev) {
-		double x_offset = InputUtils.onArrowLeft(_ev) ? -0.1 : InputUtils.onArrowRight(_ev) ? 0.1 : 0.0;
-		double y_offset = InputUtils.onArrowUp(_ev) ? -0.1 : InputUtils.onArrowDown(_ev) ? 0.1 : 0.0;
-		Point2D offset = new Point2D(x_offset, y_offset);
-		navigateCanvas(offset);
-	}
-
 	@Override
-	public void onStateChanged(com.pp.iwm.teledoc.network.User.State _state) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onReceive(Connection _connection, Object _message) {
-		System.out.println(_message);
-		if( User.instance().isConnected() ) {
-			if( _message instanceof GroupMessageResponse )
-				onGroupMessageResponseReceive((GroupMessageResponse)_message);
-		}
+	protected void createModel() {
+		window_model = new ConfWindowModel(this);
+		model = window_model;
 	}
 	
-	private void onGroupMessageResponseReceive(GroupMessageResponse _response) {
-		System.out.println("No elo");
-		ChatMessage message = new ChatMessage(new Date(), _response.getAuthorName() + " " + _response.getAuthorSurname(), _response.getMessage());
-		Platform.runLater(() -> window_layout.chat_pane.addMessage(message));
+	@Override
+	protected void createLayout() {
+		window_layout = new ConfWindowLayout(this);
+		layout = window_layout;
+	}
+	
+	@Override
+	protected void initEventHandlers() {
+		ScrollPane scroll_pane = window_layout.scroll_pane;
+		scroll_pane.addEventFilter(ScrollEvent.SCROLL, ev -> input_assistant.onScrollPaneScroll(ev));
+		scroll_pane.addEventFilter(MouseEvent.MOUSE_DRAGGED, ev -> input_assistant.onScrollPaneDragged(ev));
+		scroll_pane.addEventFilter(MouseEvent.MOUSE_PRESSED, ev -> input_assistant.onScrollPanePressed(ev));
+		
+		Dockbar dockbar = window_layout.dockbar;
+		dockbar.addEventFilter(MouseEvent.MOUSE_MOVED, ev -> input_assistant.onDockbarMouseMoved(ev));
+		dockbar.addEventHandler(MouseEvent.MOUSE_ENTERED, ev -> input_assistant.onDockbarMouseEntered(ev));
+		dockbar.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> input_assistant.onDockbarMouseExited(ev));
+		dockbar.getIcons().get(0).setOnAction(ev -> onDrawLine());
+		dockbar.getIcons().get(1).setOnAction(ev -> onDrawMultipleLines());
+		dockbar.getIcons().get(2).setOnAction(ev -> onInteractiveCursorAction());
+		dockbar.getIcons().get(3).setOnAction(ev -> onAddAnnotation());
+		dockbar.getIcons().get(4).setOnAction(ev -> onImagePanelAction());
+		dockbar.getIcons().get(5).setOnAction(ev -> onCalculateDistance());
+		dockbar.getIcons().get(6).setOnAction(ev -> onUploadImage());
+		dockbar.getIcons().get(7).setOnAction(ev -> onHelpAction());
+		dockbar.getIcons().get(8).setOnAction(ev -> onLeaveConference());
+
+		ImageButton ibtn_chat = window_layout.ibtn_chat;
+		ibtn_chat.addEventHandler(ActionEvent.ACTION, ev -> onChatBtnAction());
+		
+		ImageButton ibtn_members = window_layout.ibtn_members;
+		ibtn_members.addEventHandler(ActionEvent.ACTION, ev -> onMembersBtnAction());
+		
+		Group root = window_layout.root;
+		root.addEventFilter(KeyEvent.KEY_RELEASED, ev -> input_assistant.onHotkeyAction(ev));
+		
+		ChatPane chat_pane = window_layout.chat_pane;
+		chat_pane.opacityProperty().addListener(this);
+		chat_pane.getTextArea().addEventFilter(KeyEvent.KEY_PRESSED, ev -> input_assistant.onChatTextAreaKeyPressed(ev));
+		
+		AnnotationPane annotation_pane = window_layout.annotation_pane;
+		annotation_pane.getTextArea().addEventFilter(KeyEvent.KEY_PRESSED, ev -> input_assistant.onAnnotationPaneTextAreaKeyPressed(ev));
+		annotation_pane.getBtnSubmit().addEventFilter(ActionEvent.ACTION, ev -> onAnnotationSubmit());
+		annotation_pane.getBtnCancel().addEventFilter(ActionEvent.ACTION, ev -> onAnnotationCancel());
+	}
+	
+	@Override
+	public void changed(ObservableValue<? extends Number> _observable, Number _old_value, Number _new_value) {
+		MemberPane member_pane = window_layout.member_pane;
+		
+		if( !window_model.is_chat_hiding )
+			window_model.chat_max_opacity = _new_value.doubleValue();
+		
+		if( _old_value.doubleValue() == 0.0 && _new_value.doubleValue() > 0.0 ) {
+			member_pane.animateToLeft();
+		} else if( (window_model.is_chat_hiding && window_model.chat_max_opacity < 0.7) || 
+				(_old_value.doubleValue() >= 0.7 && _new_value.doubleValue() < 0.7) ) {
+			member_pane.animateToRight(); 
+		}
+	}
+
+	public ConfWindowModel getWindowModel() {
+		return window_model;
+	}
+	
+	public ConfWindowLayout getWindowLayout() {
+		return window_layout;
+	}
+	
+	public ConfWindowDrawableAssistant getDrawableAssistant() {
+		return drawable_assistant;
+	}
+	
+	public ConfWindowNetworkAssistant getNetworkAssistant() {
+		return network_assistant;
+	}
+	
+	public ConfWindowInputAssistant getInputAssistant() {
+		return input_assistant;
 	}
 }

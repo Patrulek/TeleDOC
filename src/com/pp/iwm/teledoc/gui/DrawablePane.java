@@ -7,6 +7,7 @@ import com.pp.iwm.teledoc.drawables.Annotation;
 import com.pp.iwm.teledoc.drawables.DrawableBrokenLine;
 import com.pp.iwm.teledoc.drawables.DrawableLine;
 import com.pp.iwm.teledoc.drawables.DrawableObject;
+import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 import com.pp.iwm.teledoc.windows.Window;
 
@@ -15,6 +16,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
@@ -33,11 +35,13 @@ public class DrawablePane extends Pane {
 	private DrawableCanvas drawable_canvas;
 	private double scale;
 	private LayersToDraw layers_to_draw;
-	private ConfWindow conf_window;
+	private ConfWindowLayout layout;
+	private List<Node> line_layer;
+	private List<Node> marker_layer;
+	private List<Node> annotation_layer;
+	private List<DrawableObject> drawables;
+	private DrawablePaneListener listener;
 	
-	private List<DrawableObject> line_layer;
-	private List<DrawableObject> marker_layer;
-	private List<DrawableObject> annotation_layer;
 	private DrawableObject selected_drawable;
 	private Rectangle[] temp_line_selectors;
 	
@@ -45,13 +49,18 @@ public class DrawablePane extends Pane {
 	// METHODS
 	// =====================================
 	
-	public DrawablePane(ConfWindow _conf_window) {
+	public DrawablePane(ConfWindowLayout _layout) {
 		super();
-		conf_window = _conf_window;
+		layout = _layout;
 		line_layer = new ArrayList<>();
 		marker_layer = new ArrayList<>();
 		annotation_layer = new ArrayList<>();
+		drawables = new ArrayList<>();
 		createLayout();
+	}
+	
+	public void setListener(DrawablePaneListener _listener) {
+		listener = _listener;
 	}
 	
 	public void refreshSelectors() {
@@ -76,7 +85,9 @@ public class DrawablePane extends Pane {
 		selected_drawable = _drawable;
 		hideLineSelectors();
 		
-		if( _drawable instanceof DrawableLine )
+		if( _drawable == null )
+			temp_line_selectors = null;
+		else if( _drawable instanceof DrawableLine )
 			temp_line_selectors = ((DrawableLine)_drawable).getSelectors();
 		else if( _drawable instanceof DrawableBrokenLine )
 			temp_line_selectors = ((DrawableBrokenLine)_drawable).getSelectors();
@@ -103,34 +114,30 @@ public class DrawablePane extends Pane {
 		drawable_canvas.rescaleBy(_rescale_by);
 		scale = drawable_canvas.getScale();
 		resize(scale * 2560.0, scale * 1440.0);		// TODO
+		listener.onRescalePane();
 		
-		for( DrawableObject object : line_layer ) 
-			object.rescale();
-		
-		for( DrawableObject object : marker_layer )
-			object.rescale();
-		
-		for( DrawableObject object : annotation_layer )
-			object.rescale();
+		for( DrawableObject drawable : drawables ) {
+			drawable.setScale(scale);
+			drawable.rescale();
+		}
+	}
+	
+	public void setDrawables(List<DrawableObject> _drawables) {
+		drawables = _drawables;
 	}
 	
 	public double getScale() {
 		return drawable_canvas.getScale();
 	}
 	
-	public void addLine(DrawableLine _line) {
-		line_layer.add(_line);
-		getChildren().add(_line.getLine());
-		annotationLayerToFront();
-	}
-	
-	private void annotationLayerToFront() {
-		for( DrawableObject annotation : annotation_layer )
-			((Annotation)annotation).getCircle().toFront();
-	}
-	
-	public void addBrokenLine(DrawableBrokenLine _broken_line) {
-		line_layer.add(_broken_line);
+	public void addDrawable(DrawableObject _drawable) {
+		if( _drawable instanceof DrawableLine )
+			getChildren().add(((DrawableLine)_drawable).getLine());
+		else if( _drawable instanceof DrawableBrokenLine )
+			getChildren().addAll(((DrawableBrokenLine)_drawable).getLines());
+		else if( _drawable instanceof Annotation )
+			getChildren().add(((Annotation)_drawable).getCircle());
+		
 		annotationLayerToFront();
 	}
 	
@@ -139,9 +146,19 @@ public class DrawablePane extends Pane {
 		annotationLayerToFront();
 	}
 	
-	public void addAnnotation(Annotation _annotation) {
-		annotation_layer.add(_annotation);
-		getChildren().add(_annotation.getCircle());
+	public void removeDrawable(DrawableObject _drawable) {
+		if( _drawable instanceof DrawableLine )
+			getChildren().remove(((DrawableLine)_drawable).getLine());
+		else if( _drawable instanceof DrawableBrokenLine )
+			getChildren().removeAll(((DrawableBrokenLine)_drawable).getLines());
+		else if( _drawable instanceof Annotation )
+			getChildren().remove(((Annotation)_drawable).getCircle());
+	}
+	
+	private void annotationLayerToFront() {
+		for( Node node : annotation_layer )
+			if( node instanceof Circle )
+				((Circle)node).toFront();
 	}
 	
 	public void removeAnnotation(Annotation _annotation) {
@@ -154,8 +171,22 @@ public class DrawablePane extends Pane {
 		redrawLayers();
 	}
 	
+	public void setLineLayer(List<Node> _line_layer) {
+		line_layer = _line_layer;
+	}
+	
+	public void setMarkerLayer(List<Node> _marker_layer) {
+		marker_layer = _marker_layer;
+	}
+	
+	public void setAnnotationLayer(List<Node> _annotation_layer) {
+		annotation_layer = _annotation_layer;
+	}
+	
 	private void redrawLayers() {
 		// TODO optymalizacja
+		listener.onRedrawLayers();
+		
 		disableAllLayers();
 		switch( layers_to_draw ) {
 			case LINES:
@@ -185,44 +216,10 @@ public class DrawablePane extends Pane {
 		}
 	}
 	
-	//TODO
-	private List<Node> lineLayer() {
-		List<Node> layer = new ArrayList<>();
-		
-		for( DrawableObject drawable : line_layer ) {
-			if( drawable instanceof DrawableLine ) {
-				DrawableLine line = (DrawableLine) drawable;
-				layer.add(line.getLine());
-			} else {
-				DrawableBrokenLine broken_line = (DrawableBrokenLine)drawable;
-				layer.addAll(broken_line.getLines());
-			}
-		}
-			
-		return layer;
-	}
-	
-	private List<Node> markerLayer() {
-		List<Node> layer = new ArrayList<>();
-		
-		return layer;
-	}
-	
-	private List<Node> annotationLayer() {
-		List<Node> layer = new ArrayList<>();
-		
-		for( DrawableObject drawable : annotation_layer ) {
-			Annotation annotation = (Annotation)drawable;
-			layer.add(annotation.getCircle());
-		}
-		
-		return layer;
-	}
-	
 	private void disableAllLayers() {
-		getChildren().removeAll(lineLayer());
-		getChildren().removeAll(markerLayer());
-		getChildren().removeAll(annotationLayer());
+		getChildren().removeAll(line_layer);
+		getChildren().removeAll(marker_layer);
+		getChildren().removeAll(annotation_layer);
 	}
 	
 	private void enableAllLayers() {
@@ -232,29 +229,19 @@ public class DrawablePane extends Pane {
 	}
 	
 	private void enableLineLayer() {
-		List<Node> lines = lineLayer();
-		getChildren().addAll(lines);
+		getChildren().addAll(line_layer);
 	}
 	
 	private void enableMarkerLayer() {
-		List<Node> markers = markerLayer();
-		getChildren().addAll(markers);
+		getChildren().addAll(marker_layer);
 	}
 	
 	private void enableAnnotationLayer() {
-		List<Node> annotations = annotationLayer();
-		getChildren().addAll(annotations);
+		getChildren().addAll(annotation_layer);
 	}
 	
-	public ConfWindow getConfWindow() {
-		return conf_window;
-	}
-	
-	public Point2D getPaneMousePos() {
-		return conf_window.getCanvasMousePos();
-	}
-	
-	public Point2D getPaneMouseDelta() {
-		return conf_window.getCanvasMouseDelta();
+	public interface DrawablePaneListener {
+		public void onRedrawLayers();
+		public void onRescalePane();
 	}
 }
