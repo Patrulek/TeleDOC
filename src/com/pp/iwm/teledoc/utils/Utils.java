@@ -70,8 +70,13 @@ public class Utils {
 	public static final int ACT_DISTANCE = 1027;
 	public static final int ACT_IMAGE_PANEL = 1028;
 	public static final int ACT_PICK_VIDEO = 1029;
+	public static final int ACT_LAYERS = 1030;
+	public static final int ACT_LOCK = 1031;
+	public static final int ACT_UNLOCK = 1032;
+	public static final int ACT_EYE = 1033;
+	public static final int ACT_DISABLED = 1034;
 	
-	public static final int ACT_EXIT_APP = 1030;
+	public static final int ACT_EXIT_APP = 1040;
 	
 	// PROMPTS
 	public static final String PROMPT_EMAIL = "Email";
@@ -117,6 +122,11 @@ public class Utils {
 	public static final String HINT_DISTANCE = "Oblicz odleg³oœæ";
 	public static final String HINT_IMAGE_PANEL = "Wyœwietl panel z otwartymi obrazami";
 	public static final String HINT_PICK_VIDEO = "Oderwij i powiêksz obraz z kamery";
+	public static final String HINT_LAYERS = "Warstwy";
+	public static final String HINT_LOCK = "Zablokuj panel";
+	public static final String HINT_UNLOCK = "Odblokuj panel";
+	public static final String HINT_EYE = "Pokaz warstwê";
+	public static final String HINT_DISABLED = "Ukryj warstwê";
 	
 	// MESSAGES
 	public static final String MSG_INPUT_EMAIL = "Podaj swój email";
@@ -168,7 +178,11 @@ public class Utils {
 	public static final int IMG_DISTANCE = 2039;
 	public static final int IMG_IMAGE_PANEL = 2040;
 	public static final int IMG_PICK_VIDEO = 2041;
-	
+	public static final int IMG_LAYERS = 2042;
+	public static final int IMG_LOCK = 2043;
+	public static final int IMG_UNLOCK = 2044;
+	public static final int IMG_EYE = 2045;
+	public static final int IMG_DISABLED = 2046;
 	
 	// other utils
 	

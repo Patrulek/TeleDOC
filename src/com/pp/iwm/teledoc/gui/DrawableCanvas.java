@@ -1,19 +1,11 @@
 package com.pp.iwm.teledoc.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.pp.iwm.teledoc.drawables.DrawableObject;
-import com.pp.iwm.teledoc.drawables.Annotation;
-import com.pp.iwm.teledoc.drawables.DrawableLine;
 import com.pp.iwm.teledoc.objects.ImageManager;
 
 import javafx.geometry.Bounds;
-import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
 
 public class DrawableCanvas extends Canvas {
 	
@@ -136,6 +128,10 @@ public class DrawableCanvas extends Canvas {
     @Override
     public double prefHeight(double width) {
         return getHeight();
+    }
+    
+    public Bounds getViewportBounds() {
+    	return viewport_bounds;
     }
 }
 

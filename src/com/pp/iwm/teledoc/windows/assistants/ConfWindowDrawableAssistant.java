@@ -8,7 +8,6 @@ import com.pp.iwm.teledoc.drawables.Annotation.State;
 import com.pp.iwm.teledoc.drawables.DrawableObject.DrawableObjectListener;
 import com.pp.iwm.teledoc.gui.DrawablePane;
 import com.pp.iwm.teledoc.gui.DrawablePane.DrawablePaneListener;
-import com.pp.iwm.teledoc.gui.DrawablePane.LayersToDraw;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.models.ConfWindowModel;
 import com.pp.iwm.teledoc.models.ConfWindowModel.UserContext;
@@ -37,10 +36,6 @@ public class ConfWindowDrawableAssistant implements DrawablePaneListener, Drawab
 		window = _window;
 		model = window.getWindowModel();
 		layout = window.getWindowLayout();
-	}
-	
-	public void changeCanvasLayerVisibility(LayersToDraw _layers_to_draw) {
-		layout.drawable_pane.changeLayer(_layers_to_draw);
 	}
 	
 	public void createTempAnnotation() {

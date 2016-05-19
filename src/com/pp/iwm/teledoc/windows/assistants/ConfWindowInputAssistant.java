@@ -7,7 +7,6 @@ import com.pp.iwm.teledoc.drawables.DrawableLine;
 import com.pp.iwm.teledoc.gui.ChatPane;
 import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.DrawablePane;
-import com.pp.iwm.teledoc.gui.DrawablePane.LayersToDraw;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.models.ConfWindowModel;
@@ -259,14 +258,7 @@ public class ConfWindowInputAssistant {
 		if( InputUtils.onAnyArrow(_ev) ) {
 			navigateCanvas(_ev);
 			_ev.consume();
-		} else if( InputUtils.onDigit0(_ev) )
-			drawable_assistant.changeCanvasLayerVisibility(LayersToDraw.ONLY_IMAGE);
-		else if( InputUtils.onDigit1(_ev) )
-			drawable_assistant.changeCanvasLayerVisibility(LayersToDraw.LINES);
-		else if( InputUtils.onDigit2(_ev) )
-			drawable_assistant.changeCanvasLayerVisibility(LayersToDraw.ANNOTATIONS);
-		else if( InputUtils.onDigit3(_ev) )
-			drawable_assistant.changeCanvasLayerVisibility(LayersToDraw.DRAW_ALL);
+		}
 	}
 
 	

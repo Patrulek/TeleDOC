@@ -52,6 +52,7 @@ public class DrawableBrokenLine extends DrawableObject {
 	public DrawableBrokenLine(Point2D _from, Point2D _to, Color _color, DrawablePane _drawable_pane) {
 		super();
 		drawable_pane = _drawable_pane;
+		scale = drawable_pane.getScale();
 		end_points = new ArrayList<>();
 		line_width = 2.0; // TODO
 		lines = new ArrayList<>();
@@ -61,8 +62,8 @@ public class DrawableBrokenLine extends DrawableObject {
 		addLine(line);
 		
 		line_selectors = new Rectangle[2];
-		line_selectors[0] = new Rectangle(SELECTOR_SIZE, SELECTOR_SIZE);
-		line_selectors[1] = new Rectangle(SELECTOR_SIZE, SELECTOR_SIZE);
+		line_selectors[0] = new Rectangle(SELECTOR_SIZE * scale, SELECTOR_SIZE * scale);
+		line_selectors[1] = new Rectangle(SELECTOR_SIZE * scale, SELECTOR_SIZE * scale);
 		line_selectors[0].setOnMouseDragged(ev -> onSelectorDragged(ev, 0));
 		line_selectors[1].setOnMouseDragged(ev -> onSelectorDragged(ev, 1));
 		

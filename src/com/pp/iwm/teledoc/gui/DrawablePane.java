@@ -11,6 +11,11 @@ import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 import com.pp.iwm.teledoc.windows.Window;
 
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -20,7 +25,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 
-public class DrawablePane extends Pane {
+public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 	
 	// =====================================
 	// FIELDS 
@@ -28,19 +33,22 @@ public class DrawablePane extends Pane {
 
 	// layer0 - image | layer1 - (broken) lines | layer2 - marker and distance pointer | layer3 - annotations
 	
-	public enum LayersToDraw {
-		ONLY_IMAGE, LINES, MARKERS, ANNOTATIONS, LINES_AND_MARKERS, LINES_AND_ANNOTATIONS, MARKERS_AND_ANNOTATIONS, DRAW_ALL;
+	public enum Layers {
+		LINES, MARKERS, ANNOTATIONS;
 	}
 	
 	private DrawableCanvas drawable_canvas;
 	private double scale;
-	private LayersToDraw layers_to_draw;
 	private ConfWindowLayout layout;
 	private List<Node> line_layer;
 	private List<Node> marker_layer;
 	private List<Node> annotation_layer;
 	private List<DrawableObject> drawables;
 	private DrawablePaneListener listener;
+	
+	private BooleanProperty lineLayerVisibilityProperty;
+	private BooleanProperty markerLayerVisibilityProperty;
+	private BooleanProperty annotationLayerVisibilityProperty;
 	
 	private DrawableObject selected_drawable;
 	private Rectangle[] temp_line_selectors;
@@ -56,7 +64,28 @@ public class DrawablePane extends Pane {
 		marker_layer = new ArrayList<>();
 		annotation_layer = new ArrayList<>();
 		drawables = new ArrayList<>();
+		
+		lineLayerVisibilityProperty = new SimpleBooleanProperty(true);
+		markerLayerVisibilityProperty = new SimpleBooleanProperty(true);
+		annotationLayerVisibilityProperty = new SimpleBooleanProperty(true);
+		
+		lineLayerVisibilityProperty.addListener(this);
+		markerLayerVisibilityProperty.addListener(this);
+		annotationLayerVisibilityProperty.addListener(this);
+		
 		createLayout();
+	}
+	
+	public BooleanProperty getLineLayerVisibilityProperty() {
+		return lineLayerVisibilityProperty;
+	}
+	
+	public BooleanProperty getMarkerLayerVisibilityProperty() {
+		return markerLayerVisibilityProperty;
+	}
+	
+	public BooleanProperty getAnnotationLayerVisibilityProperty() {
+		return annotationLayerVisibilityProperty;
 	}
 	
 	public void setListener(DrawablePaneListener _listener) {
@@ -112,9 +141,24 @@ public class DrawablePane extends Pane {
 	
 	public void rescaleBy(double _rescale_by) {
 		drawable_canvas.rescaleBy(_rescale_by);
-		scale = drawable_canvas.getScale();
-		resize(scale * 2560.0, scale * 1440.0);		// TODO
+		double new_scale = drawable_canvas.getScale();
+		
+		if( new_scale == scale )
+			return;
+
+		
+		double prev_h = layout.scroll_pane.getHvalue();
+		double prev_v = layout.scroll_pane.getVvalue();
+		
+		scale = new_scale;
+		resize(drawable_canvas.getWidth(), drawable_canvas.getHeight());
+
 		listener.onRescalePane();
+		
+		// TODO temp solution
+		layout.scroll_pane.setHvalue((7 * prev_h + layout.scroll_pane.getHvalue()) / 8.0);
+		layout.scroll_pane.setVvalue((7 * prev_v + layout.scroll_pane.getVvalue()) / 8.0);
+		
 		
 		for( DrawableObject drawable : drawables ) {
 			drawable.setScale(scale);
@@ -166,11 +210,6 @@ public class DrawablePane extends Pane {
 		annotation_layer.remove(_annotation);
 	}
 	
-	public void changeLayer(LayersToDraw _layers_to_draw) {
-		layers_to_draw = _layers_to_draw;
-		redrawLayers();
-	}
-	
 	public void setLineLayer(List<Node> _line_layer) {
 		line_layer = _line_layer;
 	}
@@ -183,65 +222,88 @@ public class DrawablePane extends Pane {
 		annotation_layer = _annotation_layer;
 	}
 	
-	private void redrawLayers() {
+	private void redrawLayers(Layers _changed_layer) {
 		// TODO optymalizacja
 		listener.onRedrawLayers();
 		
-		disableAllLayers();
-		switch( layers_to_draw ) {
+		switch( _changed_layer ) {
 			case LINES:
-				enableLineLayer();
+				disableLineLayer();
+				hideLineSelectors();
+				
+				if( lineLayerVisibilityProperty.get() ) {
+					enableLineLayer();
+					showLineSelectors();
+					annotationLayerToFront();
+				}
+				
 				break;
 			case MARKERS:
-				enableMarkerLayer();
+				disableMarkerLayer();
+				
+				if( markerLayerVisibilityProperty.get() ) {
+					enableMarkerLayer();
+					annotationLayerToFront();
+				}
+				
 				break;
 			case ANNOTATIONS:
-				enableAnnotationLayer();
-				break;
-			case LINES_AND_MARKERS:
-				enableLineLayer();
-				enableMarkerLayer();
-				break;
-			case LINES_AND_ANNOTATIONS:
-				enableLineLayer();
-				enableAnnotationLayer();
-				break;
-			case MARKERS_AND_ANNOTATIONS:
-				enableMarkerLayer();
-				enableAnnotationLayer();
-				break;
-			case DRAW_ALL:
-				enableAllLayers();
+				disableAnnotationLayer();
+				
+				if( annotationLayerVisibilityProperty.get() ) {
+					enableAnnotationLayer();
+					annotationLayerToFront();
+				}
+				
 				break;
 		}
+		
+		selectorsToFront();
 	}
 	
-	private void disableAllLayers() {
-		getChildren().removeAll(line_layer);
-		getChildren().removeAll(marker_layer);
-		getChildren().removeAll(annotation_layer);
-	}
-	
-	private void enableAllLayers() {
-		enableLineLayer();
-		enableMarkerLayer();
-		enableAnnotationLayer();
+	private void selectorsToFront() {
+		if( temp_line_selectors != null ) {
+			temp_line_selectors[0].toFront();
+			temp_line_selectors[1].toFront();
+		}
 	}
 	
 	private void enableLineLayer() {
 		getChildren().addAll(line_layer);
 	}
 	
+	private void disableLineLayer() {
+		getChildren().removeAll(line_layer);
+	}
+	
 	private void enableMarkerLayer() {
 		getChildren().addAll(marker_layer);
+	}
+	
+	private void disableMarkerLayer() {
+		getChildren().removeAll(marker_layer);
 	}
 	
 	private void enableAnnotationLayer() {
 		getChildren().addAll(annotation_layer);
 	}
 	
+	private void disableAnnotationLayer() {
+		getChildren().removeAll(annotation_layer);
+	}
+	
 	public interface DrawablePaneListener {
 		public void onRedrawLayers();
 		public void onRescalePane();
+	}
+
+	@Override
+	public void changed(ObservableValue<? extends Boolean> _observable, Boolean _old, Boolean _new) {
+		if( lineLayerVisibilityProperty == _observable )
+			redrawLayers(Layers.LINES);
+		else if( markerLayerVisibilityProperty == _observable )
+			redrawLayers(Layers.MARKERS);
+		else if( annotationLayerVisibilityProperty == _observable )
+			redrawLayers(Layers.ANNOTATIONS);
 	}
 }

@@ -218,7 +218,6 @@ public class ActionPaneConf extends Pane implements ChangeListener<Boolean> {
 	@Override	// TODO potrzeba dostroiæ
 	public void changed(ObservableValue<? extends Boolean> _observable, Boolean _old, Boolean _new) {
 		if( !_old && _new ) {
-			fade_animation.stop();
 			fade_animation.customize(1.0, getOpacity(), 400, 400);
 			fade_animation.playForward();
 		} else if( _old && !_new ) {

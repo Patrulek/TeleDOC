@@ -8,6 +8,7 @@ import com.pp.iwm.teledoc.gui.ChatPane;
 import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.DrawablePane;
 import com.pp.iwm.teledoc.gui.ImageButton;
+import com.pp.iwm.teledoc.gui.LayersPanel;
 import com.pp.iwm.teledoc.gui.MemberPane;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.models.ConfWindowModel;
@@ -96,20 +97,18 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		
 		window_layout.annotation_pane.hide();
 		tmp_ann.changeState(State.DRAWN);
-		tmp_ann = null;
+		window_model.temp_annotation = null;
 		window_model.temp1 = window_model.temp2 = null;
 		changeUserContext(UserContext.DOING_NOTHING);
 		window_layout.annotation_pane.getTextArea().setText("");
 	}
 	
 	public void onAnnotationCancel() {
-		Annotation tmp_ann = window_model.temp_annotation;
-		
 		window_layout.annotation_pane.hide();
 		window_model.temp1 = window_model.temp2 = null;
 		 
-		if( tmp_ann != null ) {
-			window_layout.drawable_pane.removeAnnotation(tmp_ann);
+		if( window_model.temp_annotation != null ) {
+			window_layout.drawable_pane.removeAnnotation(window_model.temp_annotation);
 			window_model.temp_annotation = null;
 		}
 	}
@@ -168,6 +167,7 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	public void onLeaveConference() {
 		User.instance().leaveConference();
 		window_layout.action_pane.stopOpacityThread();
+		window_layout.layers_pane.stopVisibilityThread();
 		Platform.runLater(() -> openWindowAndHideCurrent(new AppWindow()));
 	}
 	
@@ -177,6 +177,13 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	
 	public void onAddAnnotation() {
 		changeUserContext(UserContext.ADDING_ANNOTATION);
+	}
+	
+	public void onLayers() {
+		if( window_layout.layers_pane.isVisible() )
+			window_layout.layers_pane.hide();
+		else
+			window_layout.layers_pane.show();
 	}
 	
 	public void onHelpAction() {
@@ -212,9 +219,10 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		dockbar.getIcons().get(3).setOnAction(ev -> onAddAnnotation());
 		dockbar.getIcons().get(4).setOnAction(ev -> onImagePanelAction());
 		dockbar.getIcons().get(5).setOnAction(ev -> onCalculateDistance());
-		dockbar.getIcons().get(6).setOnAction(ev -> onUploadImage());
-		dockbar.getIcons().get(7).setOnAction(ev -> onHelpAction());
-		dockbar.getIcons().get(8).setOnAction(ev -> onLeaveConference());
+		dockbar.getIcons().get(6).setOnAction(ev -> onLayers());
+		dockbar.getIcons().get(7).setOnAction(ev -> onUploadImage());
+		dockbar.getIcons().get(8).setOnAction(ev -> onHelpAction());
+		dockbar.getIcons().get(9).setOnAction(ev -> onLeaveConference());
 
 		ImageButton ibtn_chat = window_layout.ibtn_chat;
 		ibtn_chat.addEventHandler(ActionEvent.ACTION, ev -> onChatBtnAction());
@@ -233,6 +241,23 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		annotation_pane.getTextArea().addEventFilter(KeyEvent.KEY_PRESSED, ev -> input_assistant.onAnnotationPaneTextAreaKeyPressed(ev));
 		annotation_pane.getBtnSubmit().addEventFilter(ActionEvent.ACTION, ev -> onAnnotationSubmit());
 		annotation_pane.getBtnCancel().addEventFilter(ActionEvent.ACTION, ev -> onAnnotationCancel());
+		
+		LayersPanel layers_pane = window_layout.layers_pane;
+		layers_pane.getLineLayerBtn().addEventHandler(ActionEvent.ACTION, ev -> onLineLayerBtn());
+		layers_pane.getMarkerLayerBtn().addEventHandler(ActionEvent.ACTION, ev -> onMarkerLayerBtn());
+		layers_pane.getAnnotationLayerBtn().addEventHandler(ActionEvent.ACTION, ev -> onAnnotationLayerBtn());
+	}
+	
+	private void onLineLayerBtn() {
+		
+	}
+	
+	private void onMarkerLayerBtn() {
+		
+	}
+	
+	private void onAnnotationLayerBtn() {
+		
 	}
 	
 	@Override

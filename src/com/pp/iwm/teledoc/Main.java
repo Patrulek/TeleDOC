@@ -82,5 +82,10 @@ public class Main extends Application {
 		ImageManager.instance().loadImage(Utils.IMG_DISTANCE, "/assets/distance_icon.png");
 		ImageManager.instance().loadImage(Utils.IMG_IMAGE_PANEL, "/assets/image_panel_icon.png");
 		ImageManager.instance().loadImage(Utils.IMG_PICK_VIDEO, "/assets/pick_video.png");
+		ImageManager.instance().loadImage(Utils.IMG_LAYERS, "/assets/layers_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_LOCK, "/assets/lock_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_UNLOCK, "/assets/unlock_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_EYE, "/assets/eye_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_DISABLED, "/assets/disabled_icon.png");
 	}
 }

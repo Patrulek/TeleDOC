@@ -10,6 +10,7 @@ import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.DoubleStateImageButton;
 import com.pp.iwm.teledoc.gui.DrawablePane;
 import com.pp.iwm.teledoc.gui.ImageButton;
+import com.pp.iwm.teledoc.gui.LayersPanel;
 import com.pp.iwm.teledoc.gui.MemberPane;
 import com.pp.iwm.teledoc.gui.StatusBar;
 import com.pp.iwm.teledoc.utils.Utils;
@@ -45,6 +46,7 @@ public class ConfWindowLayout extends WindowLayout {
 	public DrawablePane drawable_pane;
 	public AnnotationPane annotation_pane;
 	public ActionPaneConf action_pane;
+	public LayersPanel layers_pane;
 	public DoubleStateImageButton ibtn_camera;
 	public DoubleStateImageButton ibtn_microphone;
 	public DoubleStateImageButton ibtn_chat;
@@ -75,6 +77,7 @@ public class ConfWindowLayout extends WindowLayout {
 		createAnnotationPane();
 		createActionPane();
 		createButtons();
+		createLayersPane();
 		
 		addElementsToScene();
 		initializeLater();
@@ -138,17 +141,34 @@ public class ConfWindowLayout extends WindowLayout {
 		ImageButton btn_6 = new ImageButton(Utils.IMG_DISTANCE, Utils.HINT_DISTANCE, Utils.ACT_DISTANCE);
 		dockbar.addIconAndFitInBar(btn_6);
 		
-		// upload
-		ImageButton btn_7 = new ImageButton(Utils.IMG_UPLOAD_ICON, Utils.HINT_UPLOAD_FILE, Utils.ACT_UPLOAD_FILE);
+		// layers
+		ImageButton btn_7 = new ImageButton(Utils.IMG_LAYERS, Utils.HINT_LAYERS, Utils.ACT_LAYERS);
 		dockbar.addIconAndFitInBar(btn_7);
 		
-		// help
-		ImageButton btn_8 = new ImageButton(Utils.IMG_HELP_ICON, Utils.HINT_HELP, Utils.ACT_SHOW_HELP);
+		// upload
+		ImageButton btn_8 = new ImageButton(Utils.IMG_UPLOAD_ICON, Utils.HINT_UPLOAD_FILE, Utils.ACT_UPLOAD_FILE);
 		dockbar.addIconAndFitInBar(btn_8);
 		
-		// new conference from file
-		ImageButton btn_9 = new ImageButton(Utils.IMG_LOGOUT_ICON, Utils.HINT_LEAVE_CONF, Utils.ACT_LOGOUT);
+		// help
+		ImageButton btn_9 = new ImageButton(Utils.IMG_HELP_ICON, Utils.HINT_HELP, Utils.ACT_SHOW_HELP);
 		dockbar.addIconAndFitInBar(btn_9);
+		
+		// new conference from file
+		ImageButton btn_10 = new ImageButton(Utils.IMG_LOGOUT_ICON, Utils.HINT_LEAVE_CONF, Utils.ACT_LOGOUT);
+		dockbar.addIconAndFitInBar(btn_10);
+	}
+	
+	private void createLayersPane() {
+		layers_pane = new LayersPanel(this);
+		drawable_pane.getLineLayerVisibilityProperty().bind(layers_pane.getLineLayerBtn().isOnProperty());
+		drawable_pane.getMarkerLayerVisibilityProperty().bind(layers_pane.getMarkerLayerBtn().isOnProperty());
+		drawable_pane.getAnnotationLayerVisibilityProperty().bind(layers_pane.getAnnotationLayerBtn().isOnProperty());
+		
+		Platform.runLater(() -> {
+			double x_pos = dockbar.getLayoutX() + dockbar.getWidth() - layers_pane.getWidth();
+			double y_pos = dockbar.getIcons().get(6).getLayoutY() + dockbar.getLayoutY();
+			layers_pane.relocate(x_pos, y_pos);
+		});
 	}
 	
 	private void createScrollPane() {
@@ -197,6 +217,7 @@ public class ConfWindowLayout extends WindowLayout {
 								scroll_pane,
 								member_pane,
 								chat_pane,
+								layers_pane,
 								dockbar,
 								action_pane,
 								status_bar,
