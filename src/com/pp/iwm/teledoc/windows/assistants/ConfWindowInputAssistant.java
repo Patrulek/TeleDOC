@@ -192,6 +192,7 @@ public class ConfWindowInputAssistant {
 			scroll_pane.setVvalue(y_translation);
 			
 			layout.annotation_pane.refresh();
+			layout.minimap_pane.refresh();
 		}
 		
 		model.setMousePos(new_pos);

@@ -3,6 +3,7 @@ package com.pp.iwm.teledoc.gui;
 import com.pp.iwm.teledoc.objects.ImageManager;
 
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
@@ -128,6 +129,10 @@ public class DrawableCanvas extends Canvas {
     @Override
     public double prefHeight(double width) {
         return getHeight();
+    }
+    
+    public Point2D getImageSize() {
+    	return new Point2D(image.getWidth(), image.getHeight());
     }
     
     public Bounds getViewportBounds() {

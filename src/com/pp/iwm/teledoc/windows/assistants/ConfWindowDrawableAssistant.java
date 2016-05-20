@@ -113,7 +113,10 @@ public class ConfWindowDrawableAssistant implements DrawablePaneListener, Drawab
 	@Override
 	public void onRescalePane() {
 		layout.drawable_pane.setDrawables(model.drawables);
-		Platform.runLater(() -> layout.annotation_pane.refresh());
+		Platform.runLater(() -> {
+			layout.annotation_pane.refresh();
+			layout.minimap_pane.refresh();
+		});
 	}
 
 	@Override
@@ -192,5 +195,10 @@ public class ConfWindowDrawableAssistant implements DrawablePaneListener, Drawab
 		Point2D image_mouse_pos_delta = model.getMouseDelta();
 		image_mouse_pos_delta = image_mouse_pos_delta.multiply(1.0 / layout.drawable_pane.getScale());
 		return image_mouse_pos_delta;
+	}
+
+	@Override
+	public void onBoundsChanged() {
+		layout.minimap_pane.refresh();
 	}
 }

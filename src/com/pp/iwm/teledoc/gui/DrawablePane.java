@@ -73,6 +73,11 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 		markerLayerVisibilityProperty.addListener(this);
 		annotationLayerVisibilityProperty.addListener(this);
 		
+		layoutBoundsProperty().addListener((observable, old_v, new_v) -> {
+			if(old_v.getWidth() == 0.0 || old_v.getHeight() == 0.0)
+				listener.onBoundsChanged();
+		});
+		
 		createLayout();
 	}
 	
@@ -132,6 +137,10 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 	
 	public void setImageAndResetCanvas(int _image_key) {
 		drawable_canvas.setImageAndResetCanvas(_image_key);
+	}
+	
+	public Point2D getImageSize() {
+		return drawable_canvas.getImageSize();
 	}
 	
 	
@@ -304,6 +313,7 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 	public interface DrawablePaneListener {
 		public void onRedrawLayers();
 		public void onRescalePane();
+		public void onBoundsChanged();
 	}
 
 	@Override

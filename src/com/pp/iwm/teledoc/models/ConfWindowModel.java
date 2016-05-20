@@ -7,6 +7,7 @@ import com.pp.iwm.teledoc.drawables.Annotation;
 import com.pp.iwm.teledoc.drawables.DrawableBrokenLine;
 import com.pp.iwm.teledoc.drawables.DrawableLine;
 import com.pp.iwm.teledoc.drawables.DrawableObject;
+import com.pp.iwm.teledoc.windows.CameraWindow;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 
 import javafx.geometry.Point2D;
@@ -38,6 +39,8 @@ public class ConfWindowModel extends WindowModel {
 	public DrawableBrokenLine temp_broken_line;
 	public Annotation temp_annotation;
 	public Color chosen_color;
+	
+	public CameraWindow camera_window;
 	
 	public List<DrawableObject> drawables;
 	public List<Node> line_layer;

@@ -12,7 +12,9 @@ import com.pp.iwm.teledoc.gui.DoubleStateImageButton;
 import com.pp.iwm.teledoc.gui.DrawablePane;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.LayersPanel;
+import com.pp.iwm.teledoc.gui.MemberCard;
 import com.pp.iwm.teledoc.gui.MemberPane;
+import com.pp.iwm.teledoc.gui.MinimapPane;
 import com.pp.iwm.teledoc.gui.StatusBar;
 import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.ConfWindow;
@@ -48,6 +50,7 @@ public class ConfWindowLayout extends WindowLayout {
 	public AnnotationPane annotation_pane;
 	public AnnotationTextPane annotation_text_pane;
 	public ActionPaneConf action_pane;
+	public MinimapPane minimap_pane;
 	public LayersPanel layers_pane;
 	public DoubleStateImageButton ibtn_camera;
 	public DoubleStateImageButton ibtn_microphone;
@@ -64,7 +67,7 @@ public class ConfWindowLayout extends WindowLayout {
 	}
 	
 	public void create() {
-		Scene scene = new Scene(root, 1366, 768, Color.rgb(0, 0, 0, 0));
+		scene = new Scene(root, 1366, 768, Color.rgb(0, 0, 0, 0));
 		stage.initStyle(StageStyle.TRANSPARENT);
 		stage.setOnCloseRequest(ev -> ev.consume());
 		
@@ -79,6 +82,7 @@ public class ConfWindowLayout extends WindowLayout {
 		createAnnotationPane();
 		createAnnotationTextPane();
 		createActionPane();
+		createMinimapPane();
 		createButtons();
 		createLayersPane();
 		
@@ -108,7 +112,7 @@ public class ConfWindowLayout extends WindowLayout {
 	}
 	
 	private void createMemberPane() {
-		member_pane = new MemberPane(window);
+		member_pane = new MemberPane(this);
 		member_pane.setLayoutX(1065.0); member_pane.setLayoutY(60.0);
 	}
 	
@@ -205,6 +209,11 @@ public class ConfWindowLayout extends WindowLayout {
 		action_pane.setLayoutX(2.0); action_pane.setLayoutY(746.0);
 	}
 	
+	private void createMinimapPane() {
+		minimap_pane = new MinimapPane(this);
+		minimap_pane.relocate(1105.0, 564.0);
+	}
+	
 	private void createButtons() {
 		ibtn_microphone = new DoubleStateImageButton(Utils.IMG_MICROPHONE_ON, Utils.IMG_MICROPHONE_OFF, "mic", Utils.ACT_MICROPHONE);
 		ibtn_microphone.setLayoutX(1300.0); ibtn_microphone.setLayoutY(100.0);
@@ -230,6 +239,7 @@ public class ConfWindowLayout extends WindowLayout {
 								chat_pane,
 								layers_pane,
 								dockbar,
+								minimap_pane,
 								action_pane,
 								status_bar,
 								annotation_pane,
@@ -258,5 +268,9 @@ public class ConfWindowLayout extends WindowLayout {
 	
 	public Point2D mapImagePosToScreenPos(Point2D _image_pos) {
 		return conf_window.mapImagePosToScreenPos(_image_pos);
+	}
+	
+	public void openCameraWindow(MemberCard _card) {
+		conf_window.openCameraWindow(_card);
 	}
 }

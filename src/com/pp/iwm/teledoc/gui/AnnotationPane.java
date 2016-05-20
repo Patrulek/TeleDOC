@@ -81,7 +81,8 @@ public class AnnotationPane extends Pane {
 	}
 	
 	public void refresh() {
-		calculatePosition();
+		if( current_ann != null )
+			calculatePosition();
 	}
 	
 	private void calculatePosition() {

@@ -9,6 +9,7 @@ import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.DrawablePane;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.LayersPanel;
+import com.pp.iwm.teledoc.gui.MemberCard;
 import com.pp.iwm.teledoc.gui.MemberPane;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.models.ConfWindowModel;
@@ -59,6 +60,8 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		
 		ImageManager.instance().loadImageForUser(2099, "/assets/big_image.jpg");
 		User.instance().setCurrentImage(2099);
+		
+		window_layout.minimap_pane.setImage(2099);
 	}
 	
 	public void mapMousePosToImageMousePos() {
@@ -129,6 +132,7 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		if( window_model.temp_annotation != null ) {
 			window_layout.drawable_pane.removeAnnotation(window_model.temp_annotation);
 			window_model.temp_annotation = null;
+			window_layout.annotation_pane.hide();
 		}
 		
 		if( window_model.selected_drawable != null && window_model.selected_drawable instanceof Annotation )
@@ -188,6 +192,10 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	
 	public void onLeaveConference() {
 		User.instance().leaveConference();
+		
+		if( window_model.camera_window != null )
+			window_model.camera_window.hide();
+		
 		window_layout.action_pane.stopOpacityThread();
 		window_layout.layers_pane.stopVisibilityThread();
 		Platform.runLater(() -> openWindowAndHideCurrent(new AppWindow()));
@@ -217,6 +225,19 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	
 	public void onHelpAction() {
 		
+	}
+	
+	public void openCameraWindow(MemberCard _card) {
+		if( window_model.camera_window == null ) {
+			window_model.camera_window = new CameraWindow();
+			window_model.camera_window.relocate(362.0, 1.0);
+			window_model.camera_window.setParentWindow(this);
+			openWindow(window_model.camera_window);
+		}
+	}
+	
+	public void closeCameraWindow() {
+		window_model.camera_window = null;
 	}
 	
 	@Override

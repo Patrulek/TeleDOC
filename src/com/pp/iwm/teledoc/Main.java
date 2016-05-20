@@ -88,5 +88,8 @@ public class Main extends Application {
 		ImageManager.instance().loadImage(Utils.IMG_EYE, "/assets/eye_icon.png");
 		ImageManager.instance().loadImage(Utils.IMG_DISABLED, "/assets/disabled_icon.png");
 		ImageManager.instance().loadImage(Utils.IMG_DELETE, "/assets/delete_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_EMPTY_CAMERA, "/assets/empty_camera.png");
+		ImageManager.instance().loadImage(Utils.IMG_MINIMIZE, "/assets/minimize_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_MAXIMIZE, "/assets/maximize_icon.png");
 	}
 }

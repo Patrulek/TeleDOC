@@ -37,6 +37,11 @@ public abstract class Window {
 		layout.hide();
 	}
 	
+	public void relocate(double _x, double _y) {
+		layout.stage.setX(_x);
+		layout.stage.setY(_y);
+	}
+	
 	protected void openWindow(Window _new_window) {
 		_new_window.show();
 	}

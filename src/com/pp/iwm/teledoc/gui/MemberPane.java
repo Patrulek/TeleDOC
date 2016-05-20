@@ -2,6 +2,7 @@ package com.pp.iwm.teledoc.gui;
 
 import com.pp.iwm.teledoc.animations.FadeAnimation;
 import com.pp.iwm.teledoc.animations.TranslateAnimation;
+import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.windows.Window;
 
 import javafx.scene.control.ScrollPane;
@@ -17,8 +18,8 @@ public class MemberPane extends Pane {
 	
 	private ScrollPane scroll_pane;
 	private VBox content_pane;
-	
-	private Window window;
+
+	private ConfWindowLayout layout;
 	
 	private FadeAnimation fade_animation;
 	private TranslateAnimation translate_animation;
@@ -30,13 +31,17 @@ public class MemberPane extends Pane {
 	// METHODS 
 	// =======================================
 	
-	public MemberPane(Window _window) {
-		window = _window;
+	public MemberPane(ConfWindowLayout _layout) {
+		layout = _layout;
 		
 		//members = new ArrayList<>();
 		createLayout();
 		addAnimations();
 		tempAddMembers();
+	}
+	
+	public ConfWindowLayout getLayout() {
+		return layout;
 	}
 	
 	// TODO temp

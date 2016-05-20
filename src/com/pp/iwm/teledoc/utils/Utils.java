@@ -76,6 +76,8 @@ public class Utils {
 	public static final int ACT_EYE = 1033;
 	public static final int ACT_DISABLED = 1034;
 	public static final int ACT_DELETE = 1035;
+	public static final int ACT_MINIMIZE = 1036;
+	public static final int ACT_MAXIMIZE = 1037;
 	
 	public static final int ACT_EXIT_APP = 1040;
 	
@@ -129,6 +131,8 @@ public class Utils {
 	public static final String HINT_EYE = "Pokaz warstwê";
 	public static final String HINT_DISABLED = "Ukryj warstwê";
 	public static final String HINT_DELETE = "Usuñ obiekt";
+	public static final String HINT_MINIMIZE = "Zwiñ";
+	public static final String HINT_MAXIMIZE = "Rozwiñ";
 	
 	// MESSAGES
 	public static final String MSG_INPUT_EMAIL = "Podaj swój email";
@@ -186,6 +190,9 @@ public class Utils {
 	public static final int IMG_EYE = 2045;
 	public static final int IMG_DISABLED = 2046;
 	public static final int IMG_DELETE = 2047;
+	public static final int IMG_EMPTY_CAMERA = 2048;
+	public static final int IMG_MINIMIZE = 2049;
+	public static final int IMG_MAXIMIZE = 2050;
 	
 	// other utils
 	
