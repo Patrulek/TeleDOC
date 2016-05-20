@@ -75,6 +75,20 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		
 		window_model.image_mouse_pos = new Point2D(x_pos, y_pos);
 	}
+	
+	public Point2D mapImagePosToScreenPos(Point2D _image_mouse_pos) {
+		DrawablePane drawable_pane = window_layout.drawable_pane;
+		ScrollPane scroll_pane = window_layout.scroll_pane;
+		
+		double canvas_w = drawable_pane.getWidth();
+		double canvas_h = drawable_pane.getHeight();
+		double x_pos = _image_mouse_pos.getX() - scroll_pane.getHvalue() * (canvas_w - scroll_pane.getViewportBounds().getWidth()) + 4;
+		double y_pos = _image_mouse_pos.getY() - scroll_pane.getVvalue() * (canvas_h - scroll_pane.getViewportBounds().getHeight()) + 3;
+		//x_pos *= drawable_pane.getScale();
+		//y_pos *= drawable_pane.getScale();
+	
+		return new Point2D(x_pos, y_pos);
+	}
 
 	private void enableMicrophone() {
 		
@@ -92,25 +106,33 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		String text = window_layout.annotation_pane.getTextArea().getText().trim();
 		Annotation tmp_ann = window_model.temp_annotation;
 		
+		if( window_layout.annotation_pane.getCurrentAnnotation() != null )
+			tmp_ann = window_layout.annotation_pane.getCurrentAnnotation();
+		else if( tmp_ann == null )
+			return;
+		
 		if( !text.equals("") )
 			tmp_ann.setText(text);
-		
-		window_layout.annotation_pane.hide();
-		tmp_ann.changeState(State.DRAWN);
+
+		drawable_assistant.selectObject(tmp_ann);
 		window_model.temp_annotation = null;
 		window_model.temp1 = window_model.temp2 = null;
 		changeUserContext(UserContext.DOING_NOTHING);
 		window_layout.annotation_pane.getTextArea().setText("");
+		tmp_ann.changeState(State.DRAWN);
+		drawable_assistant.deselectObject();
 	}
 	
 	public void onAnnotationCancel() {
-		window_layout.annotation_pane.hide();
 		window_model.temp1 = window_model.temp2 = null;
 		 
 		if( window_model.temp_annotation != null ) {
 			window_layout.drawable_pane.removeAnnotation(window_model.temp_annotation);
 			window_model.temp_annotation = null;
 		}
+		
+		if( window_model.selected_drawable != null && window_model.selected_drawable instanceof Annotation )
+			drawable_assistant.deselectObject();
 	}
 	
 	public void showAnnotationPane(ScrollPane _annotation_text_pane) {
@@ -186,6 +208,13 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 			window_layout.layers_pane.show();
 	}
 	
+	public void onDeleteObject() {
+		if( window_model.selected_drawable != null ) {
+			drawable_assistant.removeDrawable(window_model.selected_drawable);
+			window_model.selected_drawable = null;
+		}
+	}
+	
 	public void onHelpAction() {
 		
 	}
@@ -219,10 +248,11 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		dockbar.getIcons().get(3).setOnAction(ev -> onAddAnnotation());
 		dockbar.getIcons().get(4).setOnAction(ev -> onImagePanelAction());
 		dockbar.getIcons().get(5).setOnAction(ev -> onCalculateDistance());
-		dockbar.getIcons().get(6).setOnAction(ev -> onLayers());
-		dockbar.getIcons().get(7).setOnAction(ev -> onUploadImage());
-		dockbar.getIcons().get(8).setOnAction(ev -> onHelpAction());
-		dockbar.getIcons().get(9).setOnAction(ev -> onLeaveConference());
+		dockbar.getIcons().get(6).setOnAction(ev -> onDeleteObject());
+		dockbar.getIcons().get(7).setOnAction(ev -> onLayers());
+		dockbar.getIcons().get(8).setOnAction(ev -> onUploadImage());
+		dockbar.getIcons().get(9).setOnAction(ev -> onHelpAction());
+		dockbar.getIcons().get(10).setOnAction(ev -> onLeaveConference());
 
 		ImageButton ibtn_chat = window_layout.ibtn_chat;
 		ibtn_chat.addEventHandler(ActionEvent.ACTION, ev -> onChatBtnAction());
@@ -241,23 +271,6 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		annotation_pane.getTextArea().addEventFilter(KeyEvent.KEY_PRESSED, ev -> input_assistant.onAnnotationPaneTextAreaKeyPressed(ev));
 		annotation_pane.getBtnSubmit().addEventFilter(ActionEvent.ACTION, ev -> onAnnotationSubmit());
 		annotation_pane.getBtnCancel().addEventFilter(ActionEvent.ACTION, ev -> onAnnotationCancel());
-		
-		LayersPanel layers_pane = window_layout.layers_pane;
-		layers_pane.getLineLayerBtn().addEventHandler(ActionEvent.ACTION, ev -> onLineLayerBtn());
-		layers_pane.getMarkerLayerBtn().addEventHandler(ActionEvent.ACTION, ev -> onMarkerLayerBtn());
-		layers_pane.getAnnotationLayerBtn().addEventHandler(ActionEvent.ACTION, ev -> onAnnotationLayerBtn());
-	}
-	
-	private void onLineLayerBtn() {
-		
-	}
-	
-	private void onMarkerLayerBtn() {
-		
-	}
-	
-	private void onAnnotationLayerBtn() {
-		
 	}
 	
 	@Override

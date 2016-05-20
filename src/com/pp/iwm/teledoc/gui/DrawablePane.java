@@ -152,12 +152,13 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 		
 		scale = new_scale;
 		resize(drawable_canvas.getWidth(), drawable_canvas.getHeight());
-
-		listener.onRescalePane();
 		
 		// TODO temp solution
 		layout.scroll_pane.setHvalue((7 * prev_h + layout.scroll_pane.getHvalue()) / 8.0);
 		layout.scroll_pane.setVvalue((7 * prev_v + layout.scroll_pane.getVvalue()) / 8.0);
+
+		listener.onRescalePane();
+		
 		
 		
 		for( DrawableObject drawable : drawables ) {
@@ -197,6 +198,14 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 			getChildren().removeAll(((DrawableBrokenLine)_drawable).getLines());
 		else if( _drawable instanceof Annotation )
 			getChildren().remove(((Annotation)_drawable).getCircle());
+		
+		if( temp_line_selectors != null )
+			removeLineSelectors();
+	}
+	
+	private void removeLineSelectors() {
+		getChildren().removeAll(temp_line_selectors[0], temp_line_selectors[1]);
+		temp_line_selectors = null;
 	}
 	
 	private void annotationLayerToFront() {

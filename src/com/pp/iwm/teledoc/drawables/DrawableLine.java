@@ -22,7 +22,6 @@ public class DrawableLine extends DrawableObject {
 	private Point2D to;
 	private Color original_color;
 	private double line_width;
-	private boolean is_selected;
 
 	private Rectangle [] line_selectors;
 	private Point2D first_selector;
@@ -83,11 +82,10 @@ public class DrawableLine extends DrawableObject {
 	@Override
 	public void rescale() {
 		rescaleLine();
-		rescaleSelectors();
 		
 		if( is_selected ) {
+			rescaleSelectors();
 			calculateSelectorsPosition();
-			showSelectorsAtPane();
 		}
 	}
 	
@@ -113,12 +111,6 @@ public class DrawableLine extends DrawableObject {
 		line_selectors[1].setLayoutX(second_selector.getX()); line_selectors[1].setLayoutY(second_selector.getY());
 	}
 	
-	private void showSelectorsAtPane() {
-		drawable_pane.refreshSelectors();
-	}
-	
-	// TODO zaznaczanie, usuwanie, przeci¹ganie
-	
 	public Line getLine() {
 		return line;
 	}
@@ -126,10 +118,9 @@ public class DrawableLine extends DrawableObject {
 	@Override
 	public void onSelected() {
 		listener.onSelected(this);
-		drawable_pane.setSelectedDrawable(this);
 		is_selected = true;
 		calculateSelectorsPosition();
-		showSelectorsAtPane();
+		drawable_pane.setSelectedDrawable(this);
 	}
 	
 

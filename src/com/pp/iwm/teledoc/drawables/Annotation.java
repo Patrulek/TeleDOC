@@ -33,9 +33,7 @@ public class Annotation	extends DrawableObject {
 	private Bounds viewport_bounds;
 	private State state;
 	private DrawablePane drawable_pane;
-	
-	// TODO temp
-	private ScrollPane annotation_text_pane;
+	private boolean was_dragged;
 	
 	// ======================================
 	// METHODS
@@ -48,80 +46,62 @@ public class Annotation	extends DrawableObject {
 		viewport_bounds = _viewport_bounds;
 		position = _position;
 		drawable_pane = _drawable_pane;
+		is_selected = false;
 		
 		double scale = drawable_pane.getScale();
 		circle = new Circle(scale * position.getX(), scale * position.getY(), RADIUS, color);
 		circle.setOnMouseEntered(ev -> onMouseEntered(ev));
 		circle.setOnMouseExited(ev -> onMouseExited());
+		circle.setOnMouseClicked(ev -> onSelected());
 		circle.setOnMouseDragged(ev -> onCircleDragged());
 		circle.setOnMouseReleased(ev -> onCircleDragReleased());
 		
 		Platform.runLater(() -> relocate());
 	}
 	
+	public String getText() {
+		return text;
+	}
+	
+	public State getState() {
+		return state;
+	}
+	
 	private void onCircleDragReleased() {
+		if( state == State.DRAWING )
+			return;
+		
 		if( is_dragged ) {
+			was_dragged = true;
 			is_dragged = false;
-			createTextPane(position);
+			onChanged();
 		}
 	}
 	
+	public void setOriginalColor() {
+		circle.setFill(color);
+	}
+	
 	private void onCircleDragged() {
-		if( !is_dragged ) {
+		if( state == State.DRAWING )
+			return;
+		
+		if( !is_dragged )
 			is_dragged = true;
-			destroyTextPane();
-		}
 
 		Point2D delta = listener.onDragged(this);
 		changePosition(position.add(delta));
 		
-		
 		onChanged();
-	}
-
-	// TODO temp
-	private void createTextPane(Point2D _pos) {
-		if( annotation_text_pane == null ) {
-		// TODO mo¿liwoœæ nie wyœwietlania siê ca³ego tekstu / zmiast pane scroll pane
-		Label l = new Label(text);
-		l.setWrapText(true);
-		l.setAlignment(Pos.TOP_LEFT);
-		l.setPrefSize(240.0, 60.0);
-		l.setMaxSize(240.0, 240.0);
-		l.setStyle("-fx-text-fill: rgb(140, 140, 120);");
-		annotation_text_pane = new ScrollPane(l);
-		annotation_text_pane.setVbarPolicy(ScrollBarPolicy.ALWAYS);
-		annotation_text_pane.setStyle("-fx-background-color: rgb(30, 54, 60, 0.85); -fx-background: rgb(30, 54, 60, 0.85);");
-	
-		if( _pos.getY() - RADIUS * 2 - 60.0 < 0 ) {
-			if( _pos.getY() + RADIUS * 2 + 60.0 < 744.0 )
-				annotation_text_pane.setLayoutY(_pos.getY() + RADIUS * 2);
-			else
-				annotation_text_pane.setLayoutY(0.0);
-		} else
-			annotation_text_pane.setLayoutY(_pos.getY() - RADIUS * 2 - 60.0 );
-		
-		if( _pos.getX() - 120.0 < 32.0 )
-			annotation_text_pane.setLayoutX(60.0);
-		else if( _pos.getX() + 120.0 > 1360.0 )
-			annotation_text_pane.setLayoutX(1108.0);
-		else
-			annotation_text_pane.setLayoutX(_pos.getX() - 120.0);
-		
-		//drawable_pane.getConfWindow().showAnnotationPane(annotation_text_pane);
-		}
-	}
-	
-	private void destroyTextPane() {
-		if( annotation_text_pane != null ) {
-			//drawable_pane.getConfWindow().hideAnnotationPane(annotation_text_pane);
-			annotation_text_pane = null;
-		}
 	}
 	
 	public void changePosition(Point2D _new_position) {
 		position = _new_position;
 		relocate();
+	}
+	
+	public boolean isDragged() {
+		return is_dragged;
 	}
 	
 	private void relocate() {
@@ -160,8 +140,6 @@ public class Annotation	extends DrawableObject {
 		if( state == State.DRAWN && !is_dragged ) {
 			Color c = color.invert();
 			circle.setFill(c);
-			Point2D mouse_pos = new Point2D(_ev.getSceneX(), _ev.getSceneY());
-			createTextPane(mouse_pos);
 		} 
 	}
 	
@@ -171,7 +149,15 @@ public class Annotation	extends DrawableObject {
 
 	@Override
 	public void onSelected() {
-		listener.onSelected(this);
+		if( is_selected )
+			return;
+		
+		if( !is_dragged && !was_dragged ) {
+			is_selected = true;
+			listener.onSelected(this);
+		} 
+		
+		was_dragged = false;
 	}
 	
 	@Override
@@ -183,10 +169,8 @@ public class Annotation	extends DrawableObject {
 	public void onMouseExited() {
 		listener.onMouseExited(this);
 		
-		if( state == State.DRAWN && !is_dragged ) {
-			circle.setFill(color);
-			destroyTextPane();
-		}
+		if( state == State.DRAWN && !is_dragged )
+			setOriginalColor();
 	}
 
 	@Override
@@ -196,5 +180,7 @@ public class Annotation	extends DrawableObject {
 
 	@Override
 	public void onDeselected() {
+		is_selected = false;
+		drawable_pane.setSelectedDrawable(null);
 	}
 }

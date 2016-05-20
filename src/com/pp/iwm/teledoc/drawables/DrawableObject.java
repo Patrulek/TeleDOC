@@ -13,6 +13,7 @@ public abstract class DrawableObject {
 	protected double scale = 1.0;
 	protected DrawableObjectListener listener;
 	protected boolean is_dragged;
+	protected boolean is_selected;
 	
 	//
 	// METHODS
@@ -26,6 +27,14 @@ public abstract class DrawableObject {
 	
 	public void setListener(DrawableObjectListener _listener) {
 		listener = _listener;
+	}
+	
+	public boolean isDragged() {
+		return is_dragged;
+	}
+	
+	public boolean isSelected() {
+		return is_selected;
 	}
 	
 	public abstract void rescale();

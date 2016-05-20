@@ -150,12 +150,13 @@ public class ConfWindowInputAssistant {
 	}
 	
 	private void drawAnnotation(Point2D _mouse_pos, Point2D _image_mouse_pos, ConfWindowDrawableAssistant _drawable_assistant) {
-		layout.annotation_pane.showAtLocation(_mouse_pos, -1.0, false);
 		model.temp1 = _image_mouse_pos;
 		if( model.temp_annotation == null )
 			_drawable_assistant.createTempAnnotation();
 		else
 			model.temp_annotation.changePosition(model.temp1);
+		
+		layout.annotation_pane.showForAnnotation(model.temp_annotation);
 	}
 	
 	private void cancelDrawingAnnotation() {
@@ -189,6 +190,8 @@ public class ConfWindowInputAssistant {
 			
 			scroll_pane.setHvalue(x_translation);
 			scroll_pane.setVvalue(y_translation);
+			
+			layout.annotation_pane.refresh();
 		}
 		
 		model.setMousePos(new_pos);

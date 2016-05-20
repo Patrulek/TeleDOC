@@ -143,11 +143,10 @@ public class DrawableBrokenLine extends DrawableObject {
 	@Override
 	public void rescale() {
 		rescaleLines();
-		rescaleSelectors();
 		
 		if( is_selected ) {
+			rescaleSelectors();
 			calculateSelectorsPosition();
-			showSelectorsAtPane();
 		}
 	}
 	
@@ -167,10 +166,6 @@ public class DrawableBrokenLine extends DrawableObject {
 		
 		line_selectors[0].setLayoutX(first_selector.getX()); line_selectors[0].setLayoutY(first_selector.getY());
 		line_selectors[1].setLayoutX(second_selector.getX()); line_selectors[1].setLayoutY(second_selector.getY());
-	}
-	
-	private void showSelectorsAtPane() {
-		drawable_pane.refreshSelectors();
 	}
 	
 	private void rescaleSelectors() {
@@ -196,10 +191,10 @@ public class DrawableBrokenLine extends DrawableObject {
 
 	@Override
 	public void onSelected() {
+		listener.onSelected(this);
 		is_selected = true;
-		drawable_pane.setSelectedDrawable(this);
 		calculateSelectorsPosition();
-		showSelectorsAtPane();
+		drawable_pane.setSelectedDrawable(this);
 	}
 
 	@Override

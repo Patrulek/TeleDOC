@@ -5,6 +5,7 @@ import java.util.List;
 import com.pp.iwm.teledoc.drawables.DrawableObject;
 import com.pp.iwm.teledoc.gui.ActionPaneConf;
 import com.pp.iwm.teledoc.gui.AnnotationPane;
+import com.pp.iwm.teledoc.gui.AnnotationTextPane;
 import com.pp.iwm.teledoc.gui.ChatPane;
 import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.DoubleStateImageButton;
@@ -45,6 +46,7 @@ public class ConfWindowLayout extends WindowLayout {
 	public ScrollPane scroll_pane;
 	public DrawablePane drawable_pane;
 	public AnnotationPane annotation_pane;
+	public AnnotationTextPane annotation_text_pane;
 	public ActionPaneConf action_pane;
 	public LayersPanel layers_pane;
 	public DoubleStateImageButton ibtn_camera;
@@ -75,6 +77,7 @@ public class ConfWindowLayout extends WindowLayout {
 		createDrawablePane();
 		createScrollPane();
 		createAnnotationPane();
+		createAnnotationTextPane();
 		createActionPane();
 		createButtons();
 		createLayersPane();
@@ -141,21 +144,25 @@ public class ConfWindowLayout extends WindowLayout {
 		ImageButton btn_6 = new ImageButton(Utils.IMG_DISTANCE, Utils.HINT_DISTANCE, Utils.ACT_DISTANCE);
 		dockbar.addIconAndFitInBar(btn_6);
 		
-		// layers
-		ImageButton btn_7 = new ImageButton(Utils.IMG_LAYERS, Utils.HINT_LAYERS, Utils.ACT_LAYERS);
+		// delete object
+		ImageButton btn_7 = new ImageButton(Utils.IMG_DELETE, Utils.HINT_DELETE, Utils.ACT_DELETE);
 		dockbar.addIconAndFitInBar(btn_7);
 		
-		// upload
-		ImageButton btn_8 = new ImageButton(Utils.IMG_UPLOAD_ICON, Utils.HINT_UPLOAD_FILE, Utils.ACT_UPLOAD_FILE);
+		// layers
+		ImageButton btn_8 = new ImageButton(Utils.IMG_LAYERS, Utils.HINT_LAYERS, Utils.ACT_LAYERS);
 		dockbar.addIconAndFitInBar(btn_8);
 		
-		// help
-		ImageButton btn_9 = new ImageButton(Utils.IMG_HELP_ICON, Utils.HINT_HELP, Utils.ACT_SHOW_HELP);
+		// upload
+		ImageButton btn_9 = new ImageButton(Utils.IMG_UPLOAD_ICON, Utils.HINT_UPLOAD_FILE, Utils.ACT_UPLOAD_FILE);
 		dockbar.addIconAndFitInBar(btn_9);
 		
-		// new conference from file
-		ImageButton btn_10 = new ImageButton(Utils.IMG_LOGOUT_ICON, Utils.HINT_LEAVE_CONF, Utils.ACT_LOGOUT);
+		// help
+		ImageButton btn_10 = new ImageButton(Utils.IMG_HELP_ICON, Utils.HINT_HELP, Utils.ACT_SHOW_HELP);
 		dockbar.addIconAndFitInBar(btn_10);
+		
+		// new conference from file
+		ImageButton btn_11 = new ImageButton(Utils.IMG_LOGOUT_ICON, Utils.HINT_LEAVE_CONF, Utils.ACT_LOGOUT);
+		dockbar.addIconAndFitInBar(btn_11);
 	}
 	
 	private void createLayersPane() {
@@ -186,7 +193,11 @@ public class ConfWindowLayout extends WindowLayout {
 	}
 	
 	private void createAnnotationPane() {
-		annotation_pane = new AnnotationPane(window, rect_window_background.getLayoutBounds());
+		annotation_pane = new AnnotationPane(this, rect_window_background.getLayoutBounds());
+	}
+	
+	private void createAnnotationTextPane() {
+		annotation_text_pane = new AnnotationTextPane(this, rect_window_background.getLayoutBounds());
 	}
 	
 	private void createActionPane() {
@@ -222,6 +233,7 @@ public class ConfWindowLayout extends WindowLayout {
 								action_pane,
 								status_bar,
 								annotation_pane,
+								annotation_text_pane,
 								ibtn_microphone,
 								ibtn_camera,
 								ibtn_chat,
@@ -242,5 +254,9 @@ public class ConfWindowLayout extends WindowLayout {
 	
 	public void removeTextFromStatusBar() {
 		status_bar.removeText();
+	}
+	
+	public Point2D mapImagePosToScreenPos(Point2D _image_pos) {
+		return conf_window.mapImagePosToScreenPos(_image_pos);
 	}
 }

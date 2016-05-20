@@ -1,15 +1,13 @@
 package com.pp.iwm.teledoc.gui;
 
 import com.pp.iwm.teledoc.animations.FadeAnimation;
-import com.pp.iwm.teledoc.utils.InputUtils;
-import com.pp.iwm.teledoc.windows.ConfWindow;
-import com.pp.iwm.teledoc.windows.Window;
+import com.pp.iwm.teledoc.drawables.Annotation;
+import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 
 public class AnnotationPane extends Pane {
@@ -19,16 +17,13 @@ public class AnnotationPane extends Pane {
 	// ====================================
 	
 	
-	private Window window;
+	private ConfWindowLayout layout;
 	private TextArea text_area;
 	private Button btn_submit;
 	private Button btn_cancel;
 	
-	private final double HORIZONTAL_GAP = 16.0;
-	private final double VERTICAL_GAP = 45.0;
 	private Bounds viewport_bounds;
-	private Point2D last_location;
-	private double scale;
+	private Annotation current_ann;
 	
 	private FadeAnimation fade_animation;
 	
@@ -36,10 +31,9 @@ public class AnnotationPane extends Pane {
 	// METHODS
 	// ====================================
 	
-	public AnnotationPane(Window _window, Bounds _viewport_bounds) {
+	public AnnotationPane(ConfWindowLayout _layout, Bounds _viewport_bounds) {
 		super();
-		window = _window;
-		scale = 1.0;
+		layout = _layout;
 		viewport_bounds = _viewport_bounds;
 		createLayout();
 		addAnimation();
@@ -52,6 +46,7 @@ public class AnnotationPane extends Pane {
 		text_area = new TextArea();
 		text_area.setPrefSize(290, 50);
 		text_area.setLayoutX(5); text_area.setLayoutY(5);
+		text_area.setWrapText(true);
 		
 		btn_submit = new Button("Dodaj");
 		btn_submit.setPrefSize(142, 20);
@@ -69,45 +64,53 @@ public class AnnotationPane extends Pane {
 		setVisible(false);
 	}
 	
+	public Annotation getCurrentAnnotation() {
+		return current_ann;
+	}
+	
 	private void addAnimation() {
 		fade_animation = new FadeAnimation(this);
 		fade_animation.customize(1.0, 0.0, 100, 150);
 	}
 	
-	// TODO hack
-	public void showAtLocation(Point2D _location, double _new_scale, boolean _is_moving) {
-		if( (last_location != _location && _location != null) /* || (scale != _new_scale && _new_scale != -1.0) || _is_moving */)
-			calculatePosition(_location, _new_scale);
-		
+	public void showForAnnotation(Annotation _ann) {
+		current_ann = _ann;
+		text_area.setText(current_ann.getText());
+		calculatePosition();
 		show();
 	}
 	
-	private void calculatePosition(Point2D _location, double _new_scale) {
-		last_location = _location;
-		scale = _new_scale;
+	public void refresh() {
+		calculatePosition();
+	}
+	
+	private void calculatePosition() {
+		double radius = current_ann.getCircle().getRadius();
+		Point2D pos = new Point2D(current_ann.getCircle().getCenterX(), current_ann.getCircle().getCenterY());
+		pos = layout.mapImagePosToScreenPos(pos);
+		Point2D x_bounds = new Point2D(pos.getX() - getWidth() - 2 * radius, pos.getX() + 2 * radius);
+		Point2D y_bounds = new Point2D(pos.getY() - getHeight() / 2.0, pos.getY() + getHeight() / 2.0);
+
+		if( x_bounds.getX() + getWidth() > viewport_bounds.getMaxX())
+			setLayoutX(viewport_bounds.getMaxX() - getWidth());
+		else if( x_bounds.getY() + getWidth() > viewport_bounds.getMaxX() )
+			setLayoutX(x_bounds.getX());
+		else if( x_bounds.getY() < viewport_bounds.getMinX())
+			setLayoutX(viewport_bounds.getMinX());
+		else
+			setLayoutX(x_bounds.getY());
 		
-		calculateHorizontalPosition(_location, _new_scale);
-		calculateVerticalPosition(_location, _new_scale);
-	}
-	
-	private void calculateHorizontalPosition(Point2D _location, double _new_scale) {
-			if( last_location.getX() + getWidth() > viewport_bounds.getMaxX() )
-				setLayoutX(last_location.getX() - getWidth() - HORIZONTAL_GAP);
-			else
-				setLayoutX(last_location.getX() + HORIZONTAL_GAP);
-	}
-	
-	private void calculateVerticalPosition(Point2D _location, double _new_scale) {
-			if( last_location.getY() + getHeight() / 2 > viewport_bounds.getMaxY() )
-				setLayoutY(viewport_bounds.getMaxY() - getHeight());
-			else if( last_location.getY() - getHeight() / 2 < 0.0 )
-				setLayoutY(0.0);
-			else
-				setLayoutY(last_location.getY() - VERTICAL_GAP);
+		if( y_bounds.getY() > viewport_bounds.getMaxY() )
+			setLayoutY(viewport_bounds.getMaxY() - getHeight());
+		else if( y_bounds.getX() < viewport_bounds.getMinY() )
+			setLayoutY(viewport_bounds.getMinY());
+		else
+			setLayoutY(y_bounds.getX());
 	}
 	
 	private void show() {
 		setVisible(true);
+		fade_animation.setOnFinished(null);
 		fade_animation.playForward();
 	}
 	
@@ -120,8 +123,6 @@ public class AnnotationPane extends Pane {
 		setVisible(false);
 		fade_animation.setOnFinished(null);
 	}
-	
-	
 	
 	public Button getBtnSubmit() {
 		return btn_submit;

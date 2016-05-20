@@ -13,6 +13,7 @@ import com.pp.iwm.teledoc.models.ConfWindowModel;
 import com.pp.iwm.teledoc.models.ConfWindowModel.UserContext;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 
+import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.paint.Color;
@@ -58,16 +59,42 @@ public class ConfWindowDrawableAssistant implements DrawablePaneListener, Drawab
 		layout.drawable_pane.addDrawable(_obj);
 	}
 	
+	public void removeDrawable(DrawableObject _obj) {
+		model.drawables.remove(_obj);
+		
+		if( _obj instanceof DrawableLine )
+			removeLine((DrawableLine)_obj);
+		else if( _obj instanceof DrawableBrokenLine )
+			removeBrokenLine((DrawableBrokenLine)_obj);
+		else if( _obj instanceof Annotation )
+			removeAnnotation((Annotation)_obj);
+		
+		layout.drawable_pane.removeDrawable(_obj);
+	}
+	
 	private void addLine(DrawableLine _line) {
 		model.line_layer.add(_line.getLine());
+	}
+	
+	private void removeLine(DrawableLine _line) {
+		model.line_layer.remove(_line.getLine());
 	}
 	
 	private void addBrokenLine(DrawableBrokenLine _line) {
 		model.line_layer.addAll(_line.getLines());
 	}
 	
+	private void removeBrokenLine(DrawableBrokenLine _line) {
+		model.line_layer.removeAll(_line.getLines());
+	}
+	
 	private void addAnnotation(Annotation _annotation) {
 		model.annotation_layer.add(_annotation.getCircle());
+	}
+	
+	private void removeAnnotation(Annotation _annotation) {
+		model.annotation_layer.remove(_annotation.getCircle());
+		layout.annotation_pane.hide();
 	}
 	
 	public void updateBrokenLine(Line _line) {
@@ -86,16 +113,31 @@ public class ConfWindowDrawableAssistant implements DrawablePaneListener, Drawab
 	@Override
 	public void onRescalePane() {
 		layout.drawable_pane.setDrawables(model.drawables);
+		Platform.runLater(() -> layout.annotation_pane.refresh());
 	}
 
 	@Override
 	public void onMouseEntered(DrawableObject _obj) {
 		model.hovered_drawable = _obj; 
+		
+		if( _obj instanceof Annotation ) {
+			Annotation ann = (Annotation)_obj;
+			
+			if( ann.getState() == State.DRAWN && !ann.isDragged() && !ann.isSelected() )
+				layout.annotation_text_pane.showForAnnotation(ann);
+		}
 	}
 
 	@Override
 	public void onMouseExited(DrawableObject _obj) {
 		model.hovered_drawable = null;
+		
+		if( _obj instanceof Annotation ) {
+			Annotation ann = (Annotation)_obj;
+			
+			if( ann.getState() == State.DRAWN && !ann.isDragged() && !ann.isSelected() )
+				layout.annotation_text_pane.hide();
+		}
 	}
 
 	@Override
@@ -106,19 +148,43 @@ public class ConfWindowDrawableAssistant implements DrawablePaneListener, Drawab
 	
 	public void selectObject(DrawableObject _obj) {
 		model.selected_drawable = _obj;
+		layout.drawable_pane.setSelectedDrawable(_obj);
+		
+		if( _obj instanceof Annotation ) {
+			Annotation ann = (Annotation)_obj;
+			layout.annotation_pane.showForAnnotation(ann);
+			layout.annotation_text_pane.hide();
+		}
 	}
 	
 	public void deselectObject() {
-		if( model.selected_drawable != null )
+		if( model.selected_drawable != null ) {
 			model.selected_drawable.onDeselected();
+			
+			if( model.selected_drawable instanceof Annotation )
+				layout.annotation_pane.hide();
+		}
 		
 		model.selected_drawable = null;
 	}
 
 	@Override
 	public void onChanged(DrawableObject _obj) {
-		// TODO Auto-generated method stub
-		
+		if( _obj instanceof Annotation ) {
+			Annotation ann = (Annotation)_obj;
+			
+			if( ann.isDragged() ) {
+				layout.annotation_text_pane.hide();
+				
+				if( ann.isSelected() ) 
+					layout.annotation_pane.showForAnnotation(ann);
+			}
+			else if( ann.getCircle().isHover() ) {
+				if( !ann.isSelected() )
+					layout.annotation_text_pane.showForAnnotation(ann);
+			} else
+				ann.setOriginalColor();
+		}
 	}
 	
 	@Override

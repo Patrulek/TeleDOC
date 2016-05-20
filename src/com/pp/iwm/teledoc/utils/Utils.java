@@ -75,6 +75,7 @@ public class Utils {
 	public static final int ACT_UNLOCK = 1032;
 	public static final int ACT_EYE = 1033;
 	public static final int ACT_DISABLED = 1034;
+	public static final int ACT_DELETE = 1035;
 	
 	public static final int ACT_EXIT_APP = 1040;
 	
@@ -127,6 +128,7 @@ public class Utils {
 	public static final String HINT_UNLOCK = "Odblokuj panel";
 	public static final String HINT_EYE = "Pokaz warstwê";
 	public static final String HINT_DISABLED = "Ukryj warstwê";
+	public static final String HINT_DELETE = "Usuñ obiekt";
 	
 	// MESSAGES
 	public static final String MSG_INPUT_EMAIL = "Podaj swój email";
@@ -183,6 +185,7 @@ public class Utils {
 	public static final int IMG_UNLOCK = 2044;
 	public static final int IMG_EYE = 2045;
 	public static final int IMG_DISABLED = 2046;
+	public static final int IMG_DELETE = 2047;
 	
 	// other utils
 	
