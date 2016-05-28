@@ -10,6 +10,8 @@ import com.pp.iwm.teledoc.drawables.DrawableObject;
 import com.pp.iwm.teledoc.windows.CameraWindow;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -31,6 +33,7 @@ public class ConfWindowModel extends WindowModel {
 	
 	public double chat_max_opacity;
 	public boolean is_chat_hiding;
+	public BooleanProperty is_sending_pointer;
 	
 	public Point2D image_mouse_pos;		// mapowanie pozycji kursora na pozycjê piksela w obrazie na canvasie
 	public Point2D temp1;
@@ -46,9 +49,6 @@ public class ConfWindowModel extends WindowModel {
 	public List<Node> line_layer;
 	public List<Node> marker_layer;
 	public List<Node> annotation_layer;
-	//public List<DrawableObject> line_layer;
-	//public List<DrawableObject> marker_layer;
-	//public List<DrawableObject> annotation_layer;
 	public DrawableObject selected_drawable;
 	public DrawableObject hovered_drawable;
 	
@@ -61,6 +61,7 @@ public class ConfWindowModel extends WindowModel {
 		conf_window = (ConfWindow)_window;
 		
 		chat_max_opacity = 1.0;
+		is_sending_pointer = new SimpleBooleanProperty(false);
 		is_chat_hiding = false;
 		user_context = UserContext.DOING_NOTHING;
 		chosen_color = Color.RED;

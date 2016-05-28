@@ -6,6 +6,7 @@ import com.pp.iwm.teledoc.gui.ActionPaneConf.PaneState;
 import com.pp.iwm.teledoc.gui.AnnotationPane;
 import com.pp.iwm.teledoc.gui.ChatPane;
 import com.pp.iwm.teledoc.gui.Dockbar;
+import com.pp.iwm.teledoc.gui.DoubleStateImageButton;
 import com.pp.iwm.teledoc.gui.DrawablePane;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.LayersPanel;
@@ -30,6 +31,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.shape.Rectangle;
 
 public class ConfWindow extends Window implements ChangeListener<Number> {
 
@@ -60,6 +62,7 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		
 		ImageManager.instance().loadImageForUser(2099, "/assets/big_image.jpg");
 		User.instance().setCurrentImage(2099);
+		User.instance().getAllGroupMembers();
 		
 		window_layout.minimap_pane.setImage(2099);
 	}
@@ -178,10 +181,6 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		window_layout.action_pane.changePaneStateAndRefresh(PaneState.DRAW_LINE);
 	}
 	
-	public void onInteractiveCursorAction() {
-		
-	}
-	
 	public void onUploadImage() {
 		
 	}
@@ -223,6 +222,10 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		}
 	}
 	
+	public void onSwitchPointer() {
+		User.instance().sendPointerChanged(window_model.is_sending_pointer);
+	}
+	
 	public void onHelpAction() {
 		
 	}
@@ -258,6 +261,7 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		scroll_pane.addEventFilter(ScrollEvent.SCROLL, ev -> input_assistant.onScrollPaneScroll(ev));
 		scroll_pane.addEventFilter(MouseEvent.MOUSE_DRAGGED, ev -> input_assistant.onScrollPaneDragged(ev));
 		scroll_pane.addEventFilter(MouseEvent.MOUSE_PRESSED, ev -> input_assistant.onScrollPanePressed(ev));
+		scroll_pane.addEventFilter(MouseEvent.MOUSE_MOVED, ev -> input_assistant.onMouseMoved(ev));
 		
 		Dockbar dockbar = window_layout.dockbar;
 		dockbar.addEventFilter(MouseEvent.MOUSE_MOVED, ev -> input_assistant.onDockbarMouseMoved(ev));
@@ -265,7 +269,8 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		dockbar.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> input_assistant.onDockbarMouseExited(ev));
 		dockbar.getIcons().get(0).setOnAction(ev -> onDrawLine());
 		dockbar.getIcons().get(1).setOnAction(ev -> onDrawMultipleLines());
-		dockbar.getIcons().get(2).setOnAction(ev -> onInteractiveCursorAction());
+		dockbar.getIcons().get(2).setOnAction(ev -> onSwitchPointer());
+		window_model.is_sending_pointer.bind(((DoubleStateImageButton)dockbar.getIcons().get(2)).isOnProperty());
 		dockbar.getIcons().get(3).setOnAction(ev -> onAddAnnotation());
 		dockbar.getIcons().get(4).setOnAction(ev -> onImagePanelAction());
 		dockbar.getIcons().get(5).setOnAction(ev -> onCalculateDistance());

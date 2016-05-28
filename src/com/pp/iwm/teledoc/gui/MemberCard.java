@@ -1,6 +1,7 @@
 package com.pp.iwm.teledoc.gui;
 
 import com.pp.iwm.teledoc.objects.ImageManager;
+import com.pp.iwm.teledoc.objects.Member;
 import com.pp.iwm.teledoc.utils.Utils;
 
 import javafx.event.ActionEvent;
@@ -15,7 +16,7 @@ public class MemberCard extends Pane {
 		// FIELDS
 		// ==========================================
 		
-	//private Member member = null;
+	private Member member;
 	private MemberPane member_pane;
 	private ImageView camera_image;
 	private Label lbl_username;
@@ -25,20 +26,27 @@ public class MemberCard extends Pane {
 		// ==========================================
 		// METHODS
 		// ==========================================
-		
-		public MemberCard(MemberPane _member_pane, String _name, String _surname) {
-			member_pane = _member_pane;
-			//chat_message = _chat_message;
-			createLayout(_name, _surname);
+	
+		public Member getMember() {
+			return member;
 		}
 		
-		// TODO temp
-		private void createLayout(/*temp*/ String _name, String _surname) {
+		public boolean hasMember(String _email) {
+			return member.email.equals(_email);
+		}
+		
+		public MemberCard(MemberPane _member_pane, Member _member) {
+			member_pane = _member_pane;
+			member = _member;
+			createLayout();
+		}
+		
+		private void createLayout() {
 			setStyle("-fx-background-color: transparent;");
 			setPadding(new Insets(0.0, 4.0, 0.0, 4.0));
 			setPrefHeight(100.0);
 			
-			lbl_username = new Label(_name + "\n" + _surname);
+			lbl_username = new Label(member.name + "\n" + member.surname);
 			lbl_username.setPrefSize(110.0, 40.0);
 			lbl_username.setWrapText(true);
 			lbl_username.setLayoutY(18.0); lbl_username.setLayoutX(110.0);

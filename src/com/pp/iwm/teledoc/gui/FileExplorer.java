@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.pp.iwm.teledoc.layouts.AppWindowLayout;
+import com.pp.iwm.teledoc.network.User.FileTreeListener;
 import com.pp.iwm.teledoc.objects.File;
 import com.pp.iwm.teledoc.objects.FileTree;
 import com.pp.iwm.teledoc.utils.Utils;
@@ -13,6 +14,7 @@ import com.pp.iwm.teledoc.windows.AppWindow;
 import com.pp.iwm.teledoc.windows.Window;
 import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -20,7 +22,7 @@ import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
-public class FileExplorer extends Pane {
+public class FileExplorer extends Pane implements FileTreeListener {
 	
 	// =========================================
 	// FIELDS
@@ -220,6 +222,12 @@ public class FileExplorer extends Pane {
 	
 	public FileCard getSelectedCard() {
 		return selected_card;
+	}
+
+	@Override
+	public void onFileTreeChanged(FileTree _file_tree) {
+		file_tree = _file_tree;
+		Platform.runLater(() -> refreshView());
 	}
 	
 }

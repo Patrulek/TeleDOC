@@ -2,6 +2,8 @@
 	-fx-background: rgb(30, 54, 60);
 	-fx-background-color: rgb(30, 54, 60);
 	-fx-background-insets: 0;
+	-fx-border-color: rgb(45, 81, 90);
+	-fx-border-width: 2px;
 	-fx-padding: 24px 4px 4px 4px;
 }
 

@@ -1,6 +1,7 @@
 package com.pp.iwm.teledoc.windows;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JOptionPane;
@@ -22,6 +23,9 @@ import com.pp.iwm.teledoc.network.packets.AllGroupsResponse;
 import com.pp.iwm.teledoc.network.packets.CreateGroupResponse;
 import com.pp.iwm.teledoc.network.packets.Group;
 import com.pp.iwm.teledoc.network.packets.JoinToGroupResponse;
+import com.pp.iwm.teledoc.network.packets.images.ConfirmSendImageResponse;
+import com.pp.iwm.teledoc.network.packets.images.GetAllImagesDescriptionResponse;
+import com.pp.iwm.teledoc.network.packets.images.ImageDescription;
 import com.pp.iwm.teledoc.objects.Conference;
 import com.pp.iwm.teledoc.objects.FileTree;
 import com.pp.iwm.teledoc.utils.Utils;
@@ -52,6 +56,7 @@ public class AppWindow extends Window implements NetworkListener {
 	public AppWindow() {
 		super();
 		User.instance().setListener(this);
+		User.instance().setFileTreeListener(window_layout.file_pane);
 		User.instance().loadDataFromDB();
 	}
 	
@@ -98,9 +103,10 @@ public class AppWindow extends Window implements NetworkListener {
 	}
 	
 	private void startUploading(File _file) {
-		double filesize = _file.length()/Utils.BYTES_PER_MEGABYTE;
+		double filesize = _file.length() / Utils.BYTES_PER_MEGABYTE;
 		filesize = Math.round(filesize * 10.0) / 10.0;
 		System.out.println("Przesy³anie pliku: " + _file.getName() + " o rozmiarze " + filesize + " MB"); // TODO uzupelnic
+		User.instance().sendImage(_file);
 	}
 	
 	private void onDownloadFile() {
@@ -117,7 +123,7 @@ public class AppWindow extends Window implements NetworkListener {
 	
 	private void onLogout() {
 		User.instance().logOut();
-		openWindowAndHideCurrent(new LoginWindow());
+		Platform.runLater(() -> openWindowAndHideCurrent(new LoginWindow()));
 	}
 	
 	private void onWindowBackgroundMousePressed(MouseEvent _ev) {
@@ -279,6 +285,10 @@ public class AppWindow extends Window implements NetworkListener {
 				onCreateGroupResponseReceive((CreateGroupResponse)_message);
 			else if( _message instanceof JoinToGroupResponse )
 				onJoinToGroupResponseReceive((JoinToGroupResponse)_message);
+			else if( _message instanceof ConfirmSendImageResponse )
+				onConfirmSendImageResponseReceive((ConfirmSendImageResponse)_message);
+			else if( _message instanceof GetAllImagesDescriptionResponse )
+				onGetAllImagesDescriptionResponseReceive((GetAllImagesDescriptionResponse)_message);
 		}
 	}
 	
@@ -315,6 +325,26 @@ public class AppWindow extends Window implements NetworkListener {
 			Conference c = new Conference(conf.getName(), "temp_desc", null, conf.getOwner(), /* TODO temp */ true);
 			window_layout.conf_pane.addConf(c);
 		}
+	}
+	
+	private void onConfirmSendImageResponseReceive(ConfirmSendImageResponse _response) {
+		if( _response.getAnswer() ) {
+			User.instance().addUploadedFileToTree();
+			// czy chcesz utworzyc z wczytanego obrazka konferencje?
+		} else
+			JOptionPane.showMessageDialog(null, "Nie uda³o siê wys³aæ obrazu na server!");
+	}
+	
+	private void onGetAllImagesDescriptionResponseReceive(GetAllImagesDescriptionResponse _response) {
+		List<ImageDescription> list_of_images = _response.getAllImagesDescrition();
+		List<String> list_of_filepaths = new ArrayList<>();
+		
+		for( ImageDescription desc : list_of_images ) {
+			String filepath = desc.getPath() + desc.getName();
+			list_of_filepaths.add(filepath);
+		}
+
+		User.instance().addFilesToTree(list_of_filepaths);
 	}
 	
 	public void onConferenceCardAdded(ConferenceCard _card) {

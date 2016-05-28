@@ -1,8 +1,12 @@
 package com.pp.iwm.teledoc.gui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.pp.iwm.teledoc.animations.FadeAnimation;
 import com.pp.iwm.teledoc.animations.TranslateAnimation;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
+import com.pp.iwm.teledoc.objects.Member;
 import com.pp.iwm.teledoc.windows.Window;
 
 import javafx.scene.control.ScrollPane;
@@ -23,8 +27,7 @@ public class MemberPane extends Pane {
 	
 	private FadeAnimation fade_animation;
 	private TranslateAnimation translate_animation;
-	
-	//private List<MemberCard> members;
+	private List<MemberCard> members;
 	
 	
 	// =======================================
@@ -34,20 +37,13 @@ public class MemberPane extends Pane {
 	public MemberPane(ConfWindowLayout _layout) {
 		layout = _layout;
 		
-		//members = new ArrayList<>();
+		members = new ArrayList<>();
 		createLayout();
 		addAnimations();
-		tempAddMembers();
 	}
 	
 	public ConfWindowLayout getLayout() {
 		return layout;
-	}
-	
-	// TODO temp
-	private void tempAddMembers() {
-		for( int i = 0; i < 100; i++ )
-			addMember("Imie" + (i + 1), " Nazwisko" + (i * 2));
 	}
 	
 	private void createLayout() {
@@ -93,25 +89,24 @@ public class MemberPane extends Pane {
 		fade_animation.playBackward();
 	}
 	
-	// TODO temp
-	public void addMember(String _name, String _surname) {
-		MemberCard member_card = new MemberCard(this, _name, _surname);
+	public void addMember(Member _member) {
+		MemberCard member_card = new MemberCard(this, _member);
+		members.add(member_card);
+		System.out.println("DOdano uzytkownika z emailem: " + _member.email);
 		content_pane.getChildren().add(member_card);
 	}
 	
-	/*
-	public void addMember(Member _member) {
-		if( _member == null )
-			return;
-			
-		MemberCard member_card = new MemberCard(_member);
-		
-		members.add(member_card);
-		content_pane.getChildren().add(member_card);
-	} */
-	
 	public void clearMembers() {
-	//	members.clear();
+		members.clear();
 		content_pane.getChildren().clear();
+	}
+	
+	public Member findMember(String _email) {
+		for( MemberCard card : members )
+			if( card.hasMember(_email) )
+				return card.getMember();
+		
+		// TODO
+		return null;
 	}
 }

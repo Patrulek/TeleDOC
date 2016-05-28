@@ -7,6 +7,7 @@ import com.pp.iwm.teledoc.drawables.Annotation;
 import com.pp.iwm.teledoc.drawables.DrawableBrokenLine;
 import com.pp.iwm.teledoc.drawables.DrawableLine;
 import com.pp.iwm.teledoc.drawables.DrawableObject;
+import com.pp.iwm.teledoc.drawables.Pointer;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 import com.pp.iwm.teledoc.windows.Window;
@@ -43,6 +44,7 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 	private List<Node> line_layer;
 	private List<Node> marker_layer;
 	private List<Node> annotation_layer;
+	private List<Pointer> pointers;
 	private List<DrawableObject> drawables;
 	private DrawablePaneListener listener;
 	
@@ -64,6 +66,7 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 		marker_layer = new ArrayList<>();
 		annotation_layer = new ArrayList<>();
 		drawables = new ArrayList<>();
+		pointers = new ArrayList<>();
 		
 		lineLayerVisibilityProperty = new SimpleBooleanProperty(true);
 		markerLayerVisibilityProperty = new SimpleBooleanProperty(true);
@@ -308,6 +311,39 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 	
 	private void disableAnnotationLayer() {
 		getChildren().removeAll(annotation_layer);
+	}
+	
+	private int findPointerIdx(String _member_mail) {
+		for( int i = 0; i < pointers.size(); i++ )
+			if( pointers.get(i).getMemberEmail().equals(_member_mail) )
+				return i;
+		
+		return -1;
+	}
+	
+	public void showPointerFor(String _member_mail) {
+		int pointer_idx = findPointerIdx(_member_mail);
+		
+		if( pointer_idx == -1 ) {
+			pointers.add(new Pointer(this, _member_mail));
+			pointer_idx = pointers.size() - 1;
+		}
+		
+		pointers.get(pointer_idx).show();
+	}
+	
+	public void hidePointerFor(String _member_mail) {
+		int pointer_idx = findPointerIdx(_member_mail);
+		
+		if( pointer_idx != -1 )
+			pointers.get(pointer_idx).hide();
+	}
+	
+	public void relocatePointerFor(String _member_mail, Point2D _new_pos) {
+		int pointer_idx = findPointerIdx(_member_mail);
+		
+		if( pointer_idx != -1 )
+			pointers.get(pointer_idx).relocate(_new_pos);
 	}
 	
 	public interface DrawablePaneListener {

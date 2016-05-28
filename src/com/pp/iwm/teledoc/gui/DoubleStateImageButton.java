@@ -48,11 +48,17 @@ public class DoubleStateImageButton extends ImageButton {
 	}
 	
 	public void switchOn() {
+		if( is_on.get() )
+			return;
+		
 		is_on.set(true);
 		changeGraphic();
 	}
 	
 	public void switchOff() {
+		if( !is_on.get() )
+			return;
+		
 		is_on.set(false);
 		changeGraphic();
 	}

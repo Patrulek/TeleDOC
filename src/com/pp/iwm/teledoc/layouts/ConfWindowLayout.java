@@ -1,8 +1,5 @@
 package com.pp.iwm.teledoc.layouts;
 
-import java.util.List;
-
-import com.pp.iwm.teledoc.drawables.DrawableObject;
 import com.pp.iwm.teledoc.gui.ActionPaneConf;
 import com.pp.iwm.teledoc.gui.AnnotationPane;
 import com.pp.iwm.teledoc.gui.AnnotationTextPane;
@@ -20,16 +17,12 @@ import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.geometry.Point2D;
-import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 public class ConfWindowLayout extends WindowLayout {
@@ -133,7 +126,8 @@ public class ConfWindowLayout extends WindowLayout {
 		dockbar.addIconAndFitInBar(btn_2);
 		
 		// pointer
-		DoubleStateImageButton btn_3 = new DoubleStateImageButton(Utils.IMG_POINTER_ON, Utils.IMG_POINTER_OFF, Utils.HINT_POINTER_ON, Utils.ACT_POINTER);
+		DoubleStateImageButton btn_3 = new DoubleStateImageButton(Utils.IMG_POINTER_OFF, Utils.IMG_POINTER_ON, Utils.HINT_POINTER_ON, Utils.ACT_POINTER);
+		btn_3.switchOff();
 		dockbar.addIconAndFitInBar(btn_3);
 		
 		// add annotation

@@ -43,6 +43,14 @@ public class ConfWindowInputAssistant {
 		layout = window.getWindowLayout();
 	}
 	
+	public void onMouseMoved(MouseEvent _ev) {
+		model.setMousePos(new Point2D(_ev.getSceneX(), _ev.getSceneY()));
+		window.mapMousePosToImageMousePos();
+		
+		if( model.is_sending_pointer.get() )
+			window.getNetworkAssistant().sendMousePos();
+	}
+	
 	public void onScrollPanePressed(MouseEvent _ev) {
 		DrawablePane drawable_pane = layout.drawable_pane;
 		ConfWindowDrawableAssistant drawable_assistant = window.getDrawableAssistant();

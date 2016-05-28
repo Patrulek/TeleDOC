@@ -1,15 +1,19 @@
 package com.pp.iwm.teledoc.network;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.JOptionPane;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.pp.iwm.teledoc.objects.Conference;
 import com.pp.iwm.teledoc.objects.FileTree;
 
-import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.geometry.Point2D;
 
 public class User extends Listener {
 	
@@ -28,10 +32,14 @@ public class User extends Listener {
 	private String email;
 	
 	private NetworkClient client;
+	private UserImageClient image_client;
 	
 	private List<Conference> closed_conferences;
 	private List<Conference> open_conferences;
 	private FileTree file_tree;
+	private FileTreeListener file_tree_listener;
+	private String uploading_file_path;
+	private String downloading_file_path;
 	
 	// TODO aktywna konferencja
 	
@@ -40,9 +48,14 @@ public class User extends Listener {
 	private List<Integer> used_images;
 	private int current_image;
 	
+	
 	// =======================================
 	// METHODS
 	// =======================================
+	
+	public UserImageClient getImageClient() {
+		return image_client;
+	}
 	
 	@Override
 	public void connected(Connection _connection) {
@@ -59,7 +72,8 @@ public class User extends Listener {
 	
 	@Override
 	public void received(Connection _connection, Object _message) {
-		listener.onReceive(_connection, _message);
+		if( listener != null )
+			listener.onReceive(_connection, _message);
 		//super.received(_connection, _message);
 	}
 	
@@ -91,6 +105,16 @@ public class User extends Listener {
 		used_images = new ArrayList<>();
 		file_tree = new FileTree();
 		client = new NetworkClient();
+		uploading_file_path = downloading_file_path = null;
+		image_client = new UserImageClient();
+	}
+	
+	public void setFileTreeListener(FileTreeListener _listener) {
+		file_tree_listener = _listener;
+	}
+	
+	public void removeFileTreeListener() {
+		file_tree_listener = null;
 	}
 	
 	public void setListener(NetworkListener _listener) {
@@ -142,7 +166,7 @@ public class User extends Listener {
 	
 	public void loadDataFromDB() {
 		loadConferencesFromDB();
-	//	loadFileTreeFromDB();
+		loadFileTreeFromDB();
 	}
 	
 	public void logIn(String _email, String _password) {
@@ -177,21 +201,56 @@ public class User extends Listener {
 		client.sendGroupMessageRequest(email, _message);
 	}
 	
+	public void sendMousePos(Point2D _mouse_pos) {
+		client.sendDispersedActionRequest(email, _mouse_pos);
+	}
+
+	public void sendPointerChanged(BooleanProperty is_switched_on) {
+		client.sendDispersedActionRequest(email, is_switched_on);
+	}
+	
+	public void createFolder(String _folder_name) {
+		client.sendImageRequest(email, file_tree.getCurrentFolder().getPath() + _folder_name, new File(""));
+	}
+	
+	public void sendImage(File _image) {
+		if( uploading_file_path == null ) {
+			uploading_file_path = file_tree.getCurrentFolder().getPath() + _image.getName();
+			client.sendImageRequest(email, file_tree.getCurrentFolder().getPath(), _image);
+		} else 
+			JOptionPane.showMessageDialog(null, "Obecnie trwa wysy³anie pliku: " + uploading_file_path);
+	}
+	
+	public void getAllGroupMembers() {
+		client.sendGetAllGroupMembersRequest(email);
+	}
+	
 	// updateConferences()
 	// removeNotExistingConferences()
 	// addNewConferences()
 	
 	private void loadFileTreeFromDB() {
-		for( int i = 0; i < 30; i++ ) {
-			file_tree.addFile("root/folder" + i + "/");
-			file_tree.addFile("root/image" + i + ".png");
-			file_tree.addFile("root/folder/image" + i + ".png");
-			file_tree.addFile("root/arrow.hdtv.720p/s04e17" + i + ".avi");
-			file_tree.addFile("root/_d_u_p_a_" + i + "/png" + i + ".png");
-		}
+		client.sendGetAllImagesDescriptionRequest(email);
+	}
+	
+	public void addUploadedFileToTree() {
+		file_tree.addFile(uploading_file_path);
+		uploading_file_path = null;
 		
-		//((AppWindow)window).setFileExplorerRoot(file_tree);
-		//((AppWindow)window).refreshFileExplorerView();
+		notifyFileTreeListener();
+	}
+
+	public void addFilesToTree(List<String> _list_of_filepaths) {
+		for( String path : _list_of_filepaths )
+			file_tree.addFile(path);
+		
+		notifyFileTreeListener();
+	}
+	
+	public void removeFileFromTree(String _filepath) {
+		file_tree.removeFile(_filepath);
+		
+		notifyFileTreeListener();
 	}
 	
 	public String getName() {
@@ -224,6 +283,10 @@ public class User extends Listener {
 		public void onReceive(Connection _connection, Object _message);
 	}
 	
+	public interface FileTreeListener {
+		public void onFileTreeChanged(FileTree _file_tree);
+	}
+	
 	public void addUsedImage(Integer _image_key) {
 		used_images.add(_image_key);
 	}
@@ -246,5 +309,34 @@ public class User extends Listener {
 	
 	public int getCurrentImage() {
 		return current_image;
+	}
+
+	public FileTree getFileTree() {
+		return file_tree;
+	}
+	
+	private void notifyFileTreeListener() {
+		if( file_tree_listener != null )
+			file_tree_listener.onFileTreeChanged(file_tree);
+	}
+	
+	private class UserImageClient extends Listener {
+		@Override
+		public void connected(Connection _connection) {
+			System.out.println("UserImageClient Connected");
+			super.connected(_connection);
+		}
+		
+		@Override
+		public void disconnected(Connection _connection) {
+			System.out.println("UserImageClient Disconnected");
+			super.disconnected(_connection);
+		}
+		
+		@Override
+		public void received(Connection _connection, Object _message) {
+			if( listener != null )
+				listener.onReceive(_connection, _message);
+		}
 	}
 }
