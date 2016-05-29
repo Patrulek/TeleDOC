@@ -1,16 +1,21 @@
 package com.pp.iwm.teledoc.network;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
-import com.pp.iwm.teledoc.objects.Conference;
 import com.pp.iwm.teledoc.objects.FileTree;
+import com.pp.iwm.teledoc.objects.ImageManager;
+import com.pp.iwm.teledoc.objects.Member;
+import com.pp.iwm.teledoc.objects.TempImage;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.geometry.Point2D;
@@ -32,20 +37,21 @@ public class User extends Listener {
 	private String email;
 	
 	private NetworkClient client;
-	private UserImageClient image_client;
 	
-	private List<Conference> closed_conferences;
-	private List<Conference> open_conferences;
+	private List<Member> members;
+	private MembersListListener members_listener;
+	private DownloadListener download_listener;
 	private FileTree file_tree;
 	private FileTreeListener file_tree_listener;
 	private String uploading_file_path;
+	private TempImage downloading_file;
 	private String downloading_file_path;
+	private Map<Integer, Integer> used_images;		// file ids > image manager ids
 	
 	// TODO aktywna konferencja
 	
 	private static User user;
 	private NetworkListener listener;
-	private List<Integer> used_images;
 	private int current_image;
 	
 	
@@ -53,21 +59,17 @@ public class User extends Listener {
 	// METHODS
 	// =======================================
 	
-	public UserImageClient getImageClient() {
-		return image_client;
-	}
-	
 	@Override
 	public void connected(Connection _connection) {
 		changeState(State.CONNECTED);
-		System.out.println("Connected");
+		System.out.println(_connection + " - connected");
 		//super.connected(_connection);
 	}
 	
 	@Override
 	public void disconnected(Connection _connection) {
 		changeState(State.DISCONNECTED);
-		System.out.println("Disconnected");
+		System.out.println(_connection + " - disconnected");
 	}
 	
 	@Override
@@ -100,13 +102,20 @@ public class User extends Listener {
 	
 	private User() {
 		state = State.DISCONNECTED;
-		closed_conferences = new ArrayList<>();
-		open_conferences = new ArrayList<>();
-		used_images = new ArrayList<>();
 		file_tree = new FileTree();
 		client = new NetworkClient();
+		downloading_file = null;
 		uploading_file_path = downloading_file_path = null;
-		image_client = new UserImageClient();
+		members = new ArrayList<>();
+		used_images = new HashMap<>();
+	}
+	
+	public void setDownloadListener(DownloadListener _listener) {
+		download_listener = _listener;
+	}
+	
+	public void removeDownloadListener() {
+		download_listener = null;
 	}
 	
 	public void setFileTreeListener(FileTreeListener _listener) {
@@ -115,6 +124,14 @@ public class User extends Listener {
 	
 	public void removeFileTreeListener() {
 		file_tree_listener = null;
+	}
+	
+	public void setMembersListListener(MembersListListener _listener) {
+		members_listener = _listener;
+	}
+	
+	public void removeMembersListListener() {
+		members_listener = null;
 	}
 	
 	public void setListener(NetworkListener _listener) {
@@ -134,6 +151,10 @@ public class User extends Listener {
 		
 		Thread t = new Thread(() -> tryToConnect());
 		t.start();
+	}
+	
+	public void disconnectFromServer() {
+		client.disconnectFromServer();
 	}
 	
 	private void tryToConnect() {
@@ -165,8 +186,8 @@ public class User extends Listener {
 	}
 	
 	public void loadDataFromDB() {
-		loadConferencesFromDB();
 		loadFileTreeFromDB();
+		loadConferencesFromDB();
 	}
 	
 	public void logIn(String _email, String _password) {
@@ -210,7 +231,7 @@ public class User extends Listener {
 	}
 	
 	public void createFolder(String _folder_name) {
-		client.sendImageRequest(email, file_tree.getCurrentFolder().getPath() + _folder_name, new File(""));
+		client.sendImageRequest(email, file_tree.getCurrentFolder().getPath() + _folder_name, null);
 	}
 	
 	public void sendImage(File _image) {
@@ -219,6 +240,41 @@ public class User extends Listener {
 			client.sendImageRequest(email, file_tree.getCurrentFolder().getPath(), _image);
 		} else 
 			JOptionPane.showMessageDialog(null, "Obecnie trwa wysy³anie pliku: " + uploading_file_path);
+	}
+	
+	public void downloadFile(String _filepath) {
+		if( downloading_file_path == null ) {
+			downloading_file_path = _filepath;
+			client.downloadImageRequest(email, _filepath);
+		} else
+			JOptionPane.showMessageDialog(null, "Poczekaj a¿ poprzedni plik siê pobierze: " + downloading_file_path);
+	}
+	
+	public void newDownloadingFile(int _size) {
+		downloading_file = new TempImage(_size); 
+		notifyDownloadListener(1);
+	}
+	
+	public void progressDownload(byte[] _data) {
+		downloading_file.appendData(_data);
+		notifyDownloadListener(2);
+	}
+	
+	public void saveFileToDisk(String _path, int _image_id) {
+		try {				
+			System.out.println("Zapisujemy w: " + _path);
+			FileOutputStream imageOutFile = new FileOutputStream(_path);
+			imageOutFile.write(downloading_file.getContent());
+			imageOutFile.close();		
+			ImageManager.instance().loadImageForUser(_path);
+			addUsedImage(_image_id, ImageManager.instance().getLastLoadedImageId());
+		} catch (Exception e) { e.printStackTrace(); } 
+		  finally { 
+			  downloading_file = null; 
+			  downloading_file_path = null;
+		  }	
+		
+		notifyDownloadListener(3);
 	}
 	
 	public void getAllGroupMembers() {
@@ -287,20 +343,57 @@ public class User extends Listener {
 		public void onFileTreeChanged(FileTree _file_tree);
 	}
 	
-	public void addUsedImage(Integer _image_key) {
-		used_images.add(_image_key);
+	public interface MembersListListener {
+		public void onMembersListChanged(Member _member, boolean is_removing);
 	}
 	
-	public void removeUsedImage(Integer _image_key) {
-		used_images.remove(_image_key);
+	public interface DownloadListener {
+		public void onDownloadBegin();
+		public void onDownloadProgress();
+		public void onDownloadFinish();
+	}
+	
+	public void addUsedImage(Integer _db_id, Integer _image_key) {
+		used_images.put(_db_id, _image_key);
+	}
+	
+	public void removeUsedImage(Integer _db_id) {
+		used_images.remove(_db_id);
 	}
 	
 	public void removeUsedImages() {
 		used_images.clear();
 	}
 	
-	public List<Integer> getUsedImages() {
+	public Map<Integer, Integer> getUsedImages() {
 		return used_images;
+	}
+	
+	public boolean isMemberInCurrentConference(String _member_mail) {
+		return findMemberInCurrentConference(_member_mail) != null;
+	}
+	
+	public Member findMemberInCurrentConference(String _member_mail) {
+		for( Member m : members ) 
+			if( m.email.equals(_member_mail) )
+				return m;
+		
+		return null;
+	}
+	
+	public void addMember(Member _member) {
+		members.add(_member);
+		notifyMembersListListener(_member, false);
+	}
+	
+	public void removeMember(Member _member) {
+		members.remove(_member);
+		notifyMembersListListener(_member, true);
+	}
+	
+	public void removeMembers() {
+		members.clear();
+		notifyMembersListListener(null, true);
 	}
 	
 	public void setCurrentImage(int _current_image) {
@@ -320,23 +413,25 @@ public class User extends Listener {
 			file_tree_listener.onFileTreeChanged(file_tree);
 	}
 	
-	private class UserImageClient extends Listener {
-		@Override
-		public void connected(Connection _connection) {
-			System.out.println("UserImageClient Connected");
-			super.connected(_connection);
-		}
-		
-		@Override
-		public void disconnected(Connection _connection) {
-			System.out.println("UserImageClient Disconnected");
-			super.disconnected(_connection);
-		}
-		
-		@Override
-		public void received(Connection _connection, Object _message) {
-			if( listener != null )
-				listener.onReceive(_connection, _message);
+	private void notifyMembersListListener(Member _member, boolean _is_removing) {
+		if( members_listener != null )
+			members_listener.onMembersListChanged(_member, _is_removing);
+	}
+	
+	// TODO
+	private void notifyDownloadListener(int _state) {
+		if( download_listener != null ) {
+			switch( _state ) {
+				case 1:
+					download_listener.onDownloadBegin();
+					break;
+				case 2:
+					download_listener.onDownloadProgress();
+					break;
+				case 3:
+					download_listener.onDownloadFinish();
+					break;
+			}
 		}
 	}
 }

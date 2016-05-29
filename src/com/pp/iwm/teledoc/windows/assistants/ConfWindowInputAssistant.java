@@ -33,6 +33,8 @@ public class ConfWindowInputAssistant {
 	private ConfWindowModel model;
 	private ConfWindowLayout layout;
 	
+	private double last_mouse_time;
+	
 	// ====================================
 	// METHODS
 	// ====================================
@@ -47,8 +49,12 @@ public class ConfWindowInputAssistant {
 		model.setMousePos(new Point2D(_ev.getSceneX(), _ev.getSceneY()));
 		window.mapMousePosToImageMousePos();
 		
-		if( model.is_sending_pointer.get() )
+		
+		
+		if( model.is_sending_pointer.get() && System.currentTimeMillis() > last_mouse_time + 50) {
 			window.getNetworkAssistant().sendMousePos();
+			last_mouse_time = System.currentTimeMillis();
+		}
 	}
 	
 	public void onScrollPanePressed(MouseEvent _ev) {

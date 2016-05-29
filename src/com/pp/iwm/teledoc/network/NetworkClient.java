@@ -26,8 +26,8 @@ public class NetworkClient {
 	public static final int MSG_POINTER_ON = 10001;
 	public static final int MSG_POINTER_OFF = 10002;
 
-	private final String SERVER_ADDRESS = "192.168.0.6";	// 192.168.0.6 <- wirualka
-	private final int TIMEOUT = 5000;
+	private final String SERVER_ADDRESS = "192.168.0.11";	// 192.168.0.6 <- wirualka  | 192.168.0.10 - Piotr
+	private final int TIMEOUT = 15000;
 	private final int TCP_PORT = 33000;
 	private final int UDP_PORT = 32000;
 	private final int TCP_PORT_IMAGES = 35000;
@@ -47,10 +47,10 @@ public class NetworkClient {
 	
 	public NetworkClient() {
 		has_listener = false;
-		client = new Client(10500000, 4096);
+		client = new Client(12500000, 4096);//Client(10500000, 4096);
 		client.start();
 		
-		image_client = new Client(10500000, 4096);
+		image_client = new Client(30500000, 16384); //Client(10500000, 4096);
 		image_client.start();
 		
 		registerPackets();
@@ -59,7 +59,7 @@ public class NetworkClient {
 	public void setUserAsListener() {
 		if( !has_listener ) {
 			client.addListener(User.instance());
-			image_client.addListener(User.instance().getImageClient());
+			image_client.addListener(User.instance());
 			has_listener = true;
 		}
 	}
@@ -71,6 +71,11 @@ public class NetworkClient {
 	
 	public boolean isConnected() {
 		return client.isConnected() && image_client.isConnected();
+	}
+	
+	public void disconnectFromServer() {
+		client.close();
+		image_client.close();
 	}
 	
 	private void registerPackets() {
@@ -196,7 +201,7 @@ public class NetworkClient {
 		else if( _parameters instanceof BooleanProperty )
 			sendPointerChanged(request, (BooleanProperty)_parameters);
 		
-		client.sendTCP(request);
+		client.sendUDP(request);
 	}
 	
 	private void sendPointerChanged(DispersedActionRequest _request, BooleanProperty _is_switched_on) {
@@ -218,21 +223,52 @@ public class NetworkClient {
 		client.sendTCP(request);
 	}
 
+
+	public void downloadImageRequest(String email, String _filepath) {
+		DownloadImageRequest request = new DownloadImageRequest();
+		request.setEmail(email);
+		
+		int pos = _filepath.lastIndexOf("/") + 1;
+		String path = _filepath.substring(0, pos);
+		String name = _filepath.substring(pos);
+
+		request.setPath(path);
+		request.setImageName(name);
+		
+		System.out.println("Pobieramy: " + path + name);
+		
+		image_client.sendTCP(request);	
+	}
+
 	public void sendImageRequest(String _email, String _parent_path, File _image) {
 		try {
+			SendImage request = new SendImage();
+			request.setEmail(_email);
+			request.setPath(_parent_path);
+			request.setStandardPackageSize(IMAGE_PACKET_SIZE);
+			
+			if( _image == null ) {
+				request.setSizeInBytes(1);
+				request.setName("");
+				request.setPartNumber(0);
+				request.setEndPartNumber(0);
+				request.setImageContent(null);
+				
+				image_client.sendTCP(request);
+				return;
+			}
+			
 			FileInputStream imageToSend = new FileInputStream(_image);
 			byte imageData[] = new byte[(int)_image.length()];
 			imageToSend.read(imageData);
 			int numberOfPackages = ((int)imageData.length / IMAGE_PACKET_SIZE) + 1;
 			
-			SendImage request = new SendImage();
 			request.setStandardPackageSize(IMAGE_PACKET_SIZE);
 			request.setSizeInBytes(imageData.length);
 			request.setPath(_parent_path);
 			request.setEmail(_email);
 			request.setName(_image.getName());
 			request.setEndPartNumber(numberOfPackages - 1);
-			
 			
 			int start_range = 0;
 			int end_range = IMAGE_PACKET_SIZE;
@@ -263,5 +299,6 @@ public class NetworkClient {
 		GetAllImagesDescriptionRequest request = new GetAllImagesDescriptionRequest();
 		request.setEmail(_email);
 		image_client.sendTCP(request);
+		System.out.println("Poszed³ request o wszystkie pliki");
 	}
 }

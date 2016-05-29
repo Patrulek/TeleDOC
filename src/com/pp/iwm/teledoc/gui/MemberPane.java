@@ -6,6 +6,7 @@ import java.util.List;
 import com.pp.iwm.teledoc.animations.FadeAnimation;
 import com.pp.iwm.teledoc.animations.TranslateAnimation;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
+import com.pp.iwm.teledoc.network.User.MembersListListener;
 import com.pp.iwm.teledoc.objects.Member;
 import com.pp.iwm.teledoc.windows.Window;
 
@@ -14,7 +15,7 @@ import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 
-public class MemberPane extends Pane {
+public class MemberPane extends Pane implements MembersListListener {
 	
 	// =======================================
 	// FIELDS
@@ -89,11 +90,19 @@ public class MemberPane extends Pane {
 		fade_animation.playBackward();
 	}
 	
-	public void addMember(Member _member) {
+	private void addMember(Member _member) {
 		MemberCard member_card = new MemberCard(this, _member);
 		members.add(member_card);
-		System.out.println("DOdano uzytkownika z emailem: " + _member.email);
 		content_pane.getChildren().add(member_card);
+	}
+	
+	private void removeMember(Member _member) {
+		MemberCard member_card = findCardForMember(_member);
+		
+		if( member_card != null ) {
+			content_pane.getChildren().remove(member_card);
+			members.remove(member_card);
+		}
 	}
 	
 	public void clearMembers() {
@@ -101,12 +110,23 @@ public class MemberPane extends Pane {
 		content_pane.getChildren().clear();
 	}
 	
-	public Member findMember(String _email) {
+	private MemberCard findCardForMember(Member _member) {
 		for( MemberCard card : members )
-			if( card.hasMember(_email) )
-				return card.getMember();
+			if( card.getMember().email == _member.email )
+				return card;
 		
-		// TODO
 		return null;
+	}
+
+	@Override
+	public void onMembersListChanged(Member _member, boolean is_removing) {
+		if( _member == null )
+			clearMembers();
+		else {
+			if( is_removing )
+				removeMember(_member);
+			else
+				addMember(_member);
+		}
 	}
 }

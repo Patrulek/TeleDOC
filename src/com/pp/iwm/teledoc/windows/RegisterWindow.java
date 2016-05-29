@@ -37,6 +37,7 @@ public class RegisterWindow extends Window implements ChangeListener<Boolean>, N
 	}
 	
 	private void openLoginWindow(boolean _register_success) {
+		onClose();
 		openWindowAndHideCurrent(new LoginWindow());
 	}
 	
@@ -204,5 +205,10 @@ public class RegisterWindow extends Window implements ChangeListener<Boolean>, N
 			registerSuccess();
 		else
 			registerFailed();
+	}
+
+	@Override
+	protected void onClose() {
+		User.instance().removeListener();
 	}
 }

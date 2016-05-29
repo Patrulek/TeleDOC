@@ -2,6 +2,8 @@ package com.pp.iwm.teledoc.gui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.network.User;
@@ -60,14 +62,17 @@ public class ThumbnailPanel extends Pane {
 	}
 	
 	public void loadThumbnails() {
-		List<Integer> images = User.instance().getUsedImages();
+		Map<Integer, Integer> images = User.instance().getUsedImages();
 		double x_pos = 32.0;
 		content_pane.getChildren().clear();
 		
-		for( int i = 0; i < 20; i++ ) { // TODO test
-			for( Integer image_key : images ) {
-				ThumbnailPanelCard card = new ThumbnailPanelCard(this, image_key);
-				boolean is_active = User.instance().getCurrentImage() == image_key;
+		for( int i = 0; i < 5; i++ ) {
+			for( Entry<Integer, Integer> entry : images.entrySet() ) {
+				int db_id = entry.getKey();
+				int image_id = entry.getValue();
+				
+				ThumbnailPanelCard card = new ThumbnailPanelCard(this, image_id);
+				boolean is_active = User.instance().getCurrentImage() == image_id;
 				card.setActiveAndUpdateView(is_active);
 				thumbnails.add(card);
 				card.setLayoutX(x_pos);

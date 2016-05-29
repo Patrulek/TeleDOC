@@ -77,7 +77,7 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		if( _response.getAuthorEmail().equals(User.instance().getEmail()))
 			return;
 		
-		com.pp.iwm.teledoc.objects.Member m = layout.member_pane.findMember(_response.getAuthorEmail());
+		com.pp.iwm.teledoc.objects.Member m = User.instance().findMemberInCurrentConference(_response.getAuthorEmail());
 		
 		if( m == null )
 			return;
@@ -85,7 +85,7 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		if( _response.getTypeID() == NetworkClient.MSG_POINTER && m.is_sending_pointer  ) {
 			Point2D sender_mouse_pos = parseStringParameterToMousePos(_response.getParameters());
 			layout.drawable_pane.relocatePointerFor(m.email, sender_mouse_pos);
-			System.out.println(m.name + " " + m.surname + " wskazuje na " + sender_mouse_pos);
+			//System.out.println(m.name + " " + m.surname + " wskazuje na " + sender_mouse_pos);
 		} else if( _response.getTypeID() == NetworkClient.MSG_POINTER_ON ) {
 			m.is_sending_pointer = true;
 			layout.drawable_pane.showPointerFor(m.email);
@@ -113,14 +113,14 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		
 		Platform.runLater(() -> {
 			for( Member m : group_members )
-				layout.member_pane.addMember(new com.pp.iwm.teledoc.objects.Member(m.getName(), m.getSurname(), m.getEmail()));
+				User.instance().addMember(new com.pp.iwm.teledoc.objects.Member(m.getName(), m.getSurname(), m.getEmail()));
 		});
 	}
 	
 	private void onNewGroupMemberEventReceive(NewGroupMemberEvent _response) {
 		Platform.runLater(() -> {
 			Member m = _response.getNewMember();
-			layout.member_pane.addMember(new com.pp.iwm.teledoc.objects.Member(m.getName(), m.getSurname(), m.getEmail()));
+			User.instance().addMember(new com.pp.iwm.teledoc.objects.Member(m.getName(), m.getSurname(), m.getEmail()));
 		});
 	}
 }

@@ -28,6 +28,7 @@ public abstract class Window {
 	protected abstract void createModel();
 	protected abstract void createLayout();
 	protected abstract void initEventHandlers();
+	protected abstract void onClose();
 	
 	public void show() {
 		layout.show();

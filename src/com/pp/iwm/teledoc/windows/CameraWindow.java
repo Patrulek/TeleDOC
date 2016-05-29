@@ -102,4 +102,10 @@ public class CameraWindow extends Window {
 		window_model.parent_window.closeCameraWindow();
 		super.hide();
 	}
+
+	@Override
+	protected void onClose() {
+		// TODO Auto-generated method stub
+		
+	}
 }

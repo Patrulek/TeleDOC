@@ -4,6 +4,7 @@ import java.util.Random;
 
 import com.pp.iwm.teledoc.gui.DrawablePane;
 
+import javafx.application.Platform;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
@@ -15,7 +16,8 @@ public class Pointer {
 	// FIELDS
 	// ==============================
 	
-	private final double RADIUS = 4.0;
+	private final double RADIUS = 8.0;
+	private final double HALF_RADIUS = RADIUS / 2.0;
 	
 	private DrawablePane drawable_pane;
 	private Point2D pane_pos;
@@ -42,13 +44,26 @@ public class Pointer {
 	}
 	
 	public void relocate(Point2D _new_pos) {
-		pointer.relocate(_new_pos.getX(), _new_pos.getY());
-		lbl_member.relocate(_new_pos.getX() - lbl_member.getWidth() / 2.0, _new_pos.getY() - RADIUS - lbl_member.getHeight());
 		pane_pos = _new_pos;
+		Platform.runLater(() -> refresh());
+	}
+	
+	public void refresh() {
+		double scale = drawable_pane.getScale();
+		double pointer_x = pane_pos.getX() - HALF_RADIUS;
+		double pointer_y = pane_pos.getY() - HALF_RADIUS;
+		
+		pointer.relocate(scale * pointer_x, scale * pointer_y);
+		lbl_member.relocate(scale * pointer_x - lbl_member.getWidth() / 2.0 + RADIUS, scale * pointer_y - HALF_RADIUS - lbl_member.getHeight());
 	}
 	
 	public void setMember(String _member_name) {
 		lbl_member.setText(_member_name);
+	}
+	
+	public void addToPane() {
+		drawable_pane.getChildren().add(lbl_member);
+		drawable_pane.getChildren().add(pointer);
 	}
 	
 	public void show() {

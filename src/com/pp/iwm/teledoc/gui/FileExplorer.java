@@ -6,23 +6,25 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.pp.iwm.teledoc.layouts.AppWindowLayout;
+import com.pp.iwm.teledoc.network.User;
+import com.pp.iwm.teledoc.network.User.DownloadListener;
 import com.pp.iwm.teledoc.network.User.FileTreeListener;
 import com.pp.iwm.teledoc.objects.File;
 import com.pp.iwm.teledoc.objects.FileTree;
+import com.pp.iwm.teledoc.objects.ImageManager;
 import com.pp.iwm.teledoc.utils.Utils;
-import com.pp.iwm.teledoc.windows.AppWindow;
-import com.pp.iwm.teledoc.windows.Window;
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 
-public class FileExplorer extends Pane implements FileTreeListener {
+public class FileExplorer extends Pane implements FileTreeListener, DownloadListener {
 	
 	// =========================================
 	// FIELDS
@@ -34,6 +36,8 @@ public class FileExplorer extends Pane implements FileTreeListener {
 	private Label lbl_path;
 	private Pane simple_pane;
 	private ScrollPane scroll_pane;
+	private ImageView image_preview;
+	private String previewed_file_path;
 	
 	private FileTree file_tree;
 	private FileCard selected_card;
@@ -54,6 +58,7 @@ public class FileExplorer extends Pane implements FileTreeListener {
 		icon_size = 32.0;
 		files = new ArrayList<>();
 		layout = _layout;
+		previewed_file_path = "";
 		
 		createLayout();
 		recalcMaxCardsInRow();
@@ -66,6 +71,11 @@ public class FileExplorer extends Pane implements FileTreeListener {
 		header_pane.setStyle("-fx-background-color: rgb(45, 81, 90);");
 		header_pane.setPrefSize(759.0, 24.0);
 		header_pane.setLayoutY(42.0);
+		
+		image_preview = new ImageView();
+		image_preview.setVisible(false);
+		image_preview.setFitWidth(759.0);
+		image_preview.setFitHeight(420.0);
 		
 		simple_pane = new Pane();
 		simple_pane.setStyle("-fx-background-color: rgb(30, 54, 60);");
@@ -98,7 +108,17 @@ public class FileExplorer extends Pane implements FileTreeListener {
 		getChildren().add(header_pane);
 		getChildren().add(scroll_pane);
 	}
-
+	
+	public void showImagePreview() {
+		System.out.println("Wyœwietl obraz");
+		image_preview.toFront();
+		image_preview.setVisible(true);
+	}
+	
+	public void hideImagePreview() {
+		image_preview.setVisible(false);
+	}
+	
 	// TODO hardcoded numbers
 	private void recalcMaxCardsInRow() {
 		max_cards_in_row = (int)(719.0 / (icon_size + cards_gap));
@@ -149,6 +169,8 @@ public class FileExplorer extends Pane implements FileTreeListener {
 			simple_pane.getChildren().add(files.get(i));
 			files.get(i).setLayoutX(x); files.get(i).setLayoutY(y);
 		}
+		
+		simple_pane.getChildren().add(image_preview);
 	}
 	
 	public void onCardSelect(FileCard _selected_card) {
@@ -166,8 +188,10 @@ public class FileExplorer extends Pane implements FileTreeListener {
 			file_tree.goIntoFolder(choosed_file);
 			updateLabelPath();
 			refreshView();
-		} else
-			; // TODO wyœwietl plik
+		} else {
+			previewed_file_path = _choosed_card.getFile().getPath();
+			User.instance().downloadFile(_choosed_card.getFile().getPath());
+		}
 	}
 	
 	public void onCardHover(FileCard _hovered_card) {
@@ -191,14 +215,18 @@ public class FileExplorer extends Pane implements FileTreeListener {
 	
 	private void onBtnMouseClicked(ImageButton _ibtn) {
 		if( _ibtn == btn_back ) {
-			if( file_tree.hasCurrentFolderAParent() ) {
+			updateLabelPath();
+			
+			if( image_preview.isVisible() ) {
+				hideImagePreview();
+				previewed_file_path = "";
+			} else if( file_tree.hasCurrentFolderAParent() ) {
 				if( selected_card != null ) {
 					selected_card = null;
 					removeTextFromStatusBar();
 				}
 				
 				file_tree.goParentFolderIfExist();
-				updateLabelPath();
 				refreshView();
 			}
 		}
@@ -228,6 +256,29 @@ public class FileExplorer extends Pane implements FileTreeListener {
 	public void onFileTreeChanged(FileTree _file_tree) {
 		file_tree = _file_tree;
 		Platform.runLater(() -> refreshView());
+	}
+
+	@Override
+	public void onDownloadBegin() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onDownloadProgress() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onDownloadFinish() {
+		Platform.runLater(() -> lbl_path.setText(previewed_file_path));
+		setLastDownloadedFileInPreview();
+		showImagePreview();
+	}
+	
+	private void setLastDownloadedFileInPreview() {
+		image_preview.setImage(ImageManager.instance().getLastLoadedImage());
 	}
 	
 }

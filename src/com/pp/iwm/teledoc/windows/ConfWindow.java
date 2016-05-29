@@ -52,6 +52,7 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	
 	public ConfWindow() {
 		super();
+		User.instance().setMembersListListener(window_layout.member_pane);
 		drawable_assistant = new ConfWindowDrawableAssistant(this);
 		window_layout.drawable_pane.setListener(drawable_assistant);
 		
@@ -60,11 +61,11 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		
 		input_assistant = new ConfWindowInputAssistant(this);
 		
-		ImageManager.instance().loadImageForUser(2099, "/assets/big_image.jpg");
-		User.instance().setCurrentImage(2099);
+		ImageManager.instance().loadImageForUser("/assets/big_image.jpg");
+		User.instance().setCurrentImage(ImageManager.instance().getLastLoadedImageId());
 		User.instance().getAllGroupMembers();
 		
-		window_layout.minimap_pane.setImage(2099);
+		window_layout.minimap_pane.setImage(ImageManager.instance().getLastLoadedImageId());
 	}
 	
 	public void mapMousePosToImageMousePos() {
@@ -197,6 +198,7 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		
 		window_layout.action_pane.stopOpacityThread();
 		window_layout.layers_pane.stopVisibilityThread();
+		onClose();
 		Platform.runLater(() -> openWindowAndHideCurrent(new AppWindow()));
 	}
 	
@@ -332,5 +334,13 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	
 	public ConfWindowInputAssistant getInputAssistant() {
 		return input_assistant;
+	}
+
+	@Override
+	protected void onClose() {
+		User.instance().removeMembers();
+		User.instance().removeMembersListListener();
+		User.instance().removeListener();
+		User.instance().setCurrentImage(-1);
 	}
 }

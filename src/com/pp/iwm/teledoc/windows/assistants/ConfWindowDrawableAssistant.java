@@ -114,6 +114,7 @@ public class ConfWindowDrawableAssistant implements DrawablePaneListener, Drawab
 	public void onRescalePane() {
 		layout.drawable_pane.setDrawables(model.drawables);
 		Platform.runLater(() -> {
+			layout.drawable_pane.refreshPointers();
 			layout.annotation_pane.refresh();
 			layout.minimap_pane.refresh();
 		});

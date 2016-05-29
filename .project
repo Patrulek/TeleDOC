@@ -20,4 +20,10 @@
 		<nature>org.eclipse.xtext.ui.shared.xtextNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>
+	<variableList>
+		<variable>
+			<name>TEMP</name>
+			<value>file:/T:/Temp</value>
+		</variable>
+	</variableList>
 </projectDescription>

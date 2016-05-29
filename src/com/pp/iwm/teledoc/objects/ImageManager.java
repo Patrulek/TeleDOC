@@ -16,6 +16,7 @@ public class ImageManager {
 	
 	private static ImageManager s_instance;
 	private Map<Integer, Image> images;
+	private int last_id;
 	
 	// ===============================================
 	// METHODS
@@ -45,9 +46,16 @@ public class ImageManager {
 			loadImage(_image_key, new Image(_img_path));
 	}
 	
-	public void loadImageForUser(Integer _image_key, String _img_path) {
-		loadImage(_image_key, _img_path);
-		User.instance().addUsedImage(_image_key);
+	public void loadImageForUser(String _img_path) {
+		loadImage(last_id++, _img_path);
+	}
+	
+	public int getLastLoadedImageId() {
+		return last_id - 1;
+	}
+	
+	public Image getLastLoadedImage() {
+		return getImage(getLastLoadedImageId());
 	}
 	
 	public void unloadImage(Integer _key) {
@@ -65,5 +73,6 @@ public class ImageManager {
 	
 	private ImageManager() {
 		images = new HashMap<>();
+		last_id = 50000;
 	}
 }

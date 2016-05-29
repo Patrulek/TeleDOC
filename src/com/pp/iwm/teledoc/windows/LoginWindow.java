@@ -35,11 +35,14 @@ public class LoginWindow extends Window implements ChangeListener<Boolean>, Netw
 	}
 
 	private void openRegisterWindow() {
-		if( User.instance().getState() != State.CONNECTING )
+		if( User.instance().getState() != State.CONNECTING ) {
+			onClose();
 			openWindowAndHideCurrent(new RegisterWindow());
+		}
 	}
 
 	private void openAppWindow() {
+		onClose();
 		openWindowAndHideCurrent(new AppWindow());
 	}
 	
@@ -166,6 +169,7 @@ public class LoginWindow extends Window implements ChangeListener<Boolean>, Netw
 				window_layout.changeErrorLabelText("£¹czenie z serverem");
 				window_layout.setErrorLabelTextColor(2);
 			} else if( _state == State.CONNECTED ) {
+				try{Thread.sleep(500);}catch(Exception e){};
 				tryToLogIn();
 				window_layout.changeErrorLabelText("£¹czenie z baz¹ danych");
 				window_layout.setErrorLabelTextColor(2);
@@ -179,10 +183,14 @@ public class LoginWindow extends Window implements ChangeListener<Boolean>, Netw
 	@Override
 	public void onReceive(Connection _connection, Object _message) {
 		if( _message instanceof LoginResponse && User.instance().getState() == State.CONNECTED )
-			onLoginResponseReceive((LoginResponse)_message);
+			if( User.instance().isConnected() )
+				onLoginResponseReceive((LoginResponse)_message);
+			else
+				System.out.println("Nie jestem jeszcze polaczony");
 	}
 	
 	private void onLoginResponseReceive(LoginResponse _response) {
+		System.out.println("Otrzyma³em response login");
 		if( _response.getId() != -1 ) // -1 nie znaleziono usera w bazie
 			loginSuccess(_response);
 		else
@@ -206,5 +214,10 @@ public class LoginWindow extends Window implements ChangeListener<Boolean>, Netw
 			window_layout.changeErrorLabelText("Niepoprawid³owe dane");
 			window_layout.setErrorLabelTextColor(0);
 		});
+	}
+
+	@Override
+	protected void onClose() {
+		User.instance().removeListener();
 	}
 }

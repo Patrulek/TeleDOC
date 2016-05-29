@@ -1,6 +1,7 @@
 package com.pp.iwm.teledoc.windows;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,24 +9,15 @@ import javax.swing.JOptionPane;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.pp.iwm.teledoc.gui.ActionPane.PaneState;
-import com.pp.iwm.teledoc.gui.ConferenceCard;
-import com.pp.iwm.teledoc.gui.Dockbar;
-import com.pp.iwm.teledoc.gui.FileExplorer;
-import com.pp.iwm.teledoc.gui.ImageButton;
-import com.pp.iwm.teledoc.gui.StatusBar;
+import com.pp.iwm.teledoc.gui.*;
 import com.pp.iwm.teledoc.layouts.AppWindowLayout;
 import com.pp.iwm.teledoc.models.AppWindowModel;
 import com.pp.iwm.teledoc.network.NetworkClient;
 import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.network.User.NetworkListener;
 import com.pp.iwm.teledoc.network.User.State;
-import com.pp.iwm.teledoc.network.packets.AllGroupsResponse;
-import com.pp.iwm.teledoc.network.packets.CreateGroupResponse;
-import com.pp.iwm.teledoc.network.packets.Group;
-import com.pp.iwm.teledoc.network.packets.JoinToGroupResponse;
-import com.pp.iwm.teledoc.network.packets.images.ConfirmSendImageResponse;
-import com.pp.iwm.teledoc.network.packets.images.GetAllImagesDescriptionResponse;
-import com.pp.iwm.teledoc.network.packets.images.ImageDescription;
+import com.pp.iwm.teledoc.network.packets.*;
+import com.pp.iwm.teledoc.network.packets.images.*;
 import com.pp.iwm.teledoc.objects.Conference;
 import com.pp.iwm.teledoc.objects.FileTree;
 import com.pp.iwm.teledoc.utils.Utils;
@@ -57,6 +49,7 @@ public class AppWindow extends Window implements NetworkListener {
 		super();
 		User.instance().setListener(this);
 		User.instance().setFileTreeListener(window_layout.file_pane);
+		User.instance().setDownloadListener(window_layout.file_pane);
 		User.instance().loadDataFromDB();
 	}
 	
@@ -123,7 +116,11 @@ public class AppWindow extends Window implements NetworkListener {
 	
 	private void onLogout() {
 		User.instance().logOut();
-		Platform.runLater(() -> openWindowAndHideCurrent(new LoginWindow()));
+		Platform.runLater(() -> {
+			onClose();
+			openWindowAndHideCurrent(new LoginWindow());
+			User.instance().disconnectFromServer();
+		});
 	}
 	
 	private void onWindowBackgroundMousePressed(MouseEvent _ev) {
@@ -278,7 +275,7 @@ public class AppWindow extends Window implements NetworkListener {
 
 	@Override
 	public void onReceive(Connection _connection, Object _message) {
-		if( User.instance().isConnected() ) {
+		//if( User.instance().isConnected() ) {
 			if( _message instanceof AllGroupsResponse )
 				onAllGroupsResponseReceive((AllGroupsResponse)_message);
 			else if( _message instanceof CreateGroupResponse )
@@ -289,9 +286,26 @@ public class AppWindow extends Window implements NetworkListener {
 				onConfirmSendImageResponseReceive((ConfirmSendImageResponse)_message);
 			else if( _message instanceof GetAllImagesDescriptionResponse )
 				onGetAllImagesDescriptionResponseReceive((GetAllImagesDescriptionResponse)_message);
-		}
+			else if( _message instanceof SendImage )
+				onSendImageReceive((SendImage)_message);
+		//} else {
+			//System.out.println("Jestem rozlaczony");
+		//}
 	}
 	
+	private void onSendImageReceive(SendImage _response) {
+		if( _response.getPartNumber() == 0 ) {
+			User.instance().newDownloadingFile(_response.getSizeInBytes());
+			User.instance().progressDownload(_response.getImageContent());
+		} else if( _response.getPartNumber() < _response.getEndPartNumber() )
+			User.instance().progressDownload(_response.getImageContent());		
+		else {
+			User.instance().progressDownload(_response.getImageContent());
+			String path = "assets/" + _response.getImageID() + _response.getName();
+			User.instance().saveFileToDisk(path, _response.getImageID());			
+		}
+	}
+
 	private void onAllGroupsResponseReceive(AllGroupsResponse _response) {
 		List<Group> conferences = _response.getGroups();
 		Platform.runLater(() -> addLoadedConferences(conferences));
@@ -316,6 +330,7 @@ public class AppWindow extends Window implements NetworkListener {
 			JOptionPane.showMessageDialog(null, "Nie uda³o siê do³¹czyæ do grupy");  // TODO zmieniæ
 		else {
 			window_model.is_opening_conf_window = true;
+			onClose();
 			Platform.runLater(() -> openWindowAndHideCurrent(new ConfWindow()));
 		}
 	}
@@ -389,5 +404,11 @@ public class AppWindow extends Window implements NetworkListener {
 	
 	private void onButtonMouseExited(ImageButton _ibtn) {
 		window_layout.conf_pane.removeTextFromStatusBar();
+	}
+
+	@Override
+	protected void onClose() {
+		User.instance().removeListener();
+		User.instance().removeFileTreeListener();
 	}
 }

@@ -9,6 +9,8 @@ import com.pp.iwm.teledoc.drawables.DrawableLine;
 import com.pp.iwm.teledoc.drawables.DrawableObject;
 import com.pp.iwm.teledoc.drawables.Pointer;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
+import com.pp.iwm.teledoc.network.User;
+import com.pp.iwm.teledoc.objects.Member;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 import com.pp.iwm.teledoc.windows.Window;
 
@@ -327,6 +329,18 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 		if( pointer_idx == -1 ) {
 			pointers.add(new Pointer(this, _member_mail));
 			pointer_idx = pointers.size() - 1;
+			
+			Member m = User.instance().findMemberInCurrentConference(_member_mail);
+			
+			if( m != null ) {
+				String member_name = m.name + " " + m.surname;
+				pointers.get(pointer_idx).setMember(member_name);
+			}
+			
+			Platform.runLater(() -> {
+				int pointer_idx2 = pointers.size() - 1;
+				pointers.get(pointer_idx2).addToPane();
+			});
 		}
 		
 		pointers.get(pointer_idx).show();
@@ -340,10 +354,17 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 	}
 	
 	public void relocatePointerFor(String _member_mail, Point2D _new_pos) {
-		int pointer_idx = findPointerIdx(_member_mail);
-		
-		if( pointer_idx != -1 )
-			pointers.get(pointer_idx).relocate(_new_pos);
+		Platform.runLater(() -> {
+			int pointer_idx = findPointerIdx(_member_mail);
+			
+			if( pointer_idx != -1 )
+				pointers.get(pointer_idx).relocate(_new_pos);
+		});
+	}
+	
+	public void refreshPointers() {
+		for( Pointer p : pointers )
+			p.refresh();
 	}
 	
 	public interface DrawablePaneListener {

@@ -13,6 +13,7 @@ import com.pp.iwm.teledoc.gui.MemberCard;
 import com.pp.iwm.teledoc.gui.MemberPane;
 import com.pp.iwm.teledoc.gui.MinimapPane;
 import com.pp.iwm.teledoc.gui.StatusBar;
+import com.pp.iwm.teledoc.objects.ImageManager;
 import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 
@@ -247,7 +248,7 @@ public class ConfWindowLayout extends WindowLayout {
 	private void initializeLater() {
 		Platform.runLater(() -> {
 			drawable_pane.setViewportBounds(scroll_pane.getViewportBounds());
-			drawable_pane.setImageAndResetCanvas(2099);
+			drawable_pane.setImageAndResetCanvas(ImageManager.instance().getLastLoadedImageId());
 		});
 	}
 
