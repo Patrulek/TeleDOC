@@ -78,8 +78,10 @@ public class Utils {
 	public static final int ACT_DELETE = 1035;
 	public static final int ACT_MINIMIZE = 1036;
 	public static final int ACT_MAXIMIZE = 1037;
+	public static final int ACT_ADD_FOLDER = 1038;
+	public static final int ACT_MY_FILES = 1039;
 	
-	public static final int ACT_EXIT_APP = 1040;
+	public static final int ACT_EXIT_APP = 1050;
 	
 	// PROMPTS
 	public static final String PROMPT_EMAIL = "Email";
@@ -133,6 +135,8 @@ public class Utils {
 	public static final String HINT_DELETE = "Usuñ obiekt";
 	public static final String HINT_MINIMIZE = "Zwiñ";
 	public static final String HINT_MAXIMIZE = "Rozwiñ";
+	public static final String HINT_ADD_FOLDER = "Utwórz nowy folder";
+	public static final String HINT_MY_FILES = "Wyœwietl pliki wgrane przeze mnie";
 	
 	// MESSAGES
 	public static final String MSG_INPUT_EMAIL = "Podaj swój email";
@@ -193,6 +197,10 @@ public class Utils {
 	public static final int IMG_EMPTY_CAMERA = 2048;
 	public static final int IMG_MINIMIZE = 2049;
 	public static final int IMG_MAXIMIZE = 2050;
+	public static final int IMG_ADD_FOLDER = 2051;
+	public static final int IMG_ADD_FOLDER_BIG = 2052;
+	public static final int IMG_MY_FILES = 2053;
+	public static final int IMG_ALL_FILES = 2054;
 	
 	// other utils
 	
@@ -243,5 +251,14 @@ public class Utils {
 		}
 		
 		return new Color(r / s, g / s, b / s, a / s);
+	}
+	
+	public static String changeStringToFolderName(String _str) {
+		String folder_name = _str;
+		folder_name = folder_name.replace(' ', '_');
+		folder_name = folder_name.replace("/", "");
+		folder_name = folder_name.concat("/");
+		
+		return folder_name;
 	}
 }

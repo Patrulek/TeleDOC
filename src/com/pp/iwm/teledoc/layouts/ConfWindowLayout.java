@@ -67,8 +67,6 @@ public class ConfWindowLayout extends WindowLayout {
 		
 		createBackground();
 		createStatusBar();
-		createChatPane();
-		createMemberPane();
 		createDockbar();
 
 		createDrawablePane();
@@ -77,6 +75,8 @@ public class ConfWindowLayout extends WindowLayout {
 		createAnnotationTextPane();
 		createActionPane();
 		createMinimapPane();
+		createChatPane();
+		createMemberPane();
 		createButtons();
 		createLayersPane();
 		
@@ -230,11 +230,11 @@ public class ConfWindowLayout extends WindowLayout {
 	private void addElementsToScene() {
 		root.getChildren().addAll(rect_window_background,
 								scroll_pane,
+								minimap_pane,
 								member_pane,
 								chat_pane,
 								layers_pane,
 								dockbar,
-								minimap_pane,
 								action_pane,
 								status_bar,
 								annotation_pane,

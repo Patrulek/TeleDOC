@@ -13,13 +13,23 @@ public class FileTree {
 	
 	private File root_folder;
 	private File current_folder;
+	private String name;
 	
 	// ====================================
 	// METHODS 
 	// ====================================
 	
-	public FileTree() {
+	public FileTree(String _name) {
 		root_folder = new File("root/", null);
+		current_folder = root_folder;
+		name = _name;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setCurrentAsRoot() {
 		current_folder = root_folder;
 	}
 	
@@ -54,7 +64,9 @@ public class FileTree {
 	
 	public void goParentFolderIfExist() {
 		File parent_folder = current_folder.getParent();
-		setCurrentFolder(parent_folder);
+		
+		if( parent_folder != null )
+			setCurrentFolder(parent_folder);
 	}
 	
 	public void goIntoFolder(File _folder) {
@@ -135,5 +147,6 @@ public class FileTree {
 	
 	public void removeTree() {
 		root_folder.getChildren().clear();
+		setCurrentAsRoot();
 	}
 }

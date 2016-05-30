@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.pp.iwm.teledoc.gui.ActionPane.PaneState;
 import com.pp.iwm.teledoc.layouts.AppWindowLayout;
 import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.network.User.DownloadListener;
@@ -33,11 +34,15 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	private AppWindowLayout layout;
 	private Pane header_pane;
 	private ImageButton btn_back;
+	private ImageButton btn_add_folder;
+	private DoubleStateImageButton btn_my_files;
 	private Label lbl_path;
 	private Pane simple_pane;
 	private ScrollPane scroll_pane;
 	private ImageView image_preview;
 	private String previewed_file_path;
+	private File last_current_folder;
+	private boolean is_returning_to_all_files;
 	
 	private FileTree file_tree;
 	private FileCard selected_card;
@@ -59,6 +64,7 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 		files = new ArrayList<>();
 		layout = _layout;
 		previewed_file_path = "";
+		is_returning_to_all_files = true;
 		
 		createLayout();
 		recalcMaxCardsInRow();
@@ -88,13 +94,31 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 		btn_back.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onBtnMouseExited(btn_back));
 		btn_back.addEventHandler(ActionEvent.ACTION, ev -> onBtnMouseClicked(btn_back));
 		
+		btn_add_folder = new ImageButton(Utils.IMG_ADD_FOLDER, Utils.HINT_ADD_FOLDER, Utils.ACT_ADD_FOLDER);
+		btn_add_folder.customizeZoomAnimation(1.15, 1.0, 200, 200);
+		btn_add_folder.disableFadeAnimation();
+		btn_add_folder.addEventHandler(ActionEvent.ACTION, ev -> onBtnMouseClicked(btn_add_folder));
+		btn_add_folder.addEventHandler(MouseEvent.MOUSE_ENTERED,  ev -> onBtnMouseEntered(btn_add_folder));
+		btn_add_folder.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onBtnMouseExited(btn_add_folder));
+		btn_add_folder.setLayoutX(64.0);
+		
+		btn_my_files = new DoubleStateImageButton(Utils.IMG_MY_FILES, Utils.IMG_ALL_FILES, Utils.HINT_MY_FILES, Utils.ACT_MY_FILES);
+		btn_my_files.customizeZoomAnimation(1.15, 1.0, 200, 200);
+		btn_my_files.disableFadeAnimation();
+		btn_my_files.addEventHandler(ActionEvent.ACTION, ev -> onBtnMouseClicked(btn_my_files));
+		btn_my_files.addEventHandler(MouseEvent.MOUSE_ENTERED,  ev -> onBtnMouseEntered(btn_my_files));
+		btn_my_files.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onBtnMouseExited(btn_my_files));
+		btn_my_files.setLayoutX(32.0);
+		
 		lbl_path = new Label("root/");
 		lbl_path.setFont(Utils.LBL_STATUSBAR_FONT);
 		lbl_path.setStyle("-fx-text-fill: rgb(180, 180, 240); -fx-font-weight: bold;");
 		lbl_path.setMaxWidth(600.0); lbl_path.setPrefHeight(24.0);
-		lbl_path.setLayoutX(42.0);
+		lbl_path.setLayoutX(106.0);
 		
 		header_pane.getChildren().add(btn_back);
+		header_pane.getChildren().add(btn_my_files);
+		header_pane.getChildren().add(btn_add_folder);
 		header_pane.getChildren().add(lbl_path);
 		
 		scroll_pane = new ScrollPane(simple_pane);
@@ -113,6 +137,7 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 		System.out.println("Wyœwietl obraz");
 		image_preview.toFront();
 		image_preview.setVisible(true);
+		Platform.runLater(() -> updateLabelPath());
 	}
 	
 	public void hideImagePreview() {
@@ -130,9 +155,12 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 		refreshCurrentFolder();
 		sortFiles();
 		relocateFilesInExplorer();
+		
+		updateLabelPath();
 	}
 	
 	private void refreshCurrentFolder() {
+		System.out.println("FILE_TREE: "  + file_tree.getName() + " | CURRENT FOLDER: " + file_tree.getCurrentFolder().getPath());
 		for( Entry<String, File> entry : file_tree.getFilesForCurrentFolder().entrySet() ) {
 			FileCard fc1 = new FileCard(this, entry.getValue());
 			files.add(fc1);
@@ -183,10 +211,10 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	
 	public void onCardChoose(FileCard _choosed_card) {
 		File choosed_file = _choosed_card.getFile();
+		is_returning_to_all_files = true;
 		
 		if( choosed_file.isFolder() ) {
 			file_tree.goIntoFolder(choosed_file);
-			updateLabelPath();
 			refreshView();
 		} else {
 			previewed_file_path = _choosed_card.getFile().getPath();
@@ -214,18 +242,65 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	}
 	
 	private void onBtnMouseClicked(ImageButton _ibtn) {
-		if( _ibtn == btn_back ) {
-			updateLabelPath();
-			
-			if( image_preview.isVisible() ) {
-				hideImagePreview();
-				previewed_file_path = "";
-			} else if( file_tree.hasCurrentFolderAParent() ) {
+		switch( _ibtn.getAction() ) {
+		case Utils.ACT_ADD_FOLDER:
+			onAddFolderBtnAction();
+			break;
+		case Utils.ACT_MY_FILES:
+			onMyFilesBtnAction();
+			break;
+		case Utils.ACT_PARENT_FOLDER:
+			onBackBtnAction();
+			break;
+		}
+	}
+	
+	private void onAddFolderBtnAction() {
+		if( image_preview.isVisible() || file_tree.getName().equals("group_files") || file_tree.getName().equals("my_files") )
+			return;
+	
+		layout.action_pane.changeStateAndRefresh(PaneState.ADD_FOLDER);
+	}
+	
+	private void onMyFilesBtnAction() {
+		if( image_preview.isVisible() ) {
+			hideImagePreview();
+			previewed_file_path = "";
+			lbl_path.setText("~/my_files/");
+		} 
+		
+		if( btn_my_files.isOnProperty().get() ) {
+			User.instance().showAllFiles();
+		} else
+			User.instance().showMyFiles();
+		
+		refreshView();
+	}
+	
+	private void onBackBtnAction() {
+		if( image_preview.isVisible() ) {
+			hideImagePreview();
+			previewed_file_path = "";
+		} else if( file_tree.getName().equals("group_files") ) {
+			is_returning_to_all_files = true;
+			onMyFilesBtnAction();
+		} else if( file_tree.hasCurrentFolderAParent() ) {
+			if( selected_card != null ) {
+				selected_card = null;
+				removeTextFromStatusBar();
+			}
+
+			file_tree.goParentFolderIfExist();
+			refreshView();
+		}
+		
+		if( file_tree.getName().equals("my_files") ) {
+			if( file_tree.hasCurrentFolderAParent() ) {
 				if( selected_card != null ) {
 					selected_card = null;
 					removeTextFromStatusBar();
 				}
-				
+
 				file_tree.goParentFolderIfExist();
 				refreshView();
 			}
@@ -233,7 +308,8 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	}
 	
 	private void updateLabelPath() {
-		lbl_path.setText(file_tree.getCurrentFolder().getPath());
+		String s = file_tree.getName().equals("my_files") ? "~/my_files/" : file_tree.getName().equals("group_files") ? "~/group_files/" : "";
+		lbl_path.setText(s + file_tree.getCurrentFolder().getPath());
 	}
 	
 	private void onBtnMouseEntered(ImageButton _ibtn) {
@@ -259,6 +335,42 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	}
 
 	@Override
+	public void onFileTreePreviewChanged(FileTree _file_tree) {
+		if( _file_tree == file_tree )
+			return;
+		
+		System.out.println("STARY: " + file_tree.getName() + " | NOWY: " + _file_tree.getName());
+		
+		if( file_tree.getName().equals("all_files") )
+			last_current_folder = file_tree.getCurrentFolder();
+		
+		file_tree = _file_tree;
+		if( file_tree.getName().equals("group_files") ) {
+			file_tree.setCurrentAsRoot();
+		} else if( file_tree.getName().equals("my_files") ) {
+			file_tree.setCurrentAsRoot();
+		} else {
+			if( is_returning_to_all_files ) {
+				file_tree.setCurrentFolder(last_current_folder);
+				is_returning_to_all_files = false;
+			}
+		}
+		
+		Platform.runLater(() -> {
+			if( file_tree.getName().equals("group_files") ) {
+				if( image_preview.isVisible() )
+					hideImagePreview();
+				
+			} else if( file_tree.getName().equals("my_files") ) {
+				;
+			}
+			
+			refreshView();
+		});
+	}
+	
+
+	@Override
 	public void onDownloadBegin() {
 		// TODO Auto-generated method stub
 		
@@ -280,5 +392,4 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	private void setLastDownloadedFileInPreview() {
 		image_preview.setImage(ImageManager.instance().getLastLoadedImage());
 	}
-	
 }

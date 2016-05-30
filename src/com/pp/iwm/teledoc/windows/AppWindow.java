@@ -204,6 +204,8 @@ public class AppWindow extends Window implements NetworkListener {
 		
 		if( state == PaneState.NEW_CONF )
 			User.instance().createNewConference(window_layout.action_pane.getConfTitle());
+		else if( state == PaneState.ADD_FOLDER )
+			User.instance().createFolder(window_layout.action_pane.getFolderName());
 	}
 	
 	private void onActionPaneActionBtnEntered(ImageButton _ibtn) {
@@ -288,6 +290,8 @@ public class AppWindow extends Window implements NetworkListener {
 				onGetAllImagesDescriptionResponseReceive((GetAllImagesDescriptionResponse)_message);
 			else if( _message instanceof SendImage )
 				onSendImageReceive((SendImage)_message);
+			else if( _message instanceof GetAllGroupImagesResponse )
+				onGetAllGroupImagesResponseReceive((GetAllGroupImagesResponse)_message);
 		//} else {
 			//System.out.println("Jestem rozlaczony");
 		//}
@@ -353,13 +357,31 @@ public class AppWindow extends Window implements NetworkListener {
 	private void onGetAllImagesDescriptionResponseReceive(GetAllImagesDescriptionResponse _response) {
 		List<ImageDescription> list_of_images = _response.getAllImagesDescrition();
 		List<String> list_of_filepaths = new ArrayList<>();
+		List<String> list_of_myfilepaths = new ArrayList<>();
 		
 		for( ImageDescription desc : list_of_images ) {
 			String filepath = desc.getPath() + desc.getName();
 			list_of_filepaths.add(filepath);
+			
+			if( desc.getOwnerEmail().equals(User.instance().getEmail()) )
+				list_of_myfilepaths.add(desc.getPath() + desc.getName());
 		}
 
 		User.instance().addFilesToTree(list_of_filepaths);
+		User.instance().addFilesToMyFilesTree(list_of_myfilepaths);
+	}
+	
+	private void onGetAllGroupImagesResponseReceive(GetAllGroupImagesResponse _response) {
+		List<ImageDescription> group_images = _response.getImages();
+		List<String> filepaths = new ArrayList<>();
+		
+		for( ImageDescription desc : group_images ) {
+			String filepath = desc.getPath() + desc.getName();
+			filepaths.add(filepath);
+		}
+		
+		User.instance().replaceFilesInSelectedGroupTree(filepaths);
+		Platform.runLater(() -> window_layout.file_pane.refreshView());
 	}
 	
 	public void onConferenceCardAdded(ConferenceCard _card) {

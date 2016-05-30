@@ -91,5 +91,9 @@ public class Main extends Application {
 		ImageManager.instance().loadImage(Utils.IMG_EMPTY_CAMERA, "/assets/empty_camera.png");
 		ImageManager.instance().loadImage(Utils.IMG_MINIMIZE, "/assets/minimize_icon.png");
 		ImageManager.instance().loadImage(Utils.IMG_MAXIMIZE, "/assets/maximize_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_ADD_FOLDER, "/assets/add_folder_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_ADD_FOLDER_BIG, "/assets/add_folder_icon_big.png");
+		ImageManager.instance().loadImage(Utils.IMG_MY_FILES, "/assets/my_files_icon.png");
+		ImageManager.instance().loadImage(Utils.IMG_ALL_FILES, "/assets/all_files_icon.png");
 	}
 }

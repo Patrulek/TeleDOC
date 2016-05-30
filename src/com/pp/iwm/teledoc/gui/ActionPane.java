@@ -30,6 +30,7 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 	private ImageButton ibtn_hide;
 	private ImageButton ibtn_action;
 	private StringProperty conf_title;
+	private StringProperty folder_name;
 	
 	private TranslateAnimation translate_animation;
 	private FadeAnimation fade_animation;
@@ -39,7 +40,7 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 	private PaneState state;
 	
 	public enum PaneState {
-		UNDEFINED, NEW_CONF, SEARCH_CONF, SEARCH_FILE;
+		UNDEFINED, NEW_CONF, SEARCH_CONF, SEARCH_FILE, ADD_FOLDER;
 	}
 	
 	// ============================================
@@ -51,6 +52,7 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 		state = PaneState.UNDEFINED;
 		layout = _layout;
 		conf_title = new SimpleStringProperty();
+		folder_name = new SimpleStringProperty();
 			
 		createLayout();
 		addAnimations();
@@ -134,11 +136,37 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 				createSearchConfPanel();
 				
 				break;
+			case ADD_FOLDER:
+				createAddFolderPanel();
+				
+				break;
 			default:
 		}
 		
 		fade_animation_content_pane.setOnFinished(null);
 		fade_animation_content_pane.playForward();
+	}
+	
+	private void createAddFolderPanel() {
+		TextField tf_conf_title = new TextField();
+		tf_conf_title.requestFocus();
+		ibtn_action.changeButton(Utils.IMG_ADD_FOLDER_BIG, Utils.HINT_ADD_FOLDER, Utils.ACT_ADD_FOLDER);
+		
+		tf_conf_title.setPromptText("Nazwa folderu");
+		tf_conf_title.setLayoutX(50.0); tf_conf_title.setLayoutY(20.0);
+		tf_conf_title.setPrefWidth(200.0);
+		tf_conf_title.setStyle("-fx-text-fill: rgb(222, 135, 205); "
+				+ "-fx-prompt-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-text-fill: rgb(140, 90, 135); "
+				+ "-fx-highlight-fill: rgb(15, 27, 30); "
+				+ "-fx-background-color: rgb(30, 54, 60); ");
+		tf_conf_title.setFont(Utils.TF_FONT_SMALL);
+		folder_name.bind(tf_conf_title.textProperty());
+		
+		ibtn_action.setLayoutX(280.0); ibtn_action.setLayoutY(11.0);
+		
+		content_pane.getChildren().add(tf_conf_title);
+		content_pane.getChildren().add(ibtn_action);
 	}
 	
 	private void createNewConfPanel() {
@@ -199,16 +227,6 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 		content_pane.getChildren().add(ibtn_action);
 	}
 	
-	
-	
-	private void onCreateConfAction() {
-		// TODO: zmieniæ 
-					// wys³aæ zapytanie do servera
-					// odebraæ wiadomoœæ od servera
-					// zmieniæ okno
-					// wyœwietliæ error jeœli nie uda³o siê nawi¹zaæ po³¹czenia
-	}
-	
 	public ImageButton getHideBtn() {
 		return ibtn_hide;
 	}
@@ -223,5 +241,9 @@ public class ActionPane extends Pane {	// TODO osobne funkcje dla ka¿dego button
 	
 	public String getConfTitle() {
 		return conf_title.get();
+	}
+	
+	public String getFolderName() {
+		return folder_name.get();
 	}
 }

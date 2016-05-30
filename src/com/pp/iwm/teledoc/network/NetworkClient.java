@@ -26,7 +26,7 @@ public class NetworkClient {
 	public static final int MSG_POINTER_ON = 10001;
 	public static final int MSG_POINTER_OFF = 10002;
 
-	private final String SERVER_ADDRESS = "192.168.0.11";	// 192.168.0.6 <- wirualka  | 192.168.0.10 - Piotr
+	private final String SERVER_ADDRESS = "192.168.0.6";	// 192.168.0.6 <- wirualka  | 192.168.0.10 - Piotr
 	private final int TIMEOUT = 15000;
 	private final int TCP_PORT = 33000;
 	private final int UDP_PORT = 32000;
@@ -300,5 +300,13 @@ public class NetworkClient {
 		request.setEmail(_email);
 		image_client.sendTCP(request);
 		System.out.println("Poszed³ request o wszystkie pliki");
+	}
+
+	public void sendGetAllGroupImagesRequest(String _email, String _group_name) {
+		GetAllGroupImagesRequest request = new GetAllGroupImagesRequest();
+		request.setEmail(_email);
+		request.setGroupName(_group_name);
+		
+		image_client.sendTCP(request);
 	}
 }

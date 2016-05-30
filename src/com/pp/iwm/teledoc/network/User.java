@@ -12,10 +12,12 @@ import javax.swing.JOptionPane;
 
 import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
+import com.pp.iwm.teledoc.network.packets.images.GetAllGroupImagesRequest;
 import com.pp.iwm.teledoc.objects.FileTree;
 import com.pp.iwm.teledoc.objects.ImageManager;
 import com.pp.iwm.teledoc.objects.Member;
 import com.pp.iwm.teledoc.objects.TempImage;
+import com.pp.iwm.teledoc.utils.Utils;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.geometry.Point2D;
@@ -42,6 +44,8 @@ public class User extends Listener {
 	private MembersListListener members_listener;
 	private DownloadListener download_listener;
 	private FileTree file_tree;
+	private FileTree my_files_tree;
+	private FileTree selected_group_file_tree;
 	private FileTreeListener file_tree_listener;
 	private String uploading_file_path;
 	private TempImage downloading_file;
@@ -102,7 +106,9 @@ public class User extends Listener {
 	
 	private User() {
 		state = State.DISCONNECTED;
-		file_tree = new FileTree();
+		file_tree = new FileTree("all_files");
+		my_files_tree = new FileTree("my_files");
+		selected_group_file_tree = new FileTree("group_files");
 		client = new NetworkClient();
 		downloading_file = null;
 		uploading_file_path = downloading_file_path = null;
@@ -216,6 +222,20 @@ public class User extends Listener {
 	
 	public void logOut() {
 		client.sendLogoutRequest(email);
+		clearData();
+	}
+	
+	private void clearData() {
+		name = surname = email = null;
+		file_tree.removeTree();
+		my_files_tree.removeTree();
+		selected_group_file_tree.removeTree();
+		uploading_file_path = downloading_file_path = null;
+		removeDownloadListener();
+		removeFileTreeListener();
+		removeMembersListListener();
+		removeUsedImages();
+		setCurrentImage(-1);
 	}
 	
 	public void sendChatMessage(String _message) {
@@ -231,7 +251,9 @@ public class User extends Listener {
 	}
 	
 	public void createFolder(String _folder_name) {
-		client.sendImageRequest(email, file_tree.getCurrentFolder().getPath() + _folder_name, null);
+		String folder_name = Utils.changeStringToFolderName(_folder_name);
+		client.sendImageRequest(email, file_tree.getCurrentFolder().getPath() + folder_name, null);
+		loadFileTreeFromDB();
 	}
 	
 	public void sendImage(File _image) {
@@ -291,22 +313,53 @@ public class User extends Listener {
 	
 	public void addUploadedFileToTree() {
 		file_tree.addFile(uploading_file_path);
+		my_files_tree.addFile(uploading_file_path);
 		uploading_file_path = null;
 		
-		notifyFileTreeListener();
+		notifyFileTreeListener(1, 1);
+	}
+	
+	private void loadFileForGroup(String _group_name) {
+		client.sendGetAllGroupImagesRequest(email, _group_name);
+	}
+	
+	public void showGroupFiles(String _group_name) {
+		loadFileForGroup(_group_name);
+	}
+	
+	public void showMyFiles() {
+		notifyFileTreeListener(2, 2);
+	}
+	
+	public void showAllFiles() {
+		notifyFileTreeListener(2, 1);
+	}
+
+	public void addFilesToMyFilesTree(List<String> _list_of_myfilepaths) {
+		for( String path : _list_of_myfilepaths )
+			my_files_tree.addFile(path);
 	}
 
 	public void addFilesToTree(List<String> _list_of_filepaths) {
 		for( String path : _list_of_filepaths )
 			file_tree.addFile(path);
 		
-		notifyFileTreeListener();
+		notifyFileTreeListener(1, 1);
+	}
+
+	public void replaceFilesInSelectedGroupTree(List<String> _filepaths) {
+		selected_group_file_tree.removeTree();
+		
+		for( String path : _filepaths ) 
+			selected_group_file_tree.addFile(path);
+
+		notifyFileTreeListener(2, 3);
 	}
 	
 	public void removeFileFromTree(String _filepath) {
 		file_tree.removeFile(_filepath);
 		
-		notifyFileTreeListener();
+		notifyFileTreeListener(1, 1);
 	}
 	
 	public String getName() {
@@ -341,6 +394,7 @@ public class User extends Listener {
 	
 	public interface FileTreeListener {
 		public void onFileTreeChanged(FileTree _file_tree);
+		public void onFileTreePreviewChanged(FileTree _file_tree);
 	}
 	
 	public interface MembersListListener {
@@ -408,9 +462,20 @@ public class User extends Listener {
 		return file_tree;
 	}
 	
-	private void notifyFileTreeListener() {
-		if( file_tree_listener != null )
+	private void notifyFileTreeListener(int _state, int _tree_idx) {
+		if( file_tree_listener == null )
+			return;
+		
+		if( _state == 1 )
 			file_tree_listener.onFileTreeChanged(file_tree);
+		else if( _state == 2 ) {
+			if( _tree_idx == 1 )
+				file_tree_listener.onFileTreePreviewChanged(file_tree);
+			else if( _tree_idx == 2 )
+				file_tree_listener.onFileTreePreviewChanged(my_files_tree);
+			else if( _tree_idx == 3 )
+				file_tree_listener.onFileTreePreviewChanged(selected_group_file_tree);
+		}
 	}
 	
 	private void notifyMembersListListener(Member _member, boolean _is_removing) {

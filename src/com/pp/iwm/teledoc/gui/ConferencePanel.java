@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.pp.iwm.teledoc.layouts.AppWindowLayout;
+import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.objects.Conference;
 import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.AppWindow;
@@ -187,6 +188,8 @@ public class ConferencePanel extends Pane {
 		
 		selected_card = _selected_card;
 		selected_card.setSelectionStyle();
+		
+		User.instance().showGroupFiles(_selected_card.getConference().getTitle());
 	}
 	
 	public void onCardHover(ConferenceCard _hovered_card) {
