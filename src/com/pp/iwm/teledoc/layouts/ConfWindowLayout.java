@@ -7,12 +7,14 @@ import com.pp.iwm.teledoc.gui.ChatPane;
 import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.DoubleStateImageButton;
 import com.pp.iwm.teledoc.gui.DrawablePane;
+import com.pp.iwm.teledoc.gui.FileExplorer;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.LayersPanel;
 import com.pp.iwm.teledoc.gui.MemberCard;
 import com.pp.iwm.teledoc.gui.MemberPane;
 import com.pp.iwm.teledoc.gui.MinimapPane;
 import com.pp.iwm.teledoc.gui.StatusBar;
+import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.objects.ImageManager;
 import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.ConfWindow;
@@ -50,6 +52,7 @@ public class ConfWindowLayout extends WindowLayout {
 	public DoubleStateImageButton ibtn_microphone;
 	public DoubleStateImageButton ibtn_chat;
 	public DoubleStateImageButton ibtn_members;
+	public FileExplorer file_pane;
 	
 	// =============================
 	// METHODS
@@ -79,6 +82,7 @@ public class ConfWindowLayout extends WindowLayout {
 		createMemberPane();
 		createButtons();
 		createLayersPane();
+		createFilePane();
 		
 		addElementsToScene();
 		initializeLater();
@@ -177,6 +181,12 @@ public class ConfWindowLayout extends WindowLayout {
 		});
 	}
 	
+	private void createFilePane() {
+		file_pane = new FileExplorer(this);
+		file_pane.relocate(100, 100);
+		file_pane.hide();
+	}
+	
 	private void createScrollPane() {
 		scroll_pane = new ScrollPane(drawable_pane);
 		scroll_pane.setPrefSize(1362, 744);
@@ -239,6 +249,7 @@ public class ConfWindowLayout extends WindowLayout {
 								status_bar,
 								annotation_pane,
 								annotation_text_pane,
+								file_pane,
 								ibtn_microphone,
 								ibtn_camera,
 								ibtn_chat,

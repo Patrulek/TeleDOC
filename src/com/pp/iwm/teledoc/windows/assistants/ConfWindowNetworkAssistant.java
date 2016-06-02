@@ -14,6 +14,7 @@ import com.pp.iwm.teledoc.network.User.NetworkListener;
 import com.pp.iwm.teledoc.network.User.State;
 import com.pp.iwm.teledoc.network.packets.*;
 import com.pp.iwm.teledoc.network.packets.images.ConfirmSendImageResponse;
+import com.pp.iwm.teledoc.network.packets.images.SendImage;
 import com.pp.iwm.teledoc.objects.ChatMessage;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 
@@ -65,6 +66,31 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 				onGetAllGroupMembersResponseReceive((GetAllGroupMembersResponse)_message);
 			else if( _message instanceof NewGroupMemberEvent )
 				onNewGroupMemberEventReceive((NewGroupMemberEvent)_message);
+			else if( _message instanceof SendImage )
+				onSendImageReceive((SendImage)_message);
+			else if( _message instanceof ConfirmSendImageResponse )
+				onConfirmSendImageResponseReceive((ConfirmSendImageResponse)_message);
+		}
+	}
+	
+	private void onConfirmSendImageResponseReceive(ConfirmSendImageResponse _response) {
+		if( _response.getAnswer() ) {
+			User.instance().addUploadedFileToTree();
+			// czy chcesz utworzyc z wczytanego obrazka konferencje?
+		} else
+			JOptionPane.showMessageDialog(null, "Nie uda³o siê wys³aæ obrazu na server!");
+	}
+
+	private void onSendImageReceive(SendImage _response) {
+		if( _response.getPartNumber() == 0 ) {
+			User.instance().newDownloadingFile(_response.getSizeInBytes());
+			User.instance().progressDownload(_response.getImageContent());
+		} else if( _response.getPartNumber() < _response.getEndPartNumber() )
+			User.instance().progressDownload(_response.getImageContent());		
+		else {
+			User.instance().progressDownload(_response.getImageContent());
+			String path = "assets/" + _response.getImageID() + _response.getName();
+			User.instance().saveFileToDisk(path, _response.getImageID());			
 		}
 	}
 	

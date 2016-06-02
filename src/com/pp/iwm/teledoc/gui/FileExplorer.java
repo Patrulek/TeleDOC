@@ -5,8 +5,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.swing.JOptionPane;
+
 import com.pp.iwm.teledoc.gui.ActionPane.PaneState;
 import com.pp.iwm.teledoc.layouts.AppWindowLayout;
+import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
+import com.pp.iwm.teledoc.layouts.WindowLayout;
+import com.pp.iwm.teledoc.network.NetworkClient;
 import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.network.User.DownloadListener;
 import com.pp.iwm.teledoc.network.User.FileTreeListener;
@@ -20,10 +25,11 @@ import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public class FileExplorer extends Pane implements FileTreeListener, DownloadListener {
 	
@@ -31,11 +37,12 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	// FIELDS
 	// =========================================
 
-	private AppWindowLayout layout;
+	private WindowLayout layout;
 	private Pane header_pane;
 	private ImageButton btn_back;
 	private ImageButton btn_add_folder;
 	private DoubleStateImageButton btn_my_files;
+	private ImageButton btn_add_to_conf;
 	private Label lbl_path;
 	private Pane simple_pane;
 	private ScrollPane scroll_pane;
@@ -43,6 +50,7 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	private String previewed_file_path;
 	private File last_current_folder;
 	private boolean is_returning_to_all_files;
+	private boolean is_dragged;
 	
 	private FileTree file_tree;
 	private FileCard selected_card;
@@ -57,7 +65,7 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	// METHODS
 	// ==========================================
 	
-	public FileExplorer(AppWindowLayout _layout) {
+	public FileExplorer(WindowLayout _layout) {
 		max_cards_in_row = 0;
 		cards_gap = 20.0;
 		icon_size = 32.0;
@@ -65,9 +73,18 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 		layout = _layout;
 		previewed_file_path = "";
 		is_returning_to_all_files = true;
+		is_dragged = false;
 		
 		createLayout();
 		recalcMaxCardsInRow();
+	}
+	
+	public void setDragged(boolean _is_dragged) {
+		is_dragged = _is_dragged;
+	}
+	
+	public boolean isDragged() {
+		return is_dragged;
 	}
 	
 	private void createLayout() {
@@ -94,13 +111,27 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 		btn_back.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onBtnMouseExited(btn_back));
 		btn_back.addEventHandler(ActionEvent.ACTION, ev -> onBtnMouseClicked(btn_back));
 		
-		btn_add_folder = new ImageButton(Utils.IMG_ADD_FOLDER, Utils.HINT_ADD_FOLDER, Utils.ACT_ADD_FOLDER);
+		if( layout instanceof AppWindowLayout )
+			btn_add_folder = new ImageButton(Utils.IMG_ADD_FOLDER, Utils.HINT_ADD_FOLDER, Utils.ACT_ADD_FOLDER);
+		else
+			btn_add_folder = new ImageButton(Utils.IMG_UPLOAD_ICON_SMALL, Utils.HINT_UPLOAD_FILE, Utils.ACT_UPLOAD_FILE);
+			
 		btn_add_folder.customizeZoomAnimation(1.15, 1.0, 200, 200);
 		btn_add_folder.disableFadeAnimation();
 		btn_add_folder.addEventHandler(ActionEvent.ACTION, ev -> onBtnMouseClicked(btn_add_folder));
 		btn_add_folder.addEventHandler(MouseEvent.MOUSE_ENTERED,  ev -> onBtnMouseEntered(btn_add_folder));
 		btn_add_folder.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onBtnMouseExited(btn_add_folder));
 		btn_add_folder.setLayoutX(64.0);
+		
+		if( layout instanceof ConfWindowLayout ) {
+			btn_add_to_conf = new ImageButton(Utils.IMG_DOWNLOAD_ICON_SMALL, Utils.HINT_ADD_FILE_TO_CONF, Utils.ACT_ADD_FILE_TO_CONF);
+			btn_add_to_conf.customizeZoomAnimation(1.15, 1.0, 200, 200);
+			btn_add_to_conf.disableFadeAnimation();
+			btn_add_to_conf.addEventHandler(ActionEvent.ACTION, ev -> onBtnMouseClicked(btn_add_to_conf));
+			btn_add_to_conf.addEventHandler(MouseEvent.MOUSE_ENTERED,  ev -> onBtnMouseEntered(btn_add_to_conf));
+			btn_add_to_conf.addEventHandler(MouseEvent.MOUSE_EXITED, ev -> onBtnMouseExited(btn_add_to_conf));
+			btn_add_to_conf.setLayoutX(96.0);
+		}
 		
 		btn_my_files = new DoubleStateImageButton(Utils.IMG_MY_FILES, Utils.IMG_ALL_FILES, Utils.HINT_MY_FILES, Utils.ACT_MY_FILES);
 		btn_my_files.customizeZoomAnimation(1.15, 1.0, 200, 200);
@@ -114,11 +145,19 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 		lbl_path.setFont(Utils.LBL_STATUSBAR_FONT);
 		lbl_path.setStyle("-fx-text-fill: rgb(180, 180, 240); -fx-font-weight: bold;");
 		lbl_path.setMaxWidth(600.0); lbl_path.setPrefHeight(24.0);
-		lbl_path.setLayoutX(106.0);
+		
+		if( layout instanceof ConfWindowLayout )
+			lbl_path.setLayoutX(138.0);
+		else
+			lbl_path.setLayoutX(106.0);
 		
 		header_pane.getChildren().add(btn_back);
 		header_pane.getChildren().add(btn_my_files);
 		header_pane.getChildren().add(btn_add_folder);
+		
+		if( layout instanceof ConfWindowLayout )
+			header_pane.getChildren().add(btn_add_to_conf);
+		
 		header_pane.getChildren().add(lbl_path);
 		
 		scroll_pane = new ScrollPane(simple_pane);
@@ -131,6 +170,14 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 		
 		getChildren().add(header_pane);
 		getChildren().add(scroll_pane);
+	}
+	
+	public void show() {
+		setVisible(true);
+	}
+	
+	public void hide() {
+		setVisible(false);
 	}
 	
 	public void showImagePreview() {
@@ -227,11 +274,17 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	}
 
 	public void addTextToStatusBar(String _text) {
-		layout.addTextToStatusBar(_text);
+		if( layout instanceof ConfWindowLayout )
+			((ConfWindowLayout)layout).addTextToStatusBar(_text);
+		else
+			((AppWindowLayout)layout).addTextToStatusBar(_text);
 	}
 	
 	public void removeTextFromStatusBar() {
-		layout.removeTextFromStatusBar();
+		if( layout instanceof ConfWindowLayout )
+			((ConfWindowLayout)layout).removeTextFromStatusBar();
+		else
+			((AppWindowLayout)layout).removeTextFromStatusBar();
 	}
 	
 	private void onScrollPaneMouseClicked() {
@@ -243,23 +296,61 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	
 	private void onBtnMouseClicked(ImageButton _ibtn) {
 		switch( _ibtn.getAction() ) {
-		case Utils.ACT_ADD_FOLDER:
-			onAddFolderBtnAction();
-			break;
-		case Utils.ACT_MY_FILES:
-			onMyFilesBtnAction();
-			break;
-		case Utils.ACT_PARENT_FOLDER:
-			onBackBtnAction();
-			break;
+			case Utils.ACT_ADD_FOLDER:
+				onAddFolderBtnAction();
+				break;
+			case Utils.ACT_MY_FILES:
+				onMyFilesBtnAction();
+				break;
+			case Utils.ACT_PARENT_FOLDER:
+				onBackBtnAction();
+				break;
+			case Utils.ACT_UPLOAD_FILE:
+				onUploadFile();
+				break;
+			case Utils.ACT_ADD_FILE_TO_CONF:
+				onAddToConf();
+				break;
 		}
+	}
+	
+	private void onAddToConf() {
+		if( selected_card != null ) {
+			;//User.in
+		}
+	}
+	
+	private void onUploadFile() {
+		openFileChooser();
+	}
+	
+	private void openFileChooser() {
+		FileChooser fc = new FileChooser();
+		fc.setTitle("Wybierz plik, który chcesz wgraæ na server");
+		fc.getExtensionFilters().add(new ExtensionFilter("Pliki obrazów", "*.png", "*.jpg"));
+		java.io.File selected_file = fc.showOpenDialog(layout.stage);
+		
+		if( selected_file != null ) {
+			if( Utils.isFileSizeGreaterThan(selected_file, NetworkClient.FILESIZE_LIMIT) )
+				JOptionPane.showMessageDialog(null, "Maksymalny rozmiar pliku wynosi " + NetworkClient.FILESIZE_LIMIT + " MB"); // TODO messagebox przystosowany do appki
+			else
+				startUploading(selected_file);
+		}
+	}
+	
+	private void startUploading(java.io.File _file) {
+		double filesize = _file.length() / Utils.BYTES_PER_MEGABYTE;
+		filesize = Math.round(filesize * 10.0) / 10.0;
+		System.out.println("Przesy³anie pliku: " + _file.getName() + " o rozmiarze " + filesize + " MB"); // TODO uzupelnic
+		User.instance().sendImage(_file);
 	}
 	
 	private void onAddFolderBtnAction() {
 		if( image_preview.isVisible() || file_tree.getName().equals("group_files") || file_tree.getName().equals("my_files") )
 			return;
-	
-		layout.action_pane.changeStateAndRefresh(PaneState.ADD_FOLDER);
+		
+		if( layout instanceof AppWindowLayout )
+			((AppWindowLayout)layout).action_pane.changeStateAndRefresh(PaneState.ADD_FOLDER);
 	}
 	
 	private void onMyFilesBtnAction() {
@@ -274,7 +365,7 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 		} else
 			User.instance().showMyFiles();
 		
-		refreshView();
+		Platform.runLater(() -> refreshView());
 	}
 	
 	private void onBackBtnAction() {

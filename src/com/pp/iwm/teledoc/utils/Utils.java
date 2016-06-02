@@ -80,6 +80,7 @@ public class Utils {
 	public static final int ACT_MAXIMIZE = 1037;
 	public static final int ACT_ADD_FOLDER = 1038;
 	public static final int ACT_MY_FILES = 1039;
+	public static final int ACT_ADD_FILE_TO_CONF = 1040;
 	
 	public static final int ACT_EXIT_APP = 1050;
 	
@@ -137,6 +138,7 @@ public class Utils {
 	public static final String HINT_MAXIMIZE = "Rozwiñ";
 	public static final String HINT_ADD_FOLDER = "Utwórz nowy folder";
 	public static final String HINT_MY_FILES = "Wyœwietl pliki wgrane przeze mnie";
+	public static final String HINT_ADD_FILE_TO_CONF = "Dodaj zaznaczony plik do konferencji";
 	
 	// MESSAGES
 	public static final String MSG_INPUT_EMAIL = "Podaj swój email";
@@ -201,6 +203,8 @@ public class Utils {
 	public static final int IMG_ADD_FOLDER_BIG = 2052;
 	public static final int IMG_MY_FILES = 2053;
 	public static final int IMG_ALL_FILES = 2054;
+	public static final int IMG_UPLOAD_ICON_SMALL = 2055;
+	public static final int IMG_DOWNLOAD_ICON_SMALL = 2056;
 	
 	// other utils
 	

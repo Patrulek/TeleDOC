@@ -7,6 +7,7 @@ import com.pp.iwm.teledoc.drawables.DrawableLine;
 import com.pp.iwm.teledoc.gui.ChatPane;
 import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.DrawablePane;
+import com.pp.iwm.teledoc.gui.FileExplorer;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.models.ConfWindowModel;
@@ -22,6 +23,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
+import javafx.stage.Stage;
 
 public class ConfWindowInputAssistant {
 	
@@ -339,5 +341,27 @@ public class ConfWindowInputAssistant {
 		
 		if( chat_pane.isVisible() )
 			chat_pane.goToBottom();
+	}
+
+	public void onFilePaneDragged(MouseEvent _ev) {
+		FileExplorer file_pane = window.getWindowLayout().file_pane;
+		Point2D mouse_delta = window.getWindowModel().getMouseDelta();
+		Point2D local_pos = file_pane.sceneToLocal(window.getWindowModel().getMousePos());
+		
+		if( local_pos.getY() < 50 || file_pane.isDragged() ) {
+			file_pane.setDragged(true);
+			file_pane.setLayoutX(file_pane.getLayoutX() + mouse_delta.getX());
+			file_pane.setLayoutY(file_pane.getLayoutY() + mouse_delta.getY());
+		}
+
+		window.getWindowModel().setMousePos(new Point2D(_ev.getSceneX(), _ev.getSceneY()));
+	}
+	
+	public void onFilePanePressed(MouseEvent _ev) {
+		window.getWindowModel().setMousePos(new Point2D(_ev.getSceneX(), _ev.getSceneY()));
+	}
+	
+	public void onFilePaneReleased(MouseEvent _ev) {
+		window.getWindowLayout().file_pane.setDragged(false);
 	}
 }

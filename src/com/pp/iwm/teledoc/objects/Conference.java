@@ -12,9 +12,8 @@ public class Conference {	// TODO struktura, a nie obiekt
 	
 	private String title;
 	private String description;
-	private User chairman;
+	private String owner;
 	private List<User> members;
-	private String chairman_str;			// TODO temp solution
 	// private List<ImageHistory> images;
 	private boolean is_open;
 	
@@ -22,11 +21,11 @@ public class Conference {	// TODO struktura, a nie obiekt
 	// METHODS 
 	// ====================================
 	
-	public Conference(String _title, String _description, List<User> _members, String _chairman, boolean _is_open) {
+	public Conference(String _title, String _description, List<User> _members, String _owner, boolean _is_open) {
 		title = _title;
 		description = _description;
 		members = _members;
-		chairman_str = _chairman;
+		owner = _owner;
 		is_open = _is_open;
 	}
 	
@@ -47,20 +46,15 @@ public class Conference {	// TODO struktura, a nie obiekt
 		return members;
 	}
 
-	public User getChairman() {
-		return chairman;
+	public String getOwner() {
+		return owner;
 	}
-	
-	public String getChairmanStr() {
-		return chairman_str;
-	}
-
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((chairman == null) ? 0 : chairman.hashCode());
+		result = prime * result + ((owner == null) ? 0 : owner.hashCode());
 		result = prime * result + ((description == null) ? 0 : description.hashCode());
 		result = prime * result + ((members == null) ? 0 : members.hashCode());
 		result = prime * result + (is_open ? 1231 : 1237);
@@ -82,10 +76,10 @@ public class Conference {	// TODO struktura, a nie obiekt
 		
 		Conference other = (Conference) obj;
 		
-		if (chairman == null) {
-			if (other.chairman != null)
+		if (owner == null) {
+			if (other.owner != null)
 				return false;
-		} else if (!chairman.equals(other.chairman))
+		} else if (!owner.equals(other.owner))
 			return false;
 		
 		if (description == null) {

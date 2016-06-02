@@ -6,6 +6,8 @@ import com.pp.iwm.teledoc.network.packets.Request;
 public class AddImageToGroupRequest extends Request {
 
 	private int imageID;
+	private String path;
+	private String name;
 	private String groupName; // opcjonalne jeœli uzytkownik nie do³¹czy do grupy ale jednak chce dodaæ do niej obrazek
 	
 	public AddImageToGroupRequest() {
@@ -20,6 +22,22 @@ public class AddImageToGroupRequest extends Request {
 	public void setImageID(int imageID) {
 		this.imageID = imageID;
 	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setName(String _name) {
+		name = _name;
+	}
+	
+	public String getPath() {
+		return path;
+	}
+	
+	public void setPath(String _path) {
+		path = _path;
+	}
 
 	public String getGroupName() {
 		return groupName;
@@ -28,7 +46,4 @@ public class AddImageToGroupRequest extends Request {
 	public void setGroupName(String groupName) {
 		this.groupName = groupName;
 	}
-	
-	
-	
 }

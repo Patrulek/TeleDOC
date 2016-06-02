@@ -334,6 +334,10 @@ public class AppWindow extends Window implements NetworkListener {
 			JOptionPane.showMessageDialog(null, "Nie uda³o siê do³¹czyæ do grupy");  // TODO zmieniæ
 		else {
 			window_model.is_opening_conf_window = true;
+			
+			if( window_layout.conf_pane.isUserOwnerOfOpenGroup(_response.getGroupName()) )
+				User.instance().setConfOwner(true);
+			
 			onClose();
 			Platform.runLater(() -> openWindowAndHideCurrent(new ConfWindow()));
 		}
@@ -431,6 +435,5 @@ public class AppWindow extends Window implements NetworkListener {
 	@Override
 	protected void onClose() {
 		User.instance().removeListener();
-		User.instance().removeFileTreeListener();
 	}
 }

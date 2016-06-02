@@ -259,6 +259,34 @@ public class ConferencePanel extends Pane {
 		}
 	}
 	
+	public boolean isUserOwnerOfOpenGroup(String _group_name) {
+		String user_email = User.instance().getEmail();
+		
+		for( ConferenceCard card : open_cards ) {
+			Conference conf = card.getConference();
+			
+			if( conf.getTitle().equals(_group_name) )
+				if( conf.getOwner().equals(user_email) )
+					return true;
+		}
+		
+		return false;
+	}
+	
+	public boolean isUserOwnerOfClosedGroup(String _group_name) {
+		String user_email = User.instance().getEmail();
+		
+		for( ConferenceCard card : closed_cards ) {
+			Conference conf = card.getConference();
+			
+			if( conf.getTitle().equals(_group_name) )
+				if( conf.getOwner().equals(user_email) )
+					return true;
+		}
+		
+		return false;
+	}
+	
 	private void onTabMouseClicked(Pane _tab) {
 		if( _tab == open_conf_tab && !is_open_tab_active ) {
 			setTabSelectionStyle(open_conf_tab);

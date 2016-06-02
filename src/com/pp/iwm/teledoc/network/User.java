@@ -37,6 +37,7 @@ public class User extends Listener {
 	private String name;
 	private String surname;
 	private String email;
+	private String group_name;
 	
 	private NetworkClient client;
 	
@@ -57,6 +58,7 @@ public class User extends Listener {
 	private static User user;
 	private NetworkListener listener;
 	private int current_image;
+	private boolean is_conf_owner;
 	
 	
 	// =======================================
@@ -104,6 +106,14 @@ public class User extends Listener {
 		return user;
 	}
 	
+	public void setGroupName(String _group_name) {
+		group_name = _group_name;
+	}
+	
+	public String getGroupName() {
+		return group_name;
+	}
+	
 	private User() {
 		state = State.DISCONNECTED;
 		file_tree = new FileTree("all_files");
@@ -114,6 +124,11 @@ public class User extends Listener {
 		uploading_file_path = downloading_file_path = null;
 		members = new ArrayList<>();
 		used_images = new HashMap<>();
+		is_conf_owner = false;
+	}
+	
+	public void setConfOwner(boolean _is_conf_owner) {
+		is_conf_owner = _is_conf_owner;
 	}
 	
 	public void setDownloadListener(DownloadListener _listener) {
@@ -218,6 +233,7 @@ public class User extends Listener {
 	
 	public void leaveConference() {
 		client.sendLeaveGroupRequest(email);
+		setConfOwner(false);
 	}
 	
 	public void logOut() {
@@ -280,6 +296,10 @@ public class User extends Listener {
 	public void progressDownload(byte[] _data) {
 		downloading_file.appendData(_data);
 		notifyDownloadListener(2);
+	}
+	
+	public void notifyAboutNewImage(String _image_path, String _image_name) {
+		client.sendAddImageToGroupRequest(email, group_name, _image_path, _image_name);
 	}
 	
 	public void saveFileToDisk(String _path, int _image_id) {
@@ -498,5 +518,9 @@ public class User extends Listener {
 					break;
 			}
 		}
+	}
+
+	public boolean isOwnerOfCurrentGroup() {
+		return is_conf_owner;
 	}
 }

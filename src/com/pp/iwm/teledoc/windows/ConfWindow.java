@@ -1,5 +1,7 @@
 package com.pp.iwm.teledoc.windows;
 
+import javax.swing.JOptionPane;
+
 import com.pp.iwm.teledoc.drawables.Annotation;
 import com.pp.iwm.teledoc.drawables.Annotation.State;
 import com.pp.iwm.teledoc.gui.ActionPaneConf.PaneState;
@@ -8,6 +10,7 @@ import com.pp.iwm.teledoc.gui.ChatPane;
 import com.pp.iwm.teledoc.gui.Dockbar;
 import com.pp.iwm.teledoc.gui.DoubleStateImageButton;
 import com.pp.iwm.teledoc.gui.DrawablePane;
+import com.pp.iwm.teledoc.gui.FileExplorer;
 import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.gui.LayersPanel;
 import com.pp.iwm.teledoc.gui.MemberCard;
@@ -62,6 +65,10 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		input_assistant = new ConfWindowInputAssistant(this);
 		
 		ImageManager.instance().loadImageForUser("/assets/big_image.jpg");
+		User.instance().setFileTreeListener(window_layout.file_pane);
+		window_layout.file_pane.setFileTree(User.instance().getFileTree());
+		Platform.runLater(() -> window_layout.file_pane.refreshView());
+		User.instance().setDownloadListener(window_layout.file_pane);
 		User.instance().setCurrentImage(ImageManager.instance().getLastLoadedImageId());
 		User.instance().getAllGroupMembers();
 		
@@ -183,7 +190,14 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	}
 	
 	public void onUploadImage() {
-		
+		//if( !User.instance().isOwnerOfCurrentGroup() )
+		//	JOptionPane.showMessageDialog(null, "Aby dodaæ plik do konferencji, musisz byæ jej przewodnicz¹cym");
+		if( window_layout.file_pane.isVisible() )
+			window_layout.file_pane.hide();
+		else {
+			window_layout.file_pane.setFileTree(User.instance().getFileTree());
+			window_layout.file_pane.show();
+		}
 	}
 	
 	public void onCalculateDistance() {
@@ -264,6 +278,11 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		scroll_pane.addEventFilter(MouseEvent.MOUSE_DRAGGED, ev -> input_assistant.onScrollPaneDragged(ev));
 		scroll_pane.addEventFilter(MouseEvent.MOUSE_PRESSED, ev -> input_assistant.onScrollPanePressed(ev));
 		scroll_pane.addEventFilter(MouseEvent.MOUSE_MOVED, ev -> input_assistant.onMouseMoved(ev));
+		
+		FileExplorer file_pane = window_layout.file_pane;
+		file_pane.addEventFilter(MouseEvent.MOUSE_DRAGGED, ev -> input_assistant.onFilePaneDragged(ev));
+		file_pane.addEventFilter(MouseEvent.MOUSE_PRESSED, ev -> input_assistant.onFilePanePressed(ev));
+		file_pane.addEventFilter(MouseEvent.MOUSE_RELEASED, ev -> input_assistant.onFilePaneReleased(ev));
 		
 		Dockbar dockbar = window_layout.dockbar;
 		dockbar.addEventFilter(MouseEvent.MOUSE_MOVED, ev -> input_assistant.onDockbarMouseMoved(ev));
