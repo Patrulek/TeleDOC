@@ -323,7 +323,8 @@ public class AppWindow extends Window implements NetworkListener {
 			
 			// TODO przenieœæ <tam gdzie siê da> ranlejtery do najbardziej wewnêtrznych klas
 			Platform.runLater(() -> {
-				Conference c = new Conference(_response.getGroupName(), "temp_desc", null, User.instance().getName(), true);
+				String owner_name = User.instance().getName() + " " + User.instance().getSurname();
+				Conference c = new Conference(_response.getGroupName(), "temp_desc", null, User.instance().getEmail(), owner_name, true);
 				window_layout.conf_pane.addConf(c);
 			});
 		}
@@ -338,6 +339,8 @@ public class AppWindow extends Window implements NetworkListener {
 			if( window_layout.conf_pane.isUserOwnerOfOpenGroup(_response.getGroupName()) )
 				User.instance().setConfOwner(true);
 			
+			User.instance().setGroupName(_response.getGroupName());
+			
 			onClose();
 			Platform.runLater(() -> openWindowAndHideCurrent(new ConfWindow()));
 		}
@@ -345,7 +348,8 @@ public class AppWindow extends Window implements NetworkListener {
 	
 	private void addLoadedConferences(List<Group> _conferences) {
 		for( Group conf : _conferences ) {
-			Conference c = new Conference(conf.getName(), "temp_desc", null, conf.getOwner(), /* TODO temp */ true);
+			String owner_name = conf.getOwnerName() + " " + conf.getOwnerSurname();
+			Conference c = new Conference(conf.getName(), "temp_desc", null, conf.getOwnerEmail(), owner_name, /* TODO temp */ true);
 			window_layout.conf_pane.addConf(c);
 		}
 	}

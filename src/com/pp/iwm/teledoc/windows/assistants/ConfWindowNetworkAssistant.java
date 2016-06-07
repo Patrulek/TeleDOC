@@ -13,6 +13,7 @@ import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.network.User.NetworkListener;
 import com.pp.iwm.teledoc.network.User.State;
 import com.pp.iwm.teledoc.network.packets.*;
+import com.pp.iwm.teledoc.network.packets.images.AddImageToGroupResponse;
 import com.pp.iwm.teledoc.network.packets.images.ConfirmSendImageResponse;
 import com.pp.iwm.teledoc.network.packets.images.SendImage;
 import com.pp.iwm.teledoc.objects.ChatMessage;
@@ -66,13 +67,37 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 				onGetAllGroupMembersResponseReceive((GetAllGroupMembersResponse)_message);
 			else if( _message instanceof NewGroupMemberEvent )
 				onNewGroupMemberEventReceive((NewGroupMemberEvent)_message);
+			else if( _message instanceof LeaveGroupEvent )
+				onLeaveGroupEventReceive((LeaveGroupEvent)_message);
 			else if( _message instanceof SendImage )
 				onSendImageReceive((SendImage)_message);
 			else if( _message instanceof ConfirmSendImageResponse )
 				onConfirmSendImageResponseReceive((ConfirmSendImageResponse)_message);
+			else if( _message instanceof NewGroupImageEvent )
+				onNewGroupImageEventReceive((NewGroupImageEvent)_message);
+			else if( _message instanceof AddImageToGroupResponse )
+				onAddImageToGroupResponseReceive((AddImageToGroupResponse)_message);
 		}
 	}
 	
+	private void onLeaveGroupEventReceive(LeaveGroupEvent _response) {
+		String member = _response.getEmail();
+		User.instance().removeMember(member);
+	}
+
+	private void onAddImageToGroupResponseReceive(AddImageToGroupResponse _response) {
+		//System.out.println(_response.getAnswer());
+	}
+
+	private void onNewGroupImageEventReceive(NewGroupImageEvent _response) {
+		JOptionPane.showMessageDialog(null, "Dodano nowy plik do konferencji. Za chwilê rozpocznie siê pobieranie.");
+		
+		String filepath = _response.getPath();
+		System.out.println(filepath);
+		
+		//User.instance().downloadFile(_filepath);
+	}
+
 	private void onConfirmSendImageResponseReceive(ConfirmSendImageResponse _response) {
 		if( _response.getAnswer() ) {
 			User.instance().addUploadedFileToTree();

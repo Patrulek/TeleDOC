@@ -1,7 +1,6 @@
 package com.pp.iwm.teledoc.network.packets;
 
 public class CreateGroupResponse extends Response {
-	// TODO odsy³anie nazwiska osoby która za³o¿y³a grupê
 	private String groupName;
 	private String groupOwner;
 	

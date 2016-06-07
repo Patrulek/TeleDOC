@@ -6,10 +6,12 @@ import java.util.List;
 import com.pp.iwm.teledoc.animations.FadeAnimation;
 import com.pp.iwm.teledoc.animations.TranslateAnimation;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
+import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.network.User.MembersListListener;
 import com.pp.iwm.teledoc.objects.Member;
 import com.pp.iwm.teledoc.windows.Window;
 
+import javafx.application.Platform;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import javafx.scene.layout.Pane;
@@ -83,6 +85,11 @@ public class MemberPane extends Pane implements MembersListListener {
 		setVisible(true);
 		fade_animation.setOnFinished(null);
 		fade_animation.playForward();
+		setNormalIcon();
+	}
+	
+	private void setNormalIcon() {
+		layout.ibtn_members.switchOn();
 	}
 	
 	public void hide() {
@@ -100,7 +107,7 @@ public class MemberPane extends Pane implements MembersListListener {
 		MemberCard member_card = findCardForMember(_member);
 		
 		if( member_card != null ) {
-			content_pane.getChildren().remove(member_card);
+			Platform.runLater(() -> content_pane.getChildren().remove(member_card));
 			members.remove(member_card);
 		}
 	}
@@ -127,6 +134,13 @@ public class MemberPane extends Pane implements MembersListListener {
 				removeMember(_member);
 			else
 				addMember(_member);
+			
+			if( !isVisible() && !_member.email.equals(User.instance().getEmail()) )
+				setMembersListChangedIcon();
 		}
+	}
+	
+	private void setMembersListChangedIcon() {
+		layout.ibtn_members.switchOff();
 	}
 }

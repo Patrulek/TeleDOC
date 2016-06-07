@@ -52,7 +52,7 @@ public class ConferenceCard extends Pane {
 		lbl_title.setPrefWidth(160.0);
 		
 		// TODO temp
-		lbl_founder = new Label(conf.getOwner());
+		lbl_founder = new Label(conf.getOwnerName());
 		lbl_founder.setStyle("-fx-text-fill: rgb(160, 160, 200);");
 		lbl_founder.setLayoutX(5.0); lbl_founder.setLayoutY(27.0);
 		lbl_founder.setFont(Utils.LBL_STATUSBAR_FONT);

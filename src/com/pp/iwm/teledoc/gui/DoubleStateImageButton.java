@@ -2,6 +2,7 @@ package com.pp.iwm.teledoc.gui;
 
 import com.pp.iwm.teledoc.objects.ImageManager;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
@@ -72,7 +73,7 @@ public class DoubleStateImageButton extends ImageButton {
 	
 	private void changeGraphic() {
 		Image img = is_on.get() ? ImageManager.instance().getImage(image_key) : ImageManager.instance().getImage(image_key_second);
-		setGraphic(new ImageView(img));
+		Platform.runLater(() -> setGraphic(new ImageView(img)));
 	}
 	
 	public BooleanProperty isOnProperty() {

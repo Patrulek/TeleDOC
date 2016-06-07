@@ -315,8 +315,9 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	}
 	
 	private void onAddToConf() {
-		if( selected_card != null ) {
-			;//User.in
+		if( selected_card != null && !selected_card.getFile().isFolder() ) {
+			File f = selected_card.getFile();
+			User.instance().notifyAboutNewImage(f.getParent().getPath(), f.getName());
 		}
 	}
 	

@@ -460,6 +460,13 @@ public class User extends Listener {
 		notifyMembersListListener(_member, false);
 	}
 	
+	public void removeMember(String _member_email) {
+		Member m = findMemberInCurrentConference(_member_email);
+		
+		if( m != null )
+			removeMember(m);
+	}
+	
 	public void removeMember(Member _member) {
 		members.remove(_member);
 		notifyMembersListListener(_member, true);

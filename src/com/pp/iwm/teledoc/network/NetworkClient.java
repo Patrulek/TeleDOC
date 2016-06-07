@@ -26,7 +26,7 @@ public class NetworkClient {
 	public static final int MSG_POINTER_ON = 10001;
 	public static final int MSG_POINTER_OFF = 10002;
 
-	private final String SERVER_ADDRESS = "192.168.0.3";	// 192.168.0.6 <- wirualka  | 192.168.0.10 - Piotr
+	private final String SERVER_ADDRESS = "192.168.0.9";	// 192.168.0.6 <- wirualka  | 192.168.0.10 - Piotr
 	private final int TIMEOUT = 15000;
 	private final int TCP_PORT = 33000;
 	private final int UDP_PORT = 32000;
@@ -112,6 +112,9 @@ public class NetworkClient {
 		kryo.register(DeleteActionResponse.class);
 		kryo.register(DispersedActionRequest.class);
 		kryo.register(DispersedActionResponse.class);
+		kryo.register(LeaveGroupEvent.class);
+		kryo.register(GetActiveGroupsRequest.class);
+		kryo.register(GetActiveGroupsResponse.class);
 		
 		kryo_image = image_client.getKryo();
 		kryo_image.register(SendImage.class);
