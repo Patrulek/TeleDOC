@@ -36,8 +36,8 @@ public class DrawableCanvas extends Canvas {
 		scale = 1.0;
 	}
 	
-	public void setImageAndResetCanvas(int _image_key) {
-		Image new_image = ImageManager.instance().getImage(_image_key);
+	public void setImageAndResetCanvas(Image _img) {
+		Image new_image = _img;
 		
 		if( image == new_image )
 			return;
@@ -98,8 +98,10 @@ public class DrawableCanvas extends Canvas {
 	}
 	
 	private void resizeAndDraw() {
-		resize(image.getWidth() * scale, image.getHeight() * scale);
-		draw();
+		if( image != null ) {
+			resize(image.getWidth() * scale, image.getHeight() * scale);
+			draw();
+		}
 	}
 	
 	public void rescaleBy(double _rescale_by) {

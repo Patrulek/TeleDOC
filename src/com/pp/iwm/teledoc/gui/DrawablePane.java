@@ -22,6 +22,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -140,8 +141,8 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 	}
 	
 	
-	public void setImageAndResetCanvas(int _image_key) {
-		drawable_canvas.setImageAndResetCanvas(_image_key);
+	public void setImageAndResetCanvas(Image _img) {
+		drawable_canvas.setImageAndResetCanvas(_img);
 	}
 	
 	public Point2D getImageSize() {

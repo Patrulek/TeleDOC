@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.pp.iwm.teledoc.animations.FadeAnimation;
+import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.objects.ChatMessage;
 import com.pp.iwm.teledoc.utils.InputUtils;
 import com.pp.iwm.teledoc.utils.Utils;
@@ -32,7 +33,7 @@ public class ChatPane extends Pane implements ChangeListener<Number> {	// najpie
 	private VBox content_pane;
 	private TextArea text_area;
 	
-	private Window window;
+	private ConfWindowLayout layout;
 	
 	private List<ChatMessageCard> messages;
 	
@@ -40,9 +41,9 @@ public class ChatPane extends Pane implements ChangeListener<Number> {	// najpie
 	// METHODS
 	// ======================================
 	
-	public ChatPane(Window _window) {
+	public ChatPane(ConfWindowLayout _layout) {
 		messages = new ArrayList<>();
-		window = _window;
+		layout = _layout;
 		
 		createLayout();
 		addAnimation();
@@ -85,14 +86,17 @@ public class ChatPane extends Pane implements ChangeListener<Number> {	// najpie
 		if( _message == null )
 			return;
 		
+		if( !isVisible() )
+			layout.ibtn_chat.switchOff();
+		
 		ChatMessageCard message_card = new ChatMessageCard(this, _message);
 		messages.add(message_card);
 		content_pane.getChildren().add(message_card);
 		
-		if( messages.size() % 2 == 0 )
-			message_card.setEvenStyle();
-		else
+		if( _message.isMyMessage() )
 			message_card.setOddStyle();
+		else
+			message_card.setEvenStyle();
 	}
 	
 	public void addMessages(List<ChatMessage> _messages) {
@@ -122,6 +126,7 @@ public class ChatPane extends Pane implements ChangeListener<Number> {	// najpie
 	
 	public void show() {
 		setVisible(true);
+		layout.ibtn_chat.switchOn();
 		fade_animation.setOnFinished(null);
 		fade_animation.playForward();
 		text_area.requestFocus();

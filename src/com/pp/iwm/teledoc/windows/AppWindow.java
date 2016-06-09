@@ -341,6 +341,8 @@ public class AppWindow extends Window implements NetworkListener {
 			
 			User.instance().setGroupName(_response.getGroupName());
 			
+			
+			
 			onClose();
 			Platform.runLater(() -> openWindowAndHideCurrent(new ConfWindow()));
 		}

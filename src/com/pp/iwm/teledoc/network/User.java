@@ -44,6 +44,7 @@ public class User extends Listener {
 	private List<Member> members;
 	private MembersListListener members_listener;
 	private DownloadListener download_listener;
+	private ImageListener image_listener;
 	private FileTree file_tree;
 	private FileTree my_files_tree;
 	private FileTree selected_group_file_tree;
@@ -52,6 +53,8 @@ public class User extends Listener {
 	private TempImage downloading_file;
 	private String downloading_file_path;
 	private Map<Integer, Integer> used_images;		// file ids > image manager ids
+	
+	private List<String> download_list;
 	
 	// TODO aktywna konferencja
 	
@@ -125,6 +128,23 @@ public class User extends Listener {
 		members = new ArrayList<>();
 		used_images = new HashMap<>();
 		is_conf_owner = false;
+		current_image = -1;
+		download_list = new ArrayList<>();
+	}
+	
+	public void downloadNextFileFromList() {
+		if( download_list.isEmpty() )
+			return;
+		
+		String path = download_list.get(0);
+		download_list.remove(0);
+		
+		downloadFile(path);
+	}
+	
+	public void addFileToDownloadList(String _path) {
+		if( !download_list.contains(_path) )
+			download_list.add(_path);
 	}
 	
 	public void setConfOwner(boolean _is_conf_owner) {
@@ -234,6 +254,8 @@ public class User extends Listener {
 	public void leaveConference() {
 		client.sendLeaveGroupRequest(email);
 		setConfOwner(false);
+		removeUsedImages();
+		setCurrentImage(-1);
 	}
 	
 	public void logOut() {
@@ -284,8 +306,10 @@ public class User extends Listener {
 		if( downloading_file_path == null ) {
 			downloading_file_path = _filepath;
 			client.downloadImageRequest(email, _filepath);
-		} else
-			JOptionPane.showMessageDialog(null, "Poczekaj a¿ poprzedni plik siê pobierze: " + downloading_file_path);
+		} else {
+			System.out.println("Poczekaj a¿ poprzedni plik siê pobierze: " + downloading_file_path);
+			addFileToDownloadList(_filepath);
+		}
 	}
 	
 	public void newDownloadingFile(int _size) {
@@ -299,7 +323,7 @@ public class User extends Listener {
 	}
 	
 	public void notifyAboutNewImage(String _image_path, String _image_name) {
-		client.sendAddImageToGroupRequest(email, group_name, _image_path, _image_name);
+		client.sendAddImageToGroupRequest(email, _image_path, _image_name);
 	}
 	
 	public void saveFileToDisk(String _path, int _image_id) {
@@ -308,8 +332,7 @@ public class User extends Listener {
 			FileOutputStream imageOutFile = new FileOutputStream(_path);
 			imageOutFile.write(downloading_file.getContent());
 			imageOutFile.close();		
-			ImageManager.instance().loadImageForUser(_path);
-			addUsedImage(_image_id, ImageManager.instance().getLastLoadedImageId());
+			ImageManager.instance().loadImageForUser(_image_id, _path);
 		} catch (Exception e) { e.printStackTrace(); } 
 		  finally { 
 			  downloading_file = null; 
@@ -427,8 +450,30 @@ public class User extends Listener {
 		public void onDownloadFinish();
 	}
 	
-	public void addUsedImage(Integer _db_id, Integer _image_key) {
-		used_images.put(_db_id, _image_key);
+	public interface ImageListener {
+		public void onCurrentImageChanged(int _current_img_id);
+		public void onImageAdded(int _img_id);
+		public void onImageRemoved(int _img_id);
+	}
+	
+	public void addUsedImage(Integer _image_key) {
+		if( !used_images.containsKey(_image_key) )
+			used_images.put(_image_key, _image_key);
+	}
+	
+	public void setImageListener(ImageListener _listener) {
+		image_listener = _listener;
+	}
+	
+	public void removeImageListener() {
+		image_listener = null;
+	}
+	
+	private void notifyImageListener(int _state) {
+		if( image_listener != null ) {
+			if( _state == 1 )
+				image_listener.onCurrentImageChanged(getCurrentImage());
+		}
 	}
 	
 	public void removeUsedImage(Integer _db_id) {
@@ -479,6 +524,9 @@ public class User extends Listener {
 	
 	public void setCurrentImage(int _current_image) {
 		current_image = _current_image;
+		
+		if( current_image > -1 )
+			notifyImageListener(1);
 	}
 	
 	public int getCurrentImage() {
@@ -529,5 +577,13 @@ public class User extends Listener {
 
 	public boolean isOwnerOfCurrentGroup() {
 		return is_conf_owner;
+	}
+
+	public boolean hasAnImage(int _id) {
+		return ImageManager.instance().hasUserAnImage(_id);
+	}
+
+	public void getAllGroupImages() {
+		client.sendGetAllGroupImagesRequest(email, "");
 	}
 }

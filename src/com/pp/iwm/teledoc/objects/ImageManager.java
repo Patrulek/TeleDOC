@@ -16,6 +16,7 @@ public class ImageManager {
 	
 	private static ImageManager s_instance;
 	private Map<Integer, Image> images;
+	private Map<Integer, Image> conference_images;
 	private int last_id;
 	
 	// ===============================================
@@ -46,16 +47,27 @@ public class ImageManager {
 			loadImage(_image_key, new Image(_img_path));
 	}
 	
-	public void loadImageForUser(String _img_path) {
-		loadImage(last_id++, _img_path);
+	public void loadImageForUser(Integer _image_id, String _img_path) {
+		if( !conference_images.containsKey(_image_id) ) 
+			conference_images.put(_image_id, new Image(_img_path));
+		
+		setLastDownloadedImageId(_image_id);
 	}
 	
-	public int getLastLoadedImageId() {
-		return last_id - 1;
+	public Image getConferenceImageById(int _img_id) {
+		return conference_images.get(_img_id);
 	}
 	
-	public Image getLastLoadedImage() {
-		return getImage(getLastLoadedImageId());
+	public void setLastDownloadedImageId(int _id) {
+		last_id = _id;
+	}
+	
+	public int getLastDownloadedImageId() {
+		return last_id;
+	}
+	
+	public Image getLastDownloadedImage() {
+		return conference_images.get(last_id);
 	}
 	
 	public void unloadImage(Integer _key) {
@@ -73,6 +85,11 @@ public class ImageManager {
 	
 	private ImageManager() {
 		images = new HashMap<>();
-		last_id = 50000;
+		conference_images = new HashMap<>();
+		last_id = -1;
+	}
+
+	public boolean hasUserAnImage(int _id) {
+		return conference_images.containsKey(_id);
 	}
 }

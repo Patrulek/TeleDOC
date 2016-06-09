@@ -15,12 +15,16 @@ import com.pp.iwm.teledoc.network.User.State;
 import com.pp.iwm.teledoc.network.packets.*;
 import com.pp.iwm.teledoc.network.packets.images.AddImageToGroupResponse;
 import com.pp.iwm.teledoc.network.packets.images.ConfirmSendImageResponse;
+import com.pp.iwm.teledoc.network.packets.images.GetAllGroupImagesResponse;
+import com.pp.iwm.teledoc.network.packets.images.ImageDescription;
 import com.pp.iwm.teledoc.network.packets.images.SendImage;
 import com.pp.iwm.teledoc.objects.ChatMessage;
+import com.pp.iwm.teledoc.objects.ImageManager;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
+import javafx.scene.image.Image;
 
 public class ConfWindowNetworkAssistant implements NetworkListener {
 	
@@ -77,25 +81,40 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 				onNewGroupImageEventReceive((NewGroupImageEvent)_message);
 			else if( _message instanceof AddImageToGroupResponse )
 				onAddImageToGroupResponseReceive((AddImageToGroupResponse)_message);
+			else if( _message instanceof GetAllGroupImagesResponse )
+				onGetAllGroupImagesResponse((GetAllGroupImagesResponse)_message);
 		}
 	}
 	
+	private void onGetAllGroupImagesResponse(GetAllGroupImagesResponse _response) {
+		List<ImageDescription> desc = _response.getImages();
+		
+		for( ImageDescription d : desc ) {
+			String filepath = d.getPath() + d.getName();
+			User.instance().downloadFile(filepath);
+		}
+	}
+
 	private void onLeaveGroupEventReceive(LeaveGroupEvent _response) {
 		String member = _response.getEmail();
 		User.instance().removeMember(member);
 	}
 
 	private void onAddImageToGroupResponseReceive(AddImageToGroupResponse _response) {
-		//System.out.println(_response.getAnswer());
+		//System.out.println(_response.get);
 	}
 
 	private void onNewGroupImageEventReceive(NewGroupImageEvent _response) {
-		JOptionPane.showMessageDialog(null, "Dodano nowy plik do konferencji. Za chwilê rozpocznie siê pobieranie.");
-		
-		String filepath = _response.getPath();
+		String filepath = _response.getPath() + _response.getName();
 		System.out.println(filepath);
 		
-		//User.instance().downloadFile(_filepath);
+		if( !User.instance().hasAnImage(_response.getId()) ) {
+			User.instance().downloadFile(filepath);
+			System.out.println("Nie mam wiec pobieram: " + filepath);
+		} else {
+			User.instance().addUsedImage(_response.getId());
+			System.out.println("Mam wiec dodaje: " + filepath);
+		}
 	}
 
 	private void onConfirmSendImageResponseReceive(ConfirmSendImageResponse _response) {
@@ -115,12 +134,22 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		else {
 			User.instance().progressDownload(_response.getImageContent());
 			String path = "assets/" + _response.getImageID() + _response.getName();
-			User.instance().saveFileToDisk(path, _response.getImageID());			
+			User.instance().saveFileToDisk(path, _response.getImageID());		
+			User.instance().addUsedImage(_response.getImageID());
+			
+			if( User.instance().getCurrentImage() == -1 ) {
+				System.out.println("img id = " + _response.getImageID());
+				User.instance().setCurrentImage(_response.getImageID());
+				layout.minimap_pane.setImage(ImageManager.instance().getLastDownloadedImage());
+				layout.drawable_pane.setImageAndResetCanvas(ImageManager.instance().getLastDownloadedImage());
+			}
+			
 		}
 	}
 	
 	private void onGroupMessageResponseReceive(GroupMessageResponse _response) {
-		ChatMessage message = new ChatMessage(new Date(), _response.getAuthorName() + " " + _response.getAuthorSurname(), _response.getMessage());
+		boolean is_my_message = _response.getAuthorEmail().equals(User.instance().getEmail());
+		ChatMessage message = new ChatMessage(new Date(), _response.getAuthorName() + " " + _response.getAuthorSurname(), _response.getMessage(), is_my_message);
 		Platform.runLater(() -> layout.chat_pane.addMessage(message));
 	}
 	

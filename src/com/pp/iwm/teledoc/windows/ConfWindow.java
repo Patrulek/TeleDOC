@@ -61,18 +61,21 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		
 		network_assistant = new ConfWindowNetworkAssistant(this);
 		User.instance().setListener(network_assistant);
+		User.instance().setImageListener(drawable_assistant);
 		
 		input_assistant = new ConfWindowInputAssistant(this);
 		
-		ImageManager.instance().loadImageForUser("/assets/big_image.jpg");
+		//ImageManager.instance().loadImageForUser("/assets/big_image.jpg");
 		User.instance().setFileTreeListener(window_layout.file_pane);
 		window_layout.file_pane.setFileTree(User.instance().getFileTree());
 		Platform.runLater(() -> window_layout.file_pane.refreshView());
 		User.instance().setDownloadListener(window_layout.file_pane);
-		User.instance().setCurrentImage(ImageManager.instance().getLastLoadedImageId());
+		//User.instance().setCurrentImage(ImageManager.instance().getLastLoadedImageId());
 		User.instance().getAllGroupMembers();
 		
-		window_layout.minimap_pane.setImage(ImageManager.instance().getLastLoadedImageId());
+		Platform.runLater(() -> User.instance().getAllGroupImages());
+		
+		//window_layout.minimap_pane.setImage(ImageManager.instance().getLastLoadedImageId());
 	}
 	
 	public void mapMousePosToImageMousePos() {

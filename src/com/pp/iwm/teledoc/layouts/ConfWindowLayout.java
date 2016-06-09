@@ -105,7 +105,7 @@ public class ConfWindowLayout extends WindowLayout {
 	}
 	
 	private void createChatPane() {
-		chat_pane = new ChatPane(window);
+		chat_pane = new ChatPane(this);
 		chat_pane.setLayoutX(1065.0); chat_pane.setLayoutY(60.0);
 	}
 	
@@ -259,7 +259,6 @@ public class ConfWindowLayout extends WindowLayout {
 	private void initializeLater() {
 		Platform.runLater(() -> {
 			drawable_pane.setViewportBounds(scroll_pane.getViewportBounds());
-			drawable_pane.setImageAndResetCanvas(ImageManager.instance().getLastLoadedImageId());
 		});
 	}
 

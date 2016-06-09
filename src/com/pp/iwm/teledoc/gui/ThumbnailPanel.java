@@ -63,29 +63,39 @@ public class ThumbnailPanel extends Pane {
 	
 	public void loadThumbnails() {
 		Map<Integer, Integer> images = User.instance().getUsedImages();
-		double x_pos = 32.0;
 		content_pane.getChildren().clear();
+		thumbnails.clear();
 		
-		for( int i = 0; i < 5; i++ ) {
-			for( Entry<Integer, Integer> entry : images.entrySet() ) {
-				int db_id = entry.getKey();
-				int image_id = entry.getValue();
-				
-				ThumbnailPanelCard card = new ThumbnailPanelCard(this, image_id);
-				boolean is_active = User.instance().getCurrentImage() == image_id;
-				card.setActiveAndUpdateView(is_active);
-				thumbnails.add(card);
-				card.setLayoutX(x_pos);
-				content_pane.getChildren().add(card);
-			}
+		for( Entry<Integer, Integer> entry : images.entrySet() ) {
+			int image_id = entry.getValue();
+			addThumbnailForImage(image_id);
 		}
+	}
+
+	public void addThumbnailForImage(int _image_id) {
+		for( ThumbnailPanelCard card : thumbnails )
+			if( card.getImageKey() == _image_id )
+				return;
+		
+		double x_pos = 32.0 * thumbnails.size();
+		
+		ThumbnailPanelCard card = new ThumbnailPanelCard(this, _image_id);
+		boolean is_active = User.instance().getCurrentImage() == _image_id;
+		card.setActiveAndUpdateView(is_active);
+		thumbnails.add(card);
+		card.setLayoutX(x_pos);
+		content_pane.getChildren().add(card);
+		
+		if( is_active )
+			selected_card = card;
 	}
 	
 	public void onCardSelect(ThumbnailPanelCard _card) {
 		if( selected_card != null )
-			selected_card.setSelectedAndUpdateView(false);
+			selected_card.setActiveAndUpdateView(false);
 		
+		User.instance().setCurrentImage(_card.getImageKey());
 		selected_card = _card;
-		selected_card.setSelectedAndUpdateView(true);
+		selected_card.setActiveAndUpdateView(true);
 	}
 }

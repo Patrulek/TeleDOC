@@ -11,6 +11,8 @@ import com.pp.iwm.teledoc.gui.DrawablePane.DrawablePaneListener;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.models.ConfWindowModel;
 import com.pp.iwm.teledoc.models.ConfWindowModel.UserContext;
+import com.pp.iwm.teledoc.network.User.ImageListener;
+import com.pp.iwm.teledoc.objects.ImageManager;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 
 import javafx.application.Platform;
@@ -19,7 +21,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
-public class ConfWindowDrawableAssistant implements DrawablePaneListener, DrawableObjectListener  {
+public class ConfWindowDrawableAssistant implements DrawablePaneListener, DrawableObjectListener, ImageListener  {
 	
 	// ==================================
 	// FIELDS
@@ -201,5 +203,24 @@ public class ConfWindowDrawableAssistant implements DrawablePaneListener, Drawab
 	@Override
 	public void onBoundsChanged() {
 		layout.minimap_pane.refresh();
+	}
+
+	@Override
+	public void onCurrentImageChanged(int _current_img_id) {
+		layout.drawable_pane.setImageAndResetCanvas(ImageManager.instance().getConferenceImageById(_current_img_id));
+		layout.minimap_pane.setImage(ImageManager.instance().getConferenceImageById(_current_img_id));
+		
+	}
+
+	@Override
+	public void onImageAdded(int _img_id) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onImageRemoved(int _img_id) {
+		// TODO Auto-generated method stub
+		
 	}
 }

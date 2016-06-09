@@ -207,7 +207,7 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 	}
 	
 	private void refreshCurrentFolder() {
-		System.out.println("FILE_TREE: "  + file_tree.getName() + " | CURRENT FOLDER: " + file_tree.getCurrentFolder().getPath());
+		//System.out.println("FILE_TREE: "  + file_tree.getName() + " | CURRENT FOLDER: " + file_tree.getCurrentFolder().getPath());
 		for( Entry<String, File> entry : file_tree.getFilesForCurrentFolder().entrySet() ) {
 			FileCard fc1 = new FileCard(this, entry.getValue());
 			files.add(fc1);
@@ -431,7 +431,7 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 		if( _file_tree == file_tree )
 			return;
 		
-		System.out.println("STARY: " + file_tree.getName() + " | NOWY: " + _file_tree.getName());
+		//System.out.println("STARY: " + file_tree.getName() + " | NOWY: " + _file_tree.getName());
 		
 		if( file_tree.getName().equals("all_files") )
 			last_current_folder = file_tree.getCurrentFolder();
@@ -479,9 +479,23 @@ public class FileExplorer extends Pane implements FileTreeListener, DownloadList
 		Platform.runLater(() -> lbl_path.setText(previewed_file_path));
 		setLastDownloadedFileInPreview();
 		showImagePreview();
+		
+		if( layout instanceof ConfWindowLayout ) {
+			Platform.runLater(() -> {
+					((ConfWindowLayout)layout).action_pane.addThumbnailForImage(ImageManager.instance().getLastDownloadedImageId());
+			});
+			
+			if( selected_card != null ) {
+				File f = selected_card.getFile();
+				User.instance().notifyAboutNewImage(f.getParent().getPath(), f.getName());
+			}
+		}
+		
+		User.instance().downloadNextFileFromList();
 	}
 	
 	private void setLastDownloadedFileInPreview() {
-		image_preview.setImage(ImageManager.instance().getLastLoadedImage());
+		if( isVisible() && selected_card != null )
+			image_preview.setImage(ImageManager.instance().getLastDownloadedImage());
 	}
 }

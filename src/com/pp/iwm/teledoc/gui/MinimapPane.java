@@ -10,6 +10,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -51,7 +52,7 @@ public class MinimapPane extends Pane {
 	private void createLayout() {
 		setStyle("-fx-background-color: rgb(15, 27, 30);");
 		setPrefSize(260.0, 180.0);
-		setVisible(true);
+		setVisible(false);
 		setOpacity(1.0);
 		
 		ibtn_hide = new DoubleStateImageButton(Utils.IMG_PARENT_FOLDER_SMALL, Utils.IMG_PARENT_FOLDER_SMALL, "Ukryj", -1);
@@ -99,8 +100,13 @@ public class MinimapPane extends Pane {
 		translate_animation.customize(240.0, 0.0, 300, 300);
 	}
 	
-	public void setImage(int _image_key) {
-		mini_image.setImage(ImageManager.instance().getImage(_image_key));
+	public void setImage(Image _img) {
+		Platform.runLater(() -> {
+			mini_image.setImage(_img);
+		});
+		
+		if( !isVisible() )
+			setVisible(true);
 	}
 	
 	public void refresh() {

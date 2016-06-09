@@ -101,6 +101,10 @@ public class ActionPaneConf extends Pane implements ChangeListener<Boolean> {
 		show();
 	}
 	
+	public void addThumbnailForImage(int _image_id) {
+		thumbnail_panel.addThumbnailForImage(_image_id);
+	}
+	
 	public void show() {
 		fade_animation.customize(1.0, 0.0, 550, 150);
 		fade_animation.playForward();
