@@ -20,6 +20,7 @@ import com.pp.iwm.teledoc.models.ConfWindowModel;
 import com.pp.iwm.teledoc.models.ConfWindowModel.UserContext;
 import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.objects.ImageManager;
+import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.assistants.ConfWindowDrawableAssistant;
 import com.pp.iwm.teledoc.windows.assistants.ConfWindowInputAssistant;
 import com.pp.iwm.teledoc.windows.assistants.ConfWindowNetworkAssistant;
@@ -122,7 +123,11 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	public void onAnnotationSubmit() {
 		String text = window_layout.annotation_pane.getTextArea().getText().trim();
 		Annotation tmp_ann = window_model.temp_annotation;
-		
+		int state = 1;
+
+		if( tmp_ann == null )
+			state = 2;
+			
 		if( window_layout.annotation_pane.getCurrentAnnotation() != null )
 			tmp_ann = window_layout.annotation_pane.getCurrentAnnotation();
 		else if( tmp_ann == null )
@@ -130,6 +135,15 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		
 		if( !text.equals("") )
 			tmp_ann.setText(text);
+		
+		
+		if( state == 1 ) {
+			String params = Utils.objectsToString(tmp_ann.getPosition(), tmp_ann.getOriginalColor(), tmp_ann.getText(), tmp_ann.id);
+			User.instance().sendAddAnnotationAction(params);
+		} else {
+			String params = Utils.objectsToString(tmp_ann.getText(), tmp_ann.id);
+			User.instance().sendUpdateAnnotationAction(params);
+		}
 
 		drawable_assistant.selectObject(tmp_ann);
 		window_model.temp_annotation = null;

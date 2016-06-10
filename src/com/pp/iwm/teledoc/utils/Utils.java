@@ -4,8 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.pp.iwm.teledoc.drawables.DrawableObject;
+import com.pp.iwm.teledoc.objects.ObjectId;
+
+import javafx.geometry.Point2D;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
@@ -264,5 +269,83 @@ public class Utils {
 		folder_name = folder_name.concat("/");
 		
 		return folder_name;
+	}
+	
+	public static long colorToInt(Color _color) {
+		long r = ((long)(_color.getRed() * 255)) << 24;
+		long g = ((long)(_color.getGreen() * 255)) << 16;
+		long b = ((long)(_color.getBlue() * 255)) << 8;
+		long a = (long)(_color.getOpacity() * 255);
+		
+		return (r + g + b + a);
+	}
+	
+	public static Color intToColor(long _int_color) {
+		long r = (long) ((_int_color & 0xFF000000) >> 24);
+		long g = (long) ((_int_color & 0x00FF0000) >> 16);
+		long b = (long) ((_int_color & 0x0000FF00) >> 8);
+		long a = (long) (_int_color & 0x000000FF);
+		
+		return Color.rgb((int)r, (int)g, (int)b, a / 255.0);
+	}
+	
+	public static String objectsToString(Object...objects) {
+		String s = "";
+		
+		for( Object o : objects ) {
+			if( o == null )
+				continue;
+			
+			if( o instanceof Point2D ) {
+				Point2D p2d = (Point2D)o;
+				s += "#" + p2d.getX() + "#" + p2d.getY();
+			} else if( o instanceof Color ) {
+				Color c = (Color)o;
+				long shifted = Utils.colorToInt(c);
+				s += "#" + shifted;
+			} else if( o instanceof List<?> ) {
+				List<Line> lines = (List<Line>)o;
+				s += "#" + lines.size();
+				
+				for( int i = 0; i < lines.size(); i++ ) {
+					Line l = lines.get(i);
+					s += "#" + l.getStartX() + "#" + l.getStartY();
+					
+					if( i == lines.size() - 1 )
+						s += "#" + l.getEndX() + "#" + l.getEndY();
+				}
+			} else if( o instanceof String )
+				s += "#" + o;
+			else if( o instanceof ObjectId ) {
+				ObjectId id = (ObjectId)o;
+				
+				s += "#" + id.id + "#" + id.image_id + "#" + id.owner;
+			}
+		}
+		
+		return s;
+	}
+	
+	public static ObjectId stringToObjectId(String _str) {
+		ObjectId id = new ObjectId();
+		
+		int pos = 0;
+		int new_pos = _str.indexOf("#", pos);
+		int idd = Integer.parseInt(_str.substring(pos, new_pos));
+		
+		pos = new_pos + 1;
+		new_pos = _str.indexOf("#", pos);
+		int img_id = Integer.parseInt(_str.substring(pos, new_pos));
+		
+		pos = new_pos + 1;
+		String owner_email = _str.substring(pos);
+		
+		id.id = idd;
+		id.image_id = img_id;
+		id.owner = owner_email;
+		
+		System.out.println(id);
+		
+		return id;
 	}
 }

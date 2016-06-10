@@ -1,6 +1,8 @@
 package com.pp.iwm.teledoc.drawables;
 
 import com.pp.iwm.teledoc.gui.DrawablePane;
+import com.pp.iwm.teledoc.network.User;
+import com.pp.iwm.teledoc.utils.Utils;
 
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
@@ -53,8 +55,13 @@ public class DrawableLine extends DrawableObject {
 	}
 	
 	private void onLineDragReleased() {
-		if( is_dragged )
+		if( is_dragged ) {
 			is_dragged = false;
+			
+			String params = Utils.objectsToString(max_delta, id);
+			User.instance().sendMoveObjectAction(params);
+			max_delta = new Point2D(0.0, 0.0);
+		}
 	}
 	
 	private void onLineDragged() {
@@ -62,6 +69,8 @@ public class DrawableLine extends DrawableObject {
 			is_dragged = true;
 
 		Point2D delta = listener.onDragged(this);
+		max_delta = max_delta.add(delta);
+		
 		from = from.add(delta);
 		to = to.add(delta);
 		rescale();
@@ -185,5 +194,12 @@ public class DrawableLine extends DrawableObject {
 	
 	public Rectangle[] getSelectors() {
 		return line_selectors;
+	}
+
+	@Override
+	public void move(Point2D _delta) {
+		from = from.add(_delta);
+		to = to.add(_delta);
+		rescale();
 	}
 }

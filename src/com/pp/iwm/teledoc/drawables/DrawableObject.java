@@ -1,25 +1,41 @@
 package com.pp.iwm.teledoc.drawables;
 
+import com.pp.iwm.teledoc.network.User;
+import com.pp.iwm.teledoc.objects.ObjectId;
+
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Point2D;
 
 public abstract class DrawableObject {
 	
+	
+	
 	//
 	// FIELDS
 	//
+	public static int static_id = 1;
 	
 	protected BoundingBox box;
 	protected double scale = 1.0;
 	protected DrawableObjectListener listener;
 	protected boolean is_dragged;
 	protected boolean is_selected;
+	public Point2D max_delta = new Point2D(0.0, 0.0);
+	public ObjectId id;
 	
 	//
 	// METHODS
 	//
 	
-	public DrawableObject() {}
+	public int nextId() {
+		return static_id++;
+	}
+	
+	public abstract void move(Point2D _delta);
+	
+	public DrawableObject() {
+		id = new ObjectId(nextId(), User.instance().getCurrentImage(), User.instance().getEmail());
+	}
 	
 	public void setScale(double _scale) {
 		scale = _scale;

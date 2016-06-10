@@ -321,4 +321,15 @@ public class NetworkClient {
 			
 		image_client.sendTCP(request);			
 	}
+	
+	public void sendActionRequest(String _email, int _image_id, int _action_type, String _parameters) {
+		ActionRequest request = new ActionRequest();
+		request.setEmail(_email);
+		request.setFileID(_image_id);
+		request.setTypeID(_action_type);
+		request.setParameters(_parameters);
+		
+		client.sendTCP(request);
+		//System.out.println("Wys³a³em ActionRequest: "+request.getEmail()+" "+request.getFileID()+" "+request.getTypeID()+" "+request.getParameters());
+	}
 }

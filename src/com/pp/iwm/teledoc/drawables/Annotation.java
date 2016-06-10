@@ -1,6 +1,8 @@
 package com.pp.iwm.teledoc.drawables;
 
 import com.pp.iwm.teledoc.gui.DrawablePane;
+import com.pp.iwm.teledoc.network.User;
+import com.pp.iwm.teledoc.utils.Utils;
 
 import javafx.application.Platform;
 import javafx.geometry.Bounds;
@@ -67,6 +69,14 @@ public class Annotation	extends DrawableObject {
 		return state;
 	}
 	
+	public Point2D getPosition() {
+		return position;
+	}
+	
+	public Color getOriginalColor() {
+		return color;
+	}
+	
 	private void onCircleDragReleased() {
 		if( state == State.DRAWING )
 			return;
@@ -75,6 +85,10 @@ public class Annotation	extends DrawableObject {
 			was_dragged = true;
 			is_dragged = false;
 			onChanged();
+			
+			String params = Utils.objectsToString(max_delta, id);
+			User.instance().sendMoveObjectAction(params);
+			max_delta = new Point2D(0.0, 0.0);
 		}
 	}
 	
@@ -90,6 +104,7 @@ public class Annotation	extends DrawableObject {
 			is_dragged = true;
 
 		Point2D delta = listener.onDragged(this);
+		max_delta = max_delta.add(delta);
 		changePosition(position.add(delta));
 		
 		onChanged();
@@ -172,6 +187,19 @@ public class Annotation	extends DrawableObject {
 		if( state == State.DRAWN && !is_dragged )
 			setOriginalColor();
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if( obj == null || !(obj instanceof Annotation) )
+			return false;
+		
+		Annotation ann = (Annotation)obj;
+		
+		if( ann.position.equals(position) && ann.text.equals(text) )
+			return true;
+		
+		return false;
+	}
 
 	@Override
 	public void onChanged() {
@@ -182,5 +210,12 @@ public class Annotation	extends DrawableObject {
 	public void onDeselected() {
 		is_selected = false;
 		drawable_pane.setSelectedDrawable(null);
+	}
+
+	@Override
+	public void move(Point2D _delta) {
+		changePosition(position.add(_delta));
+		
+		rescale();
 	}
 }

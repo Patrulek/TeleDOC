@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.pp.iwm.teledoc.gui.DrawablePane;
+import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.utils.Utils;
 
 import javafx.geometry.Point2D;
@@ -85,8 +86,13 @@ public class DrawableBrokenLine extends DrawableObject {
 	}
 	
 	private void onLineDragReleased() {
-		if( is_dragged )
+		if( is_dragged ) {
 			is_dragged = false;
+			
+			String params = Utils.objectsToString(max_delta, id);
+			User.instance().sendMoveObjectAction(params);
+			max_delta = new Point2D(0.0, 0.0);
+		}
 	}
 	
 	private void onLineDragged() {
@@ -94,6 +100,7 @@ public class DrawableBrokenLine extends DrawableObject {
 			is_dragged = true;
 
 		Point2D delta = listener.onDragged(this);
+		max_delta = max_delta.add(delta);
 		
 		for( int i = 0; i < end_points.size(); i++ )
 			end_points.set(i, end_points.get(i).add(delta));
@@ -188,6 +195,10 @@ public class DrawableBrokenLine extends DrawableObject {
 	public List<Line> getLines() {
 		return lines;
 	}
+	
+	public Color getOriginalColor() {
+		return original_color;
+	}
 
 	@Override
 	public void onSelected() {
@@ -221,5 +232,13 @@ public class DrawableBrokenLine extends DrawableObject {
 	@Override
 	public void onDeselected() {
 		is_selected = false;
+	}
+
+	@Override
+	public void move(Point2D _delta) {
+		for( int i = 0; i < end_points.size(); i++ )
+			end_points.set(i, end_points.get(i).add(_delta));
+		
+		rescale();
 	}
 }

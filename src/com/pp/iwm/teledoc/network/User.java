@@ -33,6 +33,10 @@ public class User extends Listener {
 	public enum State {
 		CONNECTING, RECONNECTING, CONNECTED, RECONNECTED, DISCONNECTED, CONNECTION_FAILURE
 	}
+	
+	public enum ActionType {
+		ADD_LINE, ADD_BROKEN_LINE, ADD_ANNOTATION, UPDATE_ANNOTATION, MOVE_OBJECT, DELETE_OBJECT
+	}
 
 	private String name;
 	private String surname;
@@ -573,6 +577,26 @@ public class User extends Listener {
 					break;
 			}
 		}
+	}
+	
+	public void sendAddLineAction(String _parameters) {
+		client.sendActionRequest(email, current_image, ActionType.ADD_LINE.ordinal(), _parameters);
+	}
+	
+	public void sendAddBrokenLineAction(String _parameters) {
+		client.sendActionRequest(email, current_image, ActionType.ADD_BROKEN_LINE.ordinal(), _parameters);
+	}
+	
+	public void sendAddAnnotationAction(String _parameters) {
+		client.sendActionRequest(email, current_image, ActionType.ADD_ANNOTATION.ordinal(), _parameters);
+	}
+	
+	public void sendUpdateAnnotationAction(String _parameters) {
+		client.sendActionRequest(email, current_image, ActionType.UPDATE_ANNOTATION.ordinal(), _parameters);
+	}
+
+	public void sendMoveObjectAction(String _parameters) {
+		client.sendActionRequest(email, current_image, ActionType.MOVE_OBJECT.ordinal(), _parameters);
 	}
 
 	public boolean isOwnerOfCurrentGroup() {

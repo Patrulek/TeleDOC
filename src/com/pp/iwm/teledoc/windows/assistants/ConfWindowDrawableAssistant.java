@@ -13,6 +13,7 @@ import com.pp.iwm.teledoc.models.ConfWindowModel;
 import com.pp.iwm.teledoc.models.ConfWindowModel.UserContext;
 import com.pp.iwm.teledoc.network.User.ImageListener;
 import com.pp.iwm.teledoc.objects.ImageManager;
+import com.pp.iwm.teledoc.objects.ObjectId;
 import com.pp.iwm.teledoc.windows.ConfWindow;
 
 import javafx.application.Platform;
@@ -39,6 +40,15 @@ public class ConfWindowDrawableAssistant implements DrawablePaneListener, Drawab
 		window = _window;
 		model = window.getWindowModel();
 		layout = window.getWindowLayout();
+	}
+	
+	public DrawableObject findDrawable(ObjectId _id) {
+		for( DrawableObject drawable : model.drawables ) {
+			if( drawable.id.equals(_id) )
+				return drawable;
+		}
+		
+		return null;
 	}
 	
 	public void createTempAnnotation() {

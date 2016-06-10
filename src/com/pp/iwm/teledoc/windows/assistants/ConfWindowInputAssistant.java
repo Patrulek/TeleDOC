@@ -12,6 +12,7 @@ import com.pp.iwm.teledoc.gui.ImageButton;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
 import com.pp.iwm.teledoc.models.ConfWindowModel;
 import com.pp.iwm.teledoc.models.ConfWindowModel.UserContext;
+import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.utils.InputUtils;
 import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.ConfWindow;
@@ -106,15 +107,19 @@ public class ConfWindowInputAssistant {
 		}
 	}
 	
+	
+	
 	private void drawLine(Point2D _image_mouse_pos, ConfWindowDrawableAssistant _drawable_assistant, DrawablePane _drawable_pane) {
 		if( model.temp1 == null)
 			model.temp1 = _image_mouse_pos;
 		else if( model.temp2 == null ) {
 			model.temp2 = _image_mouse_pos;
 			model.temp_line = new DrawableLine(model.temp1, model.temp2, Color.RED, _drawable_pane);
+			String params = Utils.objectsToString(model.temp1, model.temp2, Color.RED, model.temp_line.id);
 			_drawable_assistant.addDrawable(model.temp_line);
 			model.temp1 = model.temp2 = null;
 			window.changeUserContext(UserContext.DOING_NOTHING);
+			User.instance().sendAddLineAction(params);
 		}
 	}
 	
@@ -146,6 +151,12 @@ public class ConfWindowInputAssistant {
 	
 	private void cancelDrawingBrokenLine() {
 		model.temp1 = model.temp2 = null;
+		
+		if( model.temp_broken_line != null ) {
+			String params = Utils.objectsToString(model.temp_broken_line.getLines(), model.temp_broken_line.getOriginalColor(), model.temp_broken_line.id);
+			User.instance().sendAddBrokenLineAction(params);
+		}
+		
 		model.temp_broken_line = null;
 		window.changeUserContext(UserContext.DOING_NOTHING);
 	}
