@@ -219,7 +219,11 @@ public class ConfWindowDrawableAssistant implements DrawablePaneListener, Drawab
 	public void onCurrentImageChanged(int _current_img_id) {
 		layout.drawable_pane.setImageAndResetCanvas(ImageManager.instance().getConferenceImageById(_current_img_id));
 		layout.minimap_pane.setImage(ImageManager.instance().getConferenceImageById(_current_img_id));
+		layout.drawable_pane.rescaleBy(0.01);
+		layout.drawable_pane.refreshPointers();
+		layout.drawable_pane.refreshObjects();
 		
+		deselectObject();
 	}
 
 	@Override

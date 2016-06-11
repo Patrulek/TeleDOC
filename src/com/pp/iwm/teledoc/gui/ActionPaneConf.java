@@ -3,6 +3,7 @@ package com.pp.iwm.teledoc.gui;
 import com.pp.iwm.teledoc.animations.FadeAnimation;
 import com.pp.iwm.teledoc.animations.TranslateAnimation;
 import com.pp.iwm.teledoc.layouts.ConfWindowLayout;
+import com.pp.iwm.teledoc.objects.ObjectId;
 import com.pp.iwm.teledoc.utils.Utils;
 
 import javafx.application.Platform;
@@ -262,5 +263,9 @@ public class ActionPaneConf extends Pane implements ChangeListener<Boolean> {
 			});
 			
 		opacity_thread.start();
+	}
+
+	public void notifyThumbnailPanel(ObjectId _id) {
+		thumbnail_panel.imageChanged(_id);
 	}
 }

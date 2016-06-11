@@ -20,6 +20,7 @@ import com.pp.iwm.teledoc.models.ConfWindowModel;
 import com.pp.iwm.teledoc.models.ConfWindowModel.UserContext;
 import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.objects.ImageManager;
+import com.pp.iwm.teledoc.objects.ObjectId;
 import com.pp.iwm.teledoc.utils.Utils;
 import com.pp.iwm.teledoc.windows.assistants.ConfWindowDrawableAssistant;
 import com.pp.iwm.teledoc.windows.assistants.ConfWindowInputAssistant;
@@ -251,6 +252,10 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 	public void onDeleteObject() {
 		if( window_model.selected_drawable != null ) {
 			drawable_assistant.removeDrawable(window_model.selected_drawable);
+			
+			String params = Utils.objectsToString(window_model.selected_drawable.id);
+			User.instance().sendDeleteObjectAction(params);
+			
 			window_model.selected_drawable = null;
 		}
 	}

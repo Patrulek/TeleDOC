@@ -18,6 +18,7 @@ public class DrawableBrokenLine extends DrawableObject {
 	// ==================================
 	// FIELDS
 	// ==================================
+	public static final double SELECTOR_SIZE = 8.0;
 	
 	private List<Line> lines;
 	private DrawablePane drawable_pane;
@@ -36,7 +37,16 @@ public class DrawableBrokenLine extends DrawableObject {
 	// METHODS
 	// ==================================
 	
-	public static final double SELECTOR_SIZE = 8.0;
+	public void hide() {
+		for( Line l : lines )
+			l.setVisible(false);
+	}
+	
+	public void show() {
+		for( Line l : lines )
+			l.setVisible(true);
+	}
+	
 	
 	private void changeOriginalColor(Color _color) {
 		original_color = _color;

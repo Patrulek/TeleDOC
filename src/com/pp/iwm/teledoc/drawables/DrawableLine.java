@@ -33,6 +33,18 @@ public class DrawableLine extends DrawableObject {
 	// METHODS
 	// =======================================
 	
+	public void show() {
+		line.setVisible(true);
+		line_selectors[0].setVisible(true);
+		line_selectors[1].setVisible(true);
+	}
+	
+	public void hide() {
+		line.setVisible(false);
+		line_selectors[0].setVisible(false);
+		line_selectors[1].setVisible(false);
+	}
+	
 	public DrawableLine(Point2D _from, Point2D _to, Color _color, DrawablePane _drawable_pane) {
 		super();
 		drawable_pane = _drawable_pane;

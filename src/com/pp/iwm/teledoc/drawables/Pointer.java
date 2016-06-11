@@ -3,6 +3,7 @@ package com.pp.iwm.teledoc.drawables;
 import java.util.Random;
 
 import com.pp.iwm.teledoc.gui.DrawablePane;
+import com.pp.iwm.teledoc.network.User;
 
 import javafx.application.Platform;
 import javafx.geometry.Point2D;
@@ -25,6 +26,7 @@ public class Pointer {
 	private Circle pointer;
 	private Color color;
 	private String email;
+	private int img_id;
 	
 	
 	// ==============================
@@ -49,6 +51,9 @@ public class Pointer {
 	}
 	
 	public void refresh() {
+		hideIfOtherImage();
+		showIfSameImage();
+		
 		double scale = drawable_pane.getScale();
 		double pointer_x = pane_pos.getX() - HALF_RADIUS;
 		double pointer_y = pane_pos.getY() - HALF_RADIUS;
@@ -61,6 +66,10 @@ public class Pointer {
 		lbl_member.setText(_member_name);
 	}
 	
+	public void setImgId(int _img_id) {
+		img_id = _img_id;
+	}
+	
 	public void addToPane() {
 		drawable_pane.getChildren().add(lbl_member);
 		drawable_pane.getChildren().add(pointer);
@@ -69,6 +78,20 @@ public class Pointer {
 	public void show() {
 		pointer.setVisible(true);
 		lbl_member.setVisible(true);
+	}
+	
+	public void showIfSameImage() {
+		if( img_id == User.instance().getCurrentImage() ) {
+			pointer.setVisible(true);
+			lbl_member.setVisible(true);
+		}
+	}
+	
+	public void hideIfOtherImage() {
+		if( img_id != User.instance().getCurrentImage() ) {
+			pointer.setVisible(false);
+			lbl_member.setVisible(false);
+		}
 	}
 	
 	public void hide() {

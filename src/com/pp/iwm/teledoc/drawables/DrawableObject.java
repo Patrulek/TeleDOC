@@ -33,6 +33,21 @@ public abstract class DrawableObject {
 	
 	public abstract void move(Point2D _delta);
 	
+	public void showIfSameImage() {
+		if( id.image_id == User.instance().getCurrentImage() ) {
+			show();
+			rescale();
+		}
+	}
+	
+	public void hideIfOtherImage() {
+		if( id.image_id != User.instance().getCurrentImage() )
+			hide();
+	}
+	
+	public abstract void hide();
+	public abstract void show();
+	
 	public DrawableObject() {
 		id = new ObjectId(nextId(), User.instance().getCurrentImage(), User.instance().getEmail());
 	}

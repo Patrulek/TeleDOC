@@ -56,7 +56,10 @@ public class ThumbnailPanelCard extends Pane {
 	
 	public void setActiveAndUpdateView(boolean _is_active) {
 		is_active = _is_active;
-		is_changed = false;
+		
+		if( is_active )
+			is_changed = false;
+		
 		updateView();
 	}
 	

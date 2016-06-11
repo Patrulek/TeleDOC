@@ -99,8 +99,8 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 	}
 	
 	private void onActionResponseReceive(ActionResponse _response) {
-		//if( _response.getAuthorEmail().equals(User.instance().getEmail()) )
-		//	return;
+		if( _response.getAuthorEmail().equals(User.instance().getEmail()) )
+			return;
 		
 		switch( _response.getTypeID() ) {
 			case 0: // ADD_LINE
@@ -118,7 +118,26 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 			case 4: // MOVE_OBJECT
 				onActionMoveObject(_response.getFileID(), _response.getParameters());
 				break;
+			case 5: // DELETE_OBJECT
+				onDeleteObject(_response.getFileID(), _response.getParameters());
+				break;
 		}
+	}
+
+	private void onDeleteObject(int _file_id, String _parameters) {
+		System.out.println(_parameters);
+		
+		ObjectId id = Utils.stringToObjectId(_parameters.substring(1));
+		DrawableObject drawable = window.getDrawableAssistant().findDrawable(id);
+		
+		if( drawable == null )
+			return;
+
+		layout.action_pane.notifyThumbnailPanel(id);
+		
+		Platform.runLater(() -> {
+			window.getDrawableAssistant().removeDrawable(drawable);
+		});
 	}
 
 	private void onActionMoveObject(int _file_id, String _parameters) {
@@ -141,7 +160,8 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		
 		if( drawable == null )
 			return;
-		
+
+		layout.action_pane.notifyThumbnailPanel(id);
 		drawable.move(p2d);
 	}
 
@@ -161,6 +181,7 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 			return;
 		
 		Annotation ann = (Annotation)drawable;
+		layout.action_pane.notifyThumbnailPanel(id);
 		ann.setText(text);
 	}
 
@@ -190,7 +211,9 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 			Annotation ann = new Annotation(text, color, layout.drawable_pane.getLayoutBounds(), p2d, layout.drawable_pane);
 			ann.id = Utils.stringToObjectId(_parameters.substring(final_pos));
 			ann.changeState(Annotation.State.DRAWN);
+			layout.action_pane.notifyThumbnailPanel(ann.id);
 			window.getDrawableAssistant().addDrawable(ann);
+			ann.hideIfOtherImage();
 		});
 	}
 
@@ -232,8 +255,10 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 			
 			for( int i = 1; i < size; i++ )
 				line.addLine(new Line(points.get(i).getX(), points.get(i).getY(), points.get(i + 1).getX(), points.get(i + 1).getY()));
-			
+
+			layout.action_pane.notifyThumbnailPanel(line.id);
 			window.getDrawableAssistant().addDrawable(line);
+			line.hideIfOtherImage();
 		});
 	}
 
@@ -275,8 +300,10 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		Platform.runLater(() -> {
 			DrawableLine l = new DrawableLine(p1, p2, color, layout.drawable_pane);
 			l.id = Utils.stringToObjectId(_parameters.substring(final_pos));
-					
+			
+			layout.action_pane.notifyThumbnailPanel(l.id);
 			window.getDrawableAssistant().addDrawable(l);
+			l.hideIfOtherImage();
 		});
 	}
 
@@ -356,9 +383,15 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		if( m == null )
 			return;
 		
+		int pos = _response.getParameters().indexOf("#") + 1;
+		int img_id = Integer.parseInt(_response.getParameters().substring(pos));
+		layout.drawable_pane.setImageIdForPointer(m.email, img_id);
+		
 		if( _response.getTypeID() == NetworkClient.MSG_POINTER && m.is_sending_pointer  ) {
 			Point2D sender_mouse_pos = parseStringParameterToMousePos(_response.getParameters());
 			layout.drawable_pane.relocatePointerFor(m.email, sender_mouse_pos);
+			
+			
 			//System.out.println(m.name + " " + m.surname + " wskazuje na " + sender_mouse_pos);
 		} else if( _response.getTypeID() == NetworkClient.MSG_POINTER_ON ) {
 			m.is_sending_pointer = true;
@@ -377,7 +410,7 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		int y_pos = _parameters.indexOf("y:");
 		
 		double x = Double.valueOf(_parameters.substring(x_pos + 2, y_pos));
-		double y = Double.valueOf(_parameters.substring(y_pos + 2));
+		double y = Double.valueOf(_parameters.substring(y_pos + 2, _parameters.indexOf("#")));
 		
 		return new Point2D(x, y);
 	}

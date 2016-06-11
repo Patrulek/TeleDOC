@@ -143,6 +143,7 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 	
 	public void setImageAndResetCanvas(Image _img) {
 		drawable_canvas.setImageAndResetCanvas(_img);
+		scale = drawable_canvas.getScale();
 	}
 	
 	public Point2D getImageSize() {
@@ -382,5 +383,19 @@ public class DrawablePane extends Pane implements ChangeListener<Boolean> {
 			redrawLayers(Layers.MARKERS);
 		else if( annotationLayerVisibilityProperty == _observable )
 			redrawLayers(Layers.ANNOTATIONS);
+	}
+
+	public void setImageIdForPointer(String _email, int _img_id) {
+		int pointer_idx = findPointerIdx(_email);
+		
+		if( pointer_idx != -1 )
+			pointers.get(pointer_idx).setImgId(_img_id);
+	}
+
+	public void refreshObjects() {
+		for( DrawableObject drawable : drawables ) {
+			drawable.hideIfOtherImage();
+			drawable.showIfSameImage();
+		}
 	}
 }

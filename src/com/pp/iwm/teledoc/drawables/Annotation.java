@@ -41,6 +41,14 @@ public class Annotation	extends DrawableObject {
 	// METHODS
 	// ======================================
 	
+	public void show() {
+		circle.setVisible(true);
+	}
+	
+	public void hide() {
+		circle.setVisible(false);
+	}
+	
 	public Annotation(String _text, Color _color, Bounds _viewport_bounds, Point2D _position, DrawablePane _drawable_pane) {
 		state = State.DRAWING;
 		color = _color;

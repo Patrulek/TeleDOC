@@ -285,11 +285,11 @@ public class User extends Listener {
 	}
 	
 	public void sendMousePos(Point2D _mouse_pos) {
-		client.sendDispersedActionRequest(email, _mouse_pos);
+		client.sendDispersedActionRequest(email, current_image, _mouse_pos);
 	}
 
 	public void sendPointerChanged(BooleanProperty is_switched_on) {
-		client.sendDispersedActionRequest(email, is_switched_on);
+		client.sendDispersedActionRequest(email, current_image, is_switched_on);
 	}
 	
 	public void createFolder(String _folder_name) {
@@ -597,6 +597,10 @@ public class User extends Listener {
 
 	public void sendMoveObjectAction(String _parameters) {
 		client.sendActionRequest(email, current_image, ActionType.MOVE_OBJECT.ordinal(), _parameters);
+	}
+	
+	public void sendDeleteObjectAction(String _parameters) {
+		client.sendActionRequest(email, current_image, ActionType.DELETE_OBJECT.ordinal(), _parameters);
 	}
 
 	public boolean isOwnerOfCurrentGroup() {

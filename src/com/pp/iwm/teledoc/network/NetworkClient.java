@@ -195,7 +195,7 @@ public class NetworkClient {
 		client.sendTCP(request);
 	}
 
-	public void sendDispersedActionRequest(String _email, Object _parameters) {
+	public void sendDispersedActionRequest(String _email, int _current_image, Object _parameters) {
 		DispersedActionRequest request = new DispersedActionRequest();
 		request.setEmail(_email);
 		
@@ -203,6 +203,9 @@ public class NetworkClient {
 			sendMousePos(request, (Point2D)_parameters);
 		else if( _parameters instanceof BooleanProperty )
 			sendPointerChanged(request, (BooleanProperty)_parameters);
+		
+		String params = request.getParameters() + "#" + _current_image;
+		request.setParameters(params);
 		
 		client.sendUDP(request);
 	}
