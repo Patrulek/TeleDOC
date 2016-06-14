@@ -115,6 +115,9 @@ public class ConfWindowInputAssistant {
 		else if( model.temp2 == null ) {
 			model.temp2 = _image_mouse_pos;
 			model.temp_line = new DrawableLine(model.temp1, model.temp2, Color.RED, _drawable_pane);
+			
+			System.out.println("Line: " + model.temp1 + " | " + model.temp2);
+			
 			String params = Utils.objectsToString(model.temp1, model.temp2, Color.RED, model.temp_line.id);
 			_drawable_assistant.addDrawable(model.temp_line);
 			model.temp1 = model.temp2 = null;
@@ -140,6 +143,9 @@ public class ConfWindowInputAssistant {
 				_drawable_assistant.addDrawable(model.temp_broken_line);
 			} else {
 				Point2D p1 = model.temp1; Point2D p2 = model.temp2;
+
+				System.out.println("DrawableLine: " + model.temp1 + " | " + model.temp2);
+				
 				Line line = new Line(p1.getX(), p1.getY(), p2.getX(), p2.getY());
 				_drawable_assistant.updateBrokenLine(line);
 			}
@@ -153,7 +159,7 @@ public class ConfWindowInputAssistant {
 		model.temp1 = model.temp2 = null;
 		
 		if( model.temp_broken_line != null ) {
-			String params = Utils.objectsToString(model.temp_broken_line.getLines(), model.temp_broken_line.getOriginalColor(), model.temp_broken_line.id);
+			String params = Utils.objectsToString(model.temp_broken_line.getPoints(), model.temp_broken_line.getOriginalColor(), model.temp_broken_line.id);
 			User.instance().sendAddBrokenLineAction(params);
 		}
 		

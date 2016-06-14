@@ -304,15 +304,12 @@ public class Utils {
 				long shifted = Utils.colorToInt(c);
 				s += "#" + shifted;
 			} else if( o instanceof List<?> ) {
-				List<Line> lines = (List<Line>)o;
+				List<Point2D> lines = (List<Point2D>)o;
 				s += "#" + lines.size();
 				
 				for( int i = 0; i < lines.size(); i++ ) {
-					Line l = lines.get(i);
-					s += "#" + l.getStartX() + "#" + l.getStartY();
-					
-					if( i == lines.size() - 1 )
-						s += "#" + l.getEndX() + "#" + l.getEndY();
+					Point2D l = lines.get(i);
+					s += "#" + l.getX() + "#" + l.getY();
 				}
 			} else if( o instanceof String )
 				s += "#" + o;

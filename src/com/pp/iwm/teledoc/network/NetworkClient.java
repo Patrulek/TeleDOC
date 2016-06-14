@@ -335,4 +335,11 @@ public class NetworkClient {
 		client.sendTCP(request);
 		//System.out.println("Wys³a³em ActionRequest: "+request.getEmail()+" "+request.getFileID()+" "+request.getTypeID()+" "+request.getParameters());
 	}
+
+	public void sendGetAllGroupActionsRequest(String _email) {
+		GetAllGroupActionsRequest request = new GetAllGroupActionsRequest();
+		request.setEmail(_email);
+		
+		image_client.sendTCP(request);
+	}
 }

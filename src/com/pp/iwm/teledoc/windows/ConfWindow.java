@@ -75,7 +75,10 @@ public class ConfWindow extends Window implements ChangeListener<Number> {
 		//User.instance().setCurrentImage(ImageManager.instance().getLastLoadedImageId());
 		User.instance().getAllGroupMembers();
 		
-		Platform.runLater(() -> User.instance().getAllGroupImages());
+		Platform.runLater(() -> {
+			User.instance().getAllGroupImages();
+			User.instance().loadActionsForCurrentConference();
+		});
 		
 		//window_layout.minimap_pane.setImage(ImageManager.instance().getLastLoadedImageId());
 	}

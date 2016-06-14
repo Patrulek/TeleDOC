@@ -235,6 +235,10 @@ public class User extends Listener {
 		loadConferencesFromDB();
 	}
 	
+	public void loadActionsForCurrentConference() {
+		client.sendGetAllGroupActionsRequest(email);
+	}
+	
 	public void logIn(String _email, String _password) {
 		client.sendLoginRequest(_email, _password);
 	}

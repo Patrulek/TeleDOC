@@ -102,6 +102,7 @@ public class DrawableLine extends DrawableObject {
 	
 	@Override
 	public void rescale() {
+		scale = drawable_pane.getScale();
 		rescaleLine();
 		
 		if( is_selected ) {

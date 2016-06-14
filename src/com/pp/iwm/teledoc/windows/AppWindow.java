@@ -1,7 +1,6 @@
 package com.pp.iwm.teledoc.windows;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -305,7 +304,8 @@ public class AppWindow extends Window implements NetworkListener {
 			User.instance().progressDownload(_response.getImageContent());		
 		else {
 			User.instance().progressDownload(_response.getImageContent());
-			String path = "assets/" + _response.getImageID() + _response.getName();
+			String path = System.getenv("TEMP") + "/" + _response.getImageID() + _response.getName();
+			System.out.println(path);
 			User.instance().saveFileToDisk(path, _response.getImageID());			
 		}
 	}

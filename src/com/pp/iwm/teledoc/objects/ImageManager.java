@@ -3,10 +3,10 @@ package com.pp.iwm.teledoc.objects;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.pp.iwm.teledoc.network.User;
-
 import javafx.application.Platform;
 import javafx.scene.image.Image;
+
+import java.io.*;
 
 public class ImageManager {
 	
@@ -48,10 +48,17 @@ public class ImageManager {
 	}
 	
 	public void loadImageForUser(Integer _image_id, String _img_path) {
-		if( !conference_images.containsKey(_image_id) ) 
-			conference_images.put(_image_id, new Image(_img_path));
-		
-		setLastDownloadedImageId(_image_id);
+		if( !conference_images.containsKey(_image_id) ) {
+			java.io.File file = new java.io.File(_img_path);
+			
+			if( file.exists() ) {
+				conference_images.put(_image_id, new Image(file.toURI().toString()));
+				setLastDownloadedImageId(_image_id);
+			} else {
+				System.err.println("Brak pliku: " + _img_path);
+				return;
+			}
+		}
 	}
 	
 	public Image getConferenceImageById(int _img_id) {

@@ -95,6 +95,7 @@ public class Annotation	extends DrawableObject {
 			onChanged();
 			
 			String params = Utils.objectsToString(max_delta, id);
+			System.out.println("Przesunieto o: " + max_delta);
 			User.instance().sendMoveObjectAction(params);
 			max_delta = new Point2D(0.0, 0.0);
 		}
@@ -128,15 +129,15 @@ public class Annotation	extends DrawableObject {
 	}
 	
 	private void relocate() {
-		double scale = drawable_pane.getScale();
+		scale = drawable_pane.getScale();
 		double x = position.getX();
 		double y = position.getY();
 		
-		if( x * scale + RADIUS > viewport_bounds.getMaxX() )
-			x = viewport_bounds.getMaxX() - RADIUS;
+		//if( x * scale + RADIUS > viewport_bounds.getMaxX() )
+		//	x = viewport_bounds.getMaxX() - RADIUS;
 		
-		if( y * scale + RADIUS > viewport_bounds.getMaxY() )
-			y = viewport_bounds.getMaxY() - RADIUS;
+		//if( y * scale + RADIUS > viewport_bounds.getMaxY() )
+		//	y = viewport_bounds.getMaxY() - RADIUS;
 		
 		position = new Point2D(x, y);
 		circle.setCenterX(position.getX() * scale);
@@ -145,8 +146,9 @@ public class Annotation	extends DrawableObject {
 	
 	@Override
 	public void rescale() {
-		circle.setCenterX(scale * position.getX());
-		circle.setCenterY(scale * position.getY());
+		//circle.setCenterX(scale * position.getX());
+		//circle.setCenterY(scale * position.getY());
+		relocate();
 	}
 	
 	public void setText(String _text) {
@@ -222,6 +224,7 @@ public class Annotation	extends DrawableObject {
 
 	@Override
 	public void move(Point2D _delta) {
+		System.out.println("Moved by: " + _delta);
 		changePosition(position.add(_delta));
 		
 		rescale();

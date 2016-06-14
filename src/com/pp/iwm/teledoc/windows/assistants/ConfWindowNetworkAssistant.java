@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import org.omg.CORBA.Environment;
+
 import com.esotericsoftware.kryonet.Connection;
 import com.pp.iwm.teledoc.drawables.Annotation;
 import com.pp.iwm.teledoc.drawables.DrawableBrokenLine;
@@ -18,8 +20,11 @@ import com.pp.iwm.teledoc.network.User;
 import com.pp.iwm.teledoc.network.User.NetworkListener;
 import com.pp.iwm.teledoc.network.User.State;
 import com.pp.iwm.teledoc.network.packets.*;
+import com.pp.iwm.teledoc.network.packets.images.Action;
 import com.pp.iwm.teledoc.network.packets.images.AddImageToGroupResponse;
 import com.pp.iwm.teledoc.network.packets.images.ConfirmSendImageResponse;
+import com.pp.iwm.teledoc.network.packets.images.GetAllGroupActionsRequest;
+import com.pp.iwm.teledoc.network.packets.images.GetAllGroupActionsResponse;
 import com.pp.iwm.teledoc.network.packets.images.GetAllGroupImagesResponse;
 import com.pp.iwm.teledoc.network.packets.images.ImageDescription;
 import com.pp.iwm.teledoc.network.packets.images.SendImage;
@@ -95,31 +100,44 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 				onGetAllGroupImagesResponse((GetAllGroupImagesResponse)_message);
 			else if( _message instanceof ActionResponse )
 				onActionResponseReceive((ActionResponse)_message);
+			else if( _message instanceof GetAllGroupActionsResponse )
+				onGetAllGroupActionsResponseReceive((GetAllGroupActionsResponse)_message);
 		}
 	}
 	
+	private void onGetAllGroupActionsResponseReceive(GetAllGroupActionsResponse _response) {
+		List<Action> actions = _response.getActions();
+		
+		for( Action a : actions )
+			recreateAction(a.getTypeID(), a.getFileID(), a.getParameters());
+	}
+
 	private void onActionResponseReceive(ActionResponse _response) {
 		if( _response.getAuthorEmail().equals(User.instance().getEmail()) )
 			return;
 		
-		switch( _response.getTypeID() ) {
+		recreateAction(_response.getTypeID(), _response.getFileID(), _response.getParameters());
+	}
+	
+	private void recreateAction(int _type_id, int _image_id, String _params) {
+		switch( _type_id ) {
 			case 0: // ADD_LINE
-				onActionAddLine(_response.getFileID(), _response.getParameters());
+				onActionAddLine(_image_id, _params);
 				break;
 			case 1: // ADD_BROKEN_LINE
-				onActionAddBrokenLine(_response.getFileID(), _response.getParameters());
+				onActionAddBrokenLine(_image_id, _params);
 				break;
 			case 2: // ADD_ANNOTATION
-				onActionAddAnnotation(_response.getFileID(), _response.getParameters());
+				onActionAddAnnotation(_image_id, _params);
 				break;
 			case 3: // UPDATE_ANNOTATION
-				onActionUpdateAnnotation(_response.getFileID(), _response.getParameters());
+				onActionUpdateAnnotation(_image_id, _params);
 				break;
 			case 4: // MOVE_OBJECT
-				onActionMoveObject(_response.getFileID(), _response.getParameters());
+				onActionMoveObject(_image_id, _params);
 				break;
 			case 5: // DELETE_OBJECT
-				onDeleteObject(_response.getFileID(), _response.getParameters());
+				onDeleteObject(_image_id, _params);
 				break;
 		}
 	}
@@ -156,13 +174,17 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		Point2D p2d = new Point2D(Double.parseDouble(x_str), Double.parseDouble(y_str));
 		ObjectId id = Utils.stringToObjectId(_parameters.substring(pos));
 		
-		DrawableObject drawable = window.getDrawableAssistant().findDrawable(id);
-		
-		if( drawable == null )
-			return;
-
-		layout.action_pane.notifyThumbnailPanel(id);
-		drawable.move(p2d);
+		Platform.runLater(() -> {
+			DrawableObject drawable = window.getDrawableAssistant().findDrawable(id);
+	
+			System.out.println("P2d: " + p2d + " | ID: " + id + " | Drawable: " + drawable);
+			
+			if( drawable == null )
+				return;
+	
+			layout.action_pane.notifyThumbnailPanel(id);
+			drawable.move(p2d);
+		});
 	}
 
 	private void onActionUpdateAnnotation(int _file_id, String _parameters) {
@@ -175,14 +197,16 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		pos = new_pos + 1;
 		ObjectId id = Utils.stringToObjectId(_parameters.substring(pos));
 		
-		DrawableObject drawable = window.getDrawableAssistant().findDrawable(id);
-		
-		if( drawable == null )
-			return;
-		
-		Annotation ann = (Annotation)drawable;
-		layout.action_pane.notifyThumbnailPanel(id);
-		ann.setText(text);
+		Platform.runLater(() -> {
+			DrawableObject drawable = window.getDrawableAssistant().findDrawable(id);
+			
+			if( drawable == null )
+				return;
+			
+			Annotation ann = (Annotation)drawable;
+			layout.action_pane.notifyThumbnailPanel(id);
+			ann.setText(text);
+		});
 	}
 
 	private void onActionAddAnnotation(int _file_id, String _parameters) {
@@ -208,11 +232,12 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		Color color = Utils.intToColor(Long.parseLong(color_str));
 		
 		Platform.runLater(() -> {
+
 			Annotation ann = new Annotation(text, color, layout.drawable_pane.getLayoutBounds(), p2d, layout.drawable_pane);
 			ann.id = Utils.stringToObjectId(_parameters.substring(final_pos));
+			window.getDrawableAssistant().addDrawable(ann);
 			ann.changeState(Annotation.State.DRAWN);
 			layout.action_pane.notifyThumbnailPanel(ann.id);
-			window.getDrawableAssistant().addDrawable(ann);
 			ann.hideIfOtherImage();
 		});
 	}
@@ -226,7 +251,7 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		int size = Integer.parseInt(size_str);
 		List<Point2D> points = new ArrayList<>();
 		
-		for( int i = 0; i < size + 1; i++ ) {
+		for( int i = 0; i < size; i++ ) {
 			pos = new_pos + 1;
 			new_pos = _parameters.indexOf("#", pos);
 			String x_str = _parameters.substring(pos, new_pos);
@@ -250,14 +275,16 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		Color color = Utils.intToColor(int_color);
 		
 		Platform.runLater(() -> {
+
 			DrawableBrokenLine line = new DrawableBrokenLine(points.get(0), points.get(1), color, layout.drawable_pane);
 			line.id = Utils.stringToObjectId(_parameters.substring(final_pos));
-			
-			for( int i = 1; i < size; i++ )
+
+			for( int i = 0; i < size - 1; i++ )
 				line.addLine(new Line(points.get(i).getX(), points.get(i).getY(), points.get(i + 1).getX(), points.get(i + 1).getY()));
+		
+			window.getDrawableAssistant().addDrawable(line);
 
 			layout.action_pane.notifyThumbnailPanel(line.id);
-			window.getDrawableAssistant().addDrawable(line);
 			line.hideIfOtherImage();
 		});
 	}
@@ -296,13 +323,13 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 		Point2D p1 = new Point2D(x1, y1);
 		Point2D p2 = new Point2D(x2, y2);
 		
-		
 		Platform.runLater(() -> {
+
+
 			DrawableLine l = new DrawableLine(p1, p2, color, layout.drawable_pane);
 			l.id = Utils.stringToObjectId(_parameters.substring(final_pos));
-			
-			layout.action_pane.notifyThumbnailPanel(l.id);
 			window.getDrawableAssistant().addDrawable(l);
+			layout.action_pane.notifyThumbnailPanel(l.id);
 			l.hideIfOtherImage();
 		});
 	}
@@ -354,7 +381,8 @@ public class ConfWindowNetworkAssistant implements NetworkListener {
 			User.instance().progressDownload(_response.getImageContent());		
 		else {
 			User.instance().progressDownload(_response.getImageContent());
-			String path = "assets/" + _response.getImageID() + _response.getName();
+			String path = System.getenv("TEMP") + "/" +  _response.getImageID() + _response.getName();
+			System.out.println(path);
 			User.instance().saveFileToDisk(path, _response.getImageID());		
 			User.instance().addUsedImage(_response.getImageID());
 			
